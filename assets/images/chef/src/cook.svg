@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" width="480" height="480">
+<ellipse cx="198" cy="436" rx="36" ry="16" fill="#F6CFA3"/><ellipse cx="282" cy="436" rx="36" ry="16" fill="#F6CFA3"/>
+
+<path d="M240 132 C322 132 372 196 386 282 C400 372 344 432 240 432 C136 432 80 372 94 282 C108 196 158 132 240 132 Z" fill="#FFE3C2"/>
+<clipPath id="b"><path d="M240 132 C322 132 372 196 386 282 C400 372 344 432 240 432 C136 432 80 372 94 282 C108 196 158 132 240 132 Z"/></clipPath>
+<g clip-path="url(#b)"><path d="M146 470 L146 348 Q146 318 176 318 L304 318 Q334 318 334 348 L334 470 Z" fill="#FF7A59"/>
+<rect x="212" y="356" width="56" height="40" rx="14" fill="#FFA58C"/></g>
+<g transform="rotate(-9 240 140)">
+<path d="M186 150 Q240 132 294 150 L294 122 Q240 106 186 122 Z" fill="#E3DEF6" stroke="#E3DEF6" stroke-width="5" stroke-linejoin="round"/>
+<path d="M182 124 C150 108 156 62 196 62 C204 26 276 26 284 62 C324 62 330 108 298 124 Q240 106 182 124 Z" fill="#FFFFFF" stroke="#E3DEF6" stroke-width="5" stroke-linejoin="round"/>
+<path d="M214 66 q6 22 0 40 M266 66 q-6 22 0 40" stroke="#E3DEF6" stroke-width="5" stroke-linecap="round" fill="none"/></g>
+<g transform="translate(0 0)">
+<ellipse cx="160" cy="288" rx="23" ry="14" fill="#FF9DB0" opacity="0.8"/><ellipse cx="320" cy="288" rx="23" ry="14" fill="#FF9DB0" opacity="0.8"/>
+<circle cx="196" cy="262" r="9" fill="#24212B"/><circle cx="284" cy="262" r="9" fill="#24212B"/><path d="M230 276 q10 11 20 0" stroke="#24212B" stroke-width="6" stroke-linecap="round" fill="none"/></g>
+<path d="M290 380 q70 50 140 0 z" fill="#24212B"/><path d="M296 382 l-40 -10" stroke="#24212B" stroke-width="13" stroke-linecap="round"/><ellipse cx="362" cy="378" rx="34" ry="13" fill="#FFFFFF"/><circle cx="362" cy="375" r="12" fill="#FFD84D"/><path d="M410 340 q-12 -14 0 -28 q12 -14 0 -28 M444 346 q-12 -14 0 -28 q12 -14 0 -28" stroke="#E3DEF6" stroke-width="7" stroke-linecap="round" fill="none"/><ellipse cx="104" cy="334" rx="34" ry="21" fill="#FFE3C2" transform="rotate(58 104 334)"/><ellipse cx="262" cy="366" rx="34" ry="21" fill="#FFE3C2" transform="rotate(12 262 366)"/>
+</svg>
