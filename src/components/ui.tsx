@@ -6,6 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
 import type { ApiErrorKind } from '@/lib/api';
+import { BETA } from '@/lib/beta';
+import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
 import { fonts, onPastel, radius, space, touch, type } from '@/theme/tokens';
 
@@ -136,7 +138,7 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
   const [title, body] = {
     offline: [t('err.offline'), t('err.offlineBody')], failed: [t('err.failed'), t('err.failedBody')],
     not_configured: [t('err.notConfigured'), t('err.notConfiguredBody')],
-    quota: [t('ask.quotaTitle'), t('ask.quotaBody')], unauthorized: [t('ask.loginTitle'), t('ask.loginBody')],
+    quota: [t('ask.quotaTitle'), t('ask.quotaBody', { n: FREE_PER_DAY })], unauthorized: [t('ask.loginTitle'), t('ask.loginBody')],
   }[kind];
   return (
     <Card tone={kind === 'offline' ? 'note' : 'danger'} style={{ gap: space.sm }}>
@@ -146,7 +148,7 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
       </View>
       {onRetry && (kind === 'offline' || kind === 'failed') && <Button kind="onPastel" label={t('common.retry')} onPress={onRetry} style={{ alignSelf: 'flex-start' }} />}
       {kind === 'unauthorized' && <Button kind="onPastel" label={t('me.signIn')} onPress={() => router.push('/login')} style={{ alignSelf: 'flex-start' }} />}
-      {kind === 'quota' && <Button kind="onPastel" label={t('ask.seeMember')} onPress={() => router.push('/paywall')} style={{ alignSelf: 'flex-start' }} />}
+      {kind === 'quota' && !BETA && <Button kind="onPastel" label={t('ask.seeMember')} onPress={() => router.push('/paywall')} style={{ alignSelf: 'flex-start' }} />}
     </Card>
   );
 }

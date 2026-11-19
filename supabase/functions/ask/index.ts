@@ -1,4 +1,4 @@
-// ถามเชฟช้าง: ต้องเข้าสู่ระบบ ฟรีวันละ 3 คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวคืนสิทธิ์
+// ถามเชฟช้าง: ต้องเข้าสู่ระบบ ฟรีวันละ FREE_PER_DAY คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวคืนสิทธิ์
 import { admin, chat, cors, FREE_PER_DAY, isLang, isText, json, localDay, MODELS, requireUser } from '../_shared/common.ts';
 
 const SYSTEM = `You are Chef Elephant, the cooking coach inside a step-by-step cooking app for home cooks in Thailand and beyond.

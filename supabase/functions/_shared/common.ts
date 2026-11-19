@@ -6,7 +6,9 @@ export const MODELS = {
   menus: ['anthropic/claude-haiku-5.5', 'openai/gpt-6-luna'],
   prices: ['anthropic/claude-sonnet-5.5', 'anthropic/claude-haiku-5.5'],
 };
-export const FREE_PER_DAY = 3;
+// เบต้า: ยังไม่มีระบบจ่ายเงิน จึงให้ถามฟรีวันละ 20 ต้องตรงกับแอป (src/lib/beta.ts) ปิดเบต้าแล้วเปลี่ยนเป็น false แล้ว deploy ask กับ menus ใหม่
+export const BETA = true;
+export const FREE_PER_DAY = BETA ? 20 : 3;
 export const COUNTRIES = ['TH', 'JP', 'US'] as const;
 export type Country = (typeof COUNTRIES)[number];
 

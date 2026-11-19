@@ -9,6 +9,7 @@ import { IMG, MASCOT } from '@/data/images';
 import { DEFAULT_OPTS, MENU } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
+import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
 import { onPastel, radius, space } from '@/theme/tokens';
 
@@ -64,7 +65,7 @@ export default function Onboarding() {
           {(step === 1 || step === 2) && (
             <>
               <T v="title" accessibilityRole="header">{t(step === 1 ? 'ob.t1' : 'ob.t2')}</T>
-              <T tone="muted">{t(step === 1 ? 'ob.b1' : 'ob.b2')}</T>
+              <T tone="muted">{t(step === 1 ? 'ob.b1' : 'ob.b2', { n: FREE_PER_DAY })}</T>
               {step === 2 && <Card tone="ai"><T tone="pastel">{t('ob.example')}</T></Card>}
             </>
           )}

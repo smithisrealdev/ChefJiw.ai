@@ -11,7 +11,8 @@ import { ApiNotice, Button, Card, IconButton, Sheet, Skeleton, T } from '@/compo
 import { MASCOT } from '@/data/images';
 import { buildRecipe, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
-import { freeLeft, localDay, spendOne } from '@/lib/quota';
+import { BETA } from '@/lib/beta';
+import { FREE_PER_DAY, freeLeft, localDay, spendOne } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
 import { Image } from 'expo-image';
 import { fonts, onPastel, radius, space, type } from '@/theme/tokens';
@@ -186,7 +187,7 @@ function AskSheet({ visible, onClose, r, step }: { visible: boolean; onClose: ()
   );
 }
 
-/** พิมพ์ถามเอง: ต้องเข้าสู่ระบบ ฟรีวันละ 3 คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวไม่ถูกนับ */
+/** พิมพ์ถามเอง: ต้องเข้าสู่ระบบ ฟรีวันละ FREE_PER_DAY คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวไม่ถูกนับ */
 function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => void }) {
   const { t, lang, colors, signedIn, member, asked, set, pick } = useSettings();
   const [text, setText] = useState('');
@@ -205,7 +206,7 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
     } catch (e) {
       const kind = e instanceof ApiError ? e.kind : 'failed';
       // เซิร์ฟเวอร์เป็นคนตัดสินโควตาและการเข้าสู่ระบบ ให้หน้าจอตามนั้น
-      if (kind === 'quota') { set({ asked: { day: localDay(), n: 3 } }); setState({ kind: 'quota' }); }
+      if (kind === 'quota') { set({ asked: { day: localDay(), n: FREE_PER_DAY } }); setState({ kind: 'quota' }); }
       else if (kind === 'unauthorized') { set({ signedIn: false }); setState({ kind: 'login' }); }
       else setState({ kind: 'error', q: question, error: kind });
     }
@@ -219,8 +220,8 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
           <Button kind="onPastel" label={t('me.signIn')} onPress={() => goTo('/login')} style={{ alignSelf: 'flex-start', marginTop: space.sm }} /></Card>
       )}
       {state.kind === 'quota' && (
-        <Card tone="soft"><T v="subheading">{t('ask.quotaTitle')}</T><T>{t('ask.quotaBody')}</T>
-          <Button kind="accent" label={t('ask.seeMember')} onPress={() => goTo('/paywall')} style={{ alignSelf: 'flex-start', marginTop: space.sm }} /></Card>
+        <Card tone="soft"><T v="subheading">{t('ask.quotaTitle')}</T><T>{t('ask.quotaBody', { n: FREE_PER_DAY })}</T>
+          {!BETA && <Button kind="accent" label={t('ask.seeMember')} onPress={() => goTo('/paywall')} style={{ alignSelf: 'flex-start', marginTop: space.sm }} />}</Card>
       )}
       {state.kind === 'loading' && <Skeleton label={t('ask.thinking')} lines={3} />}
       {state.kind === 'answer' && (

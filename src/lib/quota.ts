@@ -1,6 +1,9 @@
+import { BETA } from './beta.ts';
+
 export type Asked = { day: string; n: number };
 
-export const FREE_PER_DAY = 3;
+// เบต้ายังไม่มีระบบจ่ายเงิน จึงให้ถามฟรีมากขึ้น ต้องตรงกับ FREE_PER_DAY ฝั่งเซิร์ฟเวอร์ (supabase/functions/_shared/common.ts)
+export const FREE_PER_DAY = BETA ? 20 : 3;
 
 /** คำถามที่พิมพ์ถาม AI ได้ฟรีที่เหลือวันนี้ นับใหม่ทุกวัน */
 export function freeLeft(asked: Asked, day: string) {

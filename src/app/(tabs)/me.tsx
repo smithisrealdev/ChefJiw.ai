@@ -7,6 +7,7 @@ import { IMG, MASCOT } from '@/data/images';
 import { MENU } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
+import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
 
@@ -50,7 +51,7 @@ export default function Me() {
 
       <T v="subheading" accessibilityRole="header">{t('me.account')}</T>
       <Row label={t('me.signIn')} value={signedIn ? t('me.signedIn') : t('me.signedOut')} onPress={() => router.push('/login')} />
-      <Row label={t('me.membership')} sub={member ? t('me.isMember') : t('me.free')} value="" onPress={() => router.push('/paywall')} />
+      {!BETA && <Row label={t('me.membership')} sub={member ? t('me.isMember') : t('me.free', { n: FREE_PER_DAY })} value="" onPress={() => router.push('/paywall')} />}
 
       <T v="subheading" accessibilityRole="header">{t('me.settings')}</T>
       <Row label={t('me.lang')} value={lang === 'th' ? 'ไทย' : 'English'} onPress={() => set({ lang: lang === 'th' ? 'en' : 'th' })} />

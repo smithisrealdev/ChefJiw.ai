@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ApiNotice, Button, Card, Screen, T } from '@/components/ui';
 import { MASCOT } from '@/data/images';
 import { api, ApiError, type ApiErrorKind, type Plan } from '@/lib/api';
+import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
 import { onPastel, radius, space } from '@/theme/tokens';
 
@@ -29,7 +30,7 @@ export default function Paywall() {
   };
 
   const rows: [string, string, string][] = [
-    [t('pay.rowAsk'), t('pay.rowAskFree'), t('pay.unlimited')],
+    [t('pay.rowAsk'), t('pay.rowAskFree', { n: FREE_PER_DAY }), t('pay.unlimited')],
     [t('pay.rowCook'), t('pay.all'), t('pay.all')],
     [t('pay.rowPrepared'), t('pay.all'), t('pay.all')],
   ];

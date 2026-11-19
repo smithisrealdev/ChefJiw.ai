@@ -6,7 +6,7 @@ import { Icon } from '@/components/icon';
 import { ApiNotice, Button, Card, Screen, T } from '@/components/ui';
 import { MASCOT } from '@/data/images';
 import { api, ApiError, type ApiErrorKind, type Provider } from '@/lib/api';
-import { freeLeft, localDay } from '@/lib/quota';
+import { FREE_PER_DAY, freeLeft, localDay } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
 import { space } from '@/theme/tokens';
 
@@ -42,7 +42,7 @@ export default function Login() {
       ) : (
         <>
           <Card><T>{t('login.intro')}</T></Card>
-          {[t('login.perk1'), t('login.perk2')].map((p) => (
+          {[t('login.perk1', { n: FREE_PER_DAY }), t('login.perk2')].map((p) => (
             <View key={p} style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
               <Icon name="check" color={colors.success} />
               <T style={{ flex: 1 }}>{p}</T>
