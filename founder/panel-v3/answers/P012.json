@@ -1,0 +1,13 @@
+{
+  "id": "P012",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I already learn from free YouTube and TikTok clips every night, and tom yum, pad see ew and massaman have tons of free videos in Thai. Maybe I download it to try the free green curry, but I would not pay for dishes I can watch for nothing.",
+  "objection": "I can watch a free video for this. I am not sure following steps in an app is better than watching a real person cook it, and 99 baht is two plates of food.",
+  "would_change_my_mind": "If I tried the free green curry and it came out clearly better than when I follow a YouTube video, I would pay the 99 baht.",
+  "price_too_cheap": 20,
+  "price_cheap": 39,
+  "price_expensive": 79,
+  "price_too_expensive": 150
+}

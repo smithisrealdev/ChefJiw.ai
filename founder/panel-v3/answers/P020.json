@@ -1,0 +1,13 @@
+{
+  "id": "P020",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "Most days I just buy a 50-baht plate, and when I do cook, my mum sends me the recipe on LINE or I watch a free YouTube video. I might download it and try the free basil pork, but I don't see why I'd pay for recipes I already get for free.",
+  "objection": "Tom yum, pad see ew and massaman are all free on YouTube, and my mum sends me recipes anyway. I'm not sure an app chef shows me much more than a good video does, and with how little I cook I'd only make two or three of the 12 dishes.",
+  "would_change_my_mind": "If I cooked the free green curry and it actually came out right where my YouTube attempts didn't, I'd pay the 99 baht. That's only two plates of food.",
+  "price_too_cheap": 20,
+  "price_cheap": 49,
+  "price_expensive": 99,
+  "price_too_expensive": 150
+}

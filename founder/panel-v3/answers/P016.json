@@ -1,0 +1,13 @@
+{
+  "id": "P016",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I already ask my AI chat app for recipes and it answers as many questions as I want, for free. I only cook on weekends, so paying for recipes in an app where the chef takes 3 questions a day doesn't make sense to me.",
+  "objection": "Two free dishes is nothing, I'd be through them in two dinners, and I already know basil pork, so I'd never get far enough to see if it's really better than my free AI. The 99 baht isn't the problem, it's paying for something I basically already get free.",
+  "would_change_my_mind": "If I cooked the free green curry one Saturday and it came out clearly better than when I follow my AI chat, I'd pay the 99 baht, it's less than one delivery order.",
+  "price_too_cheap": 20,
+  "price_cheap": 49,
+  "price_expensive": 150,
+  "price_too_expensive": 250
+}
