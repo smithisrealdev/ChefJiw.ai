@@ -44,22 +44,25 @@ npm test
 
 โมเดลที่ใช้คือ `claude-opus-5-5` ตั้งไว้ที่ `supabase/functions/_shared/common.ts`
 
-ตั้งค่าครั้งแรก:
+โปรเจกต์จริง: `jqfjqsvpjzcktfrnvobo` (migration ทั้งหมด ฟังก์ชันทั้งสี่ และงาน cron รายวัน deploy แล้ว)
 
-1. สร้างโปรเจกต์ Supabase แล้วรัน migration ทั้งสองไฟล์ (ไฟล์ cron ต้องสร้าง Vault secret `project_url` และ `cron_secret` ก่อน ดูหัวไฟล์)
-2. ตั้ง secret ของ Edge Functions: `ANTHROPIC_API_KEY` และ `CRON_SECRET`
-3. Deploy ฟังก์ชันทั้งสี่ (`update-prices` ปิด verify JWT เพราะตรวจด้วย `CRON_SECRET` เอง)
-4. Auth > Providers: เปิด Google และ Apple แล้วเพิ่ม `chefjiw://auth` ใน Redirect URLs (LINE ต้องตั้งเป็น custom OIDC provider ภายหลัง)
-5. คัดลอก `.env.example` เป็น `.env` แล้วใส่ URL กับ publishable key
+ที่เจ้าของโปรเจกต์ต้องตั้งเองใน Dashboard:
+
+1. Edge Functions > Secrets: เพิ่ม `ANTHROPIC_API_KEY` (ถ้าไม่มี ถามเชฟ คิดเมนู และอัปเดตราคา จะตอบ error)
+2. Auth > Providers: เปิด Google และ Apple แล้วเพิ่ม `chefjiw://auth` ใน Auth > URL Configuration > Redirect URLs (LINE ต้องตั้งเป็น custom OIDC provider ภายหลัง)
+
+ตั้งโปรเจกต์ใหม่จากศูนย์: รัน migration ตามลำดับ (ก่อนไฟล์ cron ให้เก็บ `project_url` ใน Vault ดูหัวไฟล์) deploy ฟังก์ชันทั้งสี่ (`update-prices` ปิด verify JWT เพราะตรวจ secret จาก Vault เอง) แล้วทำสองข้อบน
+
+แอป: คัดลอก `.env.example` เป็น `.env.local` แล้วใส่ URL กับ publishable key (ค่าทั้งสองเป็นค่าสาธารณะ)
 
 ยังไม่ได้ทำ: ระบบซื้อในแอป (App Store / Google Play) ปุ่มสมัครสมาชิกจึงยังขึ้นว่ายังไม่ได้เชื่อมระบบ สถานะสมาชิกอ่านจาก `profiles.member` ซึ่งต้องให้ฝั่งเซิร์ฟเวอร์เป็นคนตั้งหลังตรวจใบเสร็จ
 
-ทดสอบฝั่ง edge function: `cd supabase/functions && deno test --allow-env _shared/common.test.ts`
+ทดสอบฝั่ง edge function: `cd supabase/functions && SUPABASE_URL=http://x SUPABASE_SERVICE_ROLE_KEY=x deno test --allow-env _shared/common.test.ts`
 
 ## สถานะ
 
 ทำแล้ว: ทุกหน้าจอในต้นแบบที่อยู่ใน v1 พร้อมโหมดมืดและสองภาษา
 
-ยังไม่ทำ: deploy backend ขึ้นโปรเจกต์ Supabase จริง ระบบซื้อในแอป และแอนิเมชันมาสคอต ราคาสมาชิกยังเป็นช่องว่าง
+ยังไม่ทำ: ระบบซื้อในแอป และแอนิเมชันมาสคอต ราคาสมาชิกยังเป็นช่องว่าง
 
 สูตรทั้งหมดยังไม่ได้ลองทำจริง ต้องลองก่อนเปิดให้คนใช้

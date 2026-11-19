@@ -1,5 +1,5 @@
 // งานรายวัน: ให้ Claude ค้นราคาวัตถุดิบจากเว็บต่อประเทศ แล้วบันทึกลงตาราง prices
-// เรียกจาก pg_cron เท่านั้น ตรวจด้วย CRON_SECRET
+// เรียกจาก pg_cron เท่านั้น ตรวจ x-cron-secret กับ Vault ผ่าน check_cron_secret
 import { admin, anthropic, cors, finalText, json, MODEL, type Country } from '../_shared/common.ts';
 
 // ตรงกับรายการใน src/data/market.ts ของแอป
@@ -49,8 +49,9 @@ async function lookup(country: Country) {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
-  const secret = Deno.env.get('CRON_SECRET');
-  if (!secret || req.headers.get('x-cron-secret') !== secret) return json({ error: 'unauthorized' }, 401);
+  const given = req.headers.get('x-cron-secret');
+  const { data: ok } = given ? await admin.rpc('check_cron_secret', { p: given }) : { data: false };
+  if (!ok) return json({ error: 'unauthorized' }, 401);
 
   const report: Record<string, number | string> = {};
   for (const country of Object.keys(ITEMS) as Country[]) {

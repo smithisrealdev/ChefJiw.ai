@@ -14,7 +14,7 @@ Deno.serve(async (req) => {
 
   const body = await req.json().catch(() => ({}));
   const { question, recipe, step, lang, tzOffset } = body ?? {};
-  if (!isText(question, 500) || !isText(recipe, 40) || !isText(step, 40) || !isLang(lang)) return json({ error: 'bad_request' }, 400);
+  if (!isText(question, 500) || !isText(recipe, 80) || !isText(step, 80) || !isLang(lang)) return json({ error: 'bad_request' }, 400);
 
   const day = localDay(tzOffset);
   const { data: allowed, error } = await admin.rpc('reserve_ai_call', { p_user: user.id, p_day: day, p_limit: FREE_PER_DAY });
