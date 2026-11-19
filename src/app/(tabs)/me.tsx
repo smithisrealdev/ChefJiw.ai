@@ -5,6 +5,7 @@ import { Icon } from '@/components/icon';
 import { Card, Screen, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT } from '@/data/images';
 import { MENU } from '@/data/recipes';
+import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
 import { useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
@@ -53,8 +54,10 @@ export default function Me() {
 
       <T v="subheading" accessibilityRole="header">{t('me.settings')}</T>
       <Row label={t('me.lang')} value={lang === 'th' ? 'ไทย' : 'English'} onPress={() => set({ lang: lang === 'th' ? 'en' : 'th' })} />
-      <Row label={t('me.country')} sub={t('me.countryHint')} value={t(`country.${country}`)}
-        onPress={() => set({ country: COUNTRIES[(COUNTRIES.indexOf(country) + 1) % COUNTRIES.length] })} />
+      {!BETA && (
+        <Row label={t('me.country')} sub={t('me.countryHint')} value={t(`country.${country}`)}
+          onPress={() => set({ country: COUNTRIES[(COUNTRIES.indexOf(country) + 1) % COUNTRIES.length] })} />
+      )}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 60, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.surfaceSoft }}>
         <View style={{ flex: 1 }}>
           <T v="bodyBold">{t('me.dark')}</T>

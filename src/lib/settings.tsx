@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { BETA } from '@/lib/beta';
 import { translate, type Key, type L, type Lang } from '@/lib/i18n';
 import { money, type Country } from '@/lib/money';
 import type { Asked } from '@/lib/quota';
@@ -48,12 +49,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     });
 
   const isDark = saved.theme === 'dark' || (saved.theme === 'system' && scheme === 'dark');
+  // เบต้าเปิดแค่ไทย ประเทศที่เคยเลือกยังเก็บไว้ ปิดเบต้าแล้วกลับมาเหมือนเดิม
+  const country: Country = BETA ? 'TH' : saved.country;
   const value: Ctx = {
-    ...saved, ready, set, isDark,
+    ...saved, country, ready, set, isDark,
     colors: isDark ? dark : light,
     t: (key, vars) => translate(saved.lang, key, vars),
     pick: (text) => text[saved.lang],
-    price: (baht) => money(baht, saved.country),
+    price: (baht) => money(baht, country),
   };
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 }

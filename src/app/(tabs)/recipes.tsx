@@ -7,9 +7,11 @@ import { ApiNotice, Button, Card, Chip, Screen, Skeleton, T, Thumb } from '@/com
 import { IMG, MASCOT } from '@/data/images';
 import { fridgeFit, MENU, PANTRY, type MenuItem } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind, type MenuIdea } from '@/lib/api';
+import { BETA } from '@/lib/beta';
 import { useSettings } from '@/lib/settings';
 import { fonts, radius, space, type } from '@/theme/tokens';
 
+const DISHES = BETA ? MENU.filter((m) => m.ready) : MENU;
 type Filter = 'all' | 'fast' | 'cheap' | 'light';
 const TESTS: Record<Filter, (m: MenuItem) => boolean> = { all: () => true, fast: (m) => m.mins <= 15, cheap: (m) => m.baht <= 40, light: (m) => m.kcal < 400 };
 const TINT: Record<string, string> = { kaprao: '#FFD9CC', omelet: '#FFF0B8', 'fried-rice': '#FFE2C2', 'morning-glory': '#D6F5D9', 'tom-yum': '#FFD6DF', 'green-curry': '#DCDCFF' };
@@ -28,7 +30,7 @@ export default function Recipes() {
   const [have, setHave] = useState<string[]>([]);
 
   const fridge = fridgeOpen && have.length > 0;
-  let list = MENU.filter((m) => TESTS[filter](m) && (!q.trim() || pick(m.name).toLowerCase().includes(q.trim().toLowerCase())));
+  let list = DISHES.filter((m) => TESTS[filter](m) && (!q.trim() || pick(m.name).toLowerCase().includes(q.trim().toLowerCase())));
   if (fridge) list = [...list].sort((a, b) => fridgeFit(a, have).rank - fridgeFit(b, have).rank);
   const ready = list.filter((m) => m.ready), soon = list.filter((m) => !m.ready);
   const nameOf = (id: string) => pick(PANTRY.find((p) => p.id === id)!.name);
@@ -52,12 +54,14 @@ export default function Recipes() {
         <TextInput value={q} onChangeText={setQ} placeholder={t('recipes.search')} placeholderTextColor={colors.muted} accessibilityLabel={t('recipes.search')}
           style={{ flex: 1, minHeight: 48, fontFamily: fonts.body, fontSize: type.md, color: colors.ink }} />
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
-        {filters.map(([id, label]) => <Chip key={id} label={label} selected={filter === id} onPress={() => setFilter(id)} />)}
-      </ScrollView>
-      <T v="small" tone="muted">{fridge ? t('recipes.sorted', { n: have.length }) : t('recipes.count', { ready: ready.length, soon: soon.length })}</T>
+      {!BETA && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
+          {filters.map(([id, label]) => <Chip key={id} label={label} selected={filter === id} onPress={() => setFilter(id)} />)}
+        </ScrollView>
+      )}
+      {!BETA && <T v="small" tone="muted">{fridge ? t('recipes.sorted', { n: have.length }) : t('recipes.count', { ready: ready.length, soon: soon.length })}</T>}
 
-      <Card tone="ai">
+      {!BETA && <Card tone="ai">
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
           <View style={{ flex: 1 }}>
             <T v="subheading" tone="pastel">{t('recipes.fridge')}</T>
@@ -93,7 +97,7 @@ export default function Recipes() {
             <T v="small" tone="pastelMuted">{t('ai.untested')}</T>
           </View>
         )}
-      </Card>
+      </Card>}
 
       {ready.map((m) => {
         const m2 = meta2(m);

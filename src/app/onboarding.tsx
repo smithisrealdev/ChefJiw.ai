@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button, Card, Chip, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT } from '@/data/images';
 import { DEFAULT_OPTS, MENU } from '@/data/recipes';
+import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
 import { useSettings } from '@/lib/settings';
 import { onPastel, radius, space } from '@/theme/tokens';
@@ -44,16 +45,20 @@ export default function Onboarding() {
 
           {step === 0 && (
             <>
-              <T v="title" accessibilityRole="header">{t('ob.langTitle')}</T>
-              <T v="smallBold" tone="muted">{t('me.lang')}</T>
+              <T v="title" accessibilityRole="header">{t(BETA ? 'me.lang' : 'ob.langTitle')}</T>
+              {!BETA && <T v="smallBold" tone="muted">{t('me.lang')}</T>}
               <View style={s.row}>
                 {(['th', 'en'] as const).map((code) => <Chip key={code} label={code === 'th' ? 'ไทย' : 'English'} selected={lang === code} onPress={() => set({ lang: code })} />)}
               </View>
-              <T v="smallBold" tone="muted">{t('me.country')}</T>
-              <View style={s.row}>
-                {COUNTRIES.map((c) => <Chip key={c} label={t(`country.${c}`)} selected={country === c} onPress={() => set({ country: c })} />)}
-              </View>
-              <T tone="muted">{t('ob.countryNote')}</T>
+              {!BETA && (
+                <>
+                  <T v="smallBold" tone="muted">{t('me.country')}</T>
+                  <View style={s.row}>
+                    {COUNTRIES.map((c) => <Chip key={c} label={t(`country.${c}`)} selected={country === c} onPress={() => set({ country: c })} />)}
+                  </View>
+                  <T tone="muted">{t('ob.countryNote')}</T>
+                </>
+              )}
             </>
           )}
           {(step === 1 || step === 2) && (

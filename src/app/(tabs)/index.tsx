@@ -6,6 +6,7 @@ import { ResumeCard } from '@/components/resume-card';
 import { Button, Card, Screen, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT } from '@/data/images';
 import { MENU } from '@/data/recipes';
+import { BETA } from '@/lib/beta';
 import type { L } from '@/lib/i18n';
 import { useSettings } from '@/lib/settings';
 import { space } from '@/theme/tokens';
@@ -32,13 +33,15 @@ export default function Home() {
         </View>
       </Card>
       <ResumeCard />
-      <Card onPress={() => router.push('/market')} label={t('market.open')} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-        <Thumb source={MASCOT.capybara} size={64} />
-        <View style={{ flex: 1 }}>
-          <T v="subheading">{t('market.open')}</T>
-          <T v="small" tone="muted">{t('market.openSub')}</T>
-        </View>
-      </Card>
+      {!BETA && (
+        <Card onPress={() => router.push('/market')} label={t('market.open')} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <Thumb source={MASCOT.capybara} size={64} />
+          <View style={{ flex: 1 }}>
+            <T v="subheading">{t('market.open')}</T>
+            <T v="small" tone="muted">{t('market.openSub')}</T>
+          </View>
+        </Card>
+      )}
       <T v="subheading" accessibilityRole="header">{t('home.today')}</T>
       <Card onPress={() => router.push(`/recipe/${pickToday.id}`)} label={pick(pickToday.name)} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <Thumb source={IMG[pickToday.img]} tint="#FFD9CC" size={72} />
