@@ -1,0 +1,13 @@
+{
+  "id": "P003",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I already learn from free YouTube and TikTok clips, and my mum sends me recipes on LINE whenever I ask, so paying every month for recipes doesn't make sense for me. The two free dishes are basil pork with egg and pork omelet, which I can already cook, so the free part shows me nothing new.",
+  "objection": "Only two free dishes, and I already know how to make both, so I would run out after two dinners. Even 12 more dishes plus one a week is small next to YouTube, where I can find a hundred green curry videos for free.",
+  "would_change_my_mind": "If the free part had one dish I can't already make, like green curry from paste, so I could see the chef actually do better than a YouTube video before I sign up for anything.",
+  "price_too_cheap": 10,
+  "price_cheap": 39,
+  "price_expensive": 79,
+  "price_too_expensive": 149
+}
