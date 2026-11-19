@@ -1,10 +1,10 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
+import { DishCard } from '@/components/dish-card';
 import { Icon } from '@/components/icon';
 import { ApiNotice, Button, Card, Chip, Screen, Skeleton, T, Thumb } from '@/components/ui';
-import { IMG, MASCOT } from '@/data/images';
+import { DISH_TINT, IMG, MASCOT } from '@/data/images';
 import { fridgeFit, MENU, PANTRY, type MenuItem } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind, type MenuIdea } from '@/lib/api';
 import { BETA } from '@/lib/beta';
@@ -14,7 +14,6 @@ import { fonts, radius, space, type } from '@/theme/tokens';
 const DISHES = BETA ? MENU.filter((m) => m.ready) : MENU;
 type Filter = 'all' | 'fast' | 'cheap' | 'light';
 const TESTS: Record<Filter, (m: MenuItem) => boolean> = { all: () => true, fast: (m) => m.mins <= 15, cheap: (m) => m.baht <= 40, light: (m) => m.kcal < 400 };
-const TINT: Record<string, string> = { kaprao: '#FFD9CC', omelet: '#FFF0B8', 'fried-rice': '#FFE2C2', 'morning-glory': '#D6F5D9', 'tom-yum': '#FFD6DF', 'green-curry': '#DCDCFF' };
 
 export default function Recipes() {
   const { colors, t, pick, price, runs, lang, country } = useSettings();
@@ -99,26 +98,14 @@ export default function Recipes() {
         )}
       </Card>}
 
-      {ready.map((m) => {
-        const m2 = meta2(m);
-        return (
-          <Card key={m.id} onPress={() => router.push(`/recipe/${m.id}`)} label={pick(m.name)} style={s.row}>
-            <Thumb source={IMG[m.img]} tint={TINT[m.id]} size={72} />
-            <View style={{ flex: 1 }}>
-              <T v="subheading">{pick(m.name)}</T>
-              <T v="small" tone="muted">{t('recipes.minutes', { n: m.mins })} · {m.easy ? t('detail.easy') : '—'}</T>
-              <T v="smallBold" tone={m2.tone}>{m2.text}</T>
-            </View>
-            <T v="subheading">{price(m.baht)}</T>
-            <Icon name="next" color={colors.muted} size={20} />
-          </Card>
-        );
-      })}
+      <View style={s.grid}>
+        {ready.map((m) => { const m2 = meta2(m); return <DishCard key={m.id} m={m} sub={m2.text} subTone={m2.tone} />; })}
+      </View>
 
       {soon.length > 0 && <T v="subheading" tone="muted" style={{ marginTop: space.sm }}>{t('recipes.soon')}</T>}
       {soon.map((m) => (
         <Card key={m.id} tone="surface" style={[s.row, { borderWidth: 1, borderColor: colors.line }]}>
-          <Thumb source={IMG[m.img]} tint={TINT[m.id]} size={52} />
+          <Thumb source={IMG[m.img]} tint={DISH_TINT[m.id]} size={52} />
           <View style={{ flex: 1 }}>
             <T v="bodyBold">{pick(m.name)}</T>
             <T v="small" tone={fridge ? meta2(m).tone : 'muted'}>{fridge ? meta2(m).text : t('recipes.minutes', { n: m.mins })}</T>
@@ -142,5 +129,6 @@ const s = StyleSheet.create({
   search: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.md, borderRadius: radius.sm },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, marginTop: space.sm },
   pantry: { minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill, justifyContent: 'center' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: space.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.sm, paddingRight: space.md },
 });

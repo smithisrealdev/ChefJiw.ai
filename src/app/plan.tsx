@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { Button, Card, Screen, T, Thumb } from '@/components/ui';
-import { IMG, MASCOT } from '@/data/images';
+import { DISH_TINT, IMG, MASCOT } from '@/data/images';
 import { MENU, planShopping, SUNDAY_PLAN } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
@@ -32,11 +32,11 @@ export default function Plan() {
           <Button kind="onPastel" size="cook" label={t('plan.start')} onPress={() => router.push(`/recipe/${first}`)} />
         </Card>
       }>
-      <Card tone="note">
-        <T v="smallBold" tone="pastelMuted">{t('plan.perMeal')}</T>
-        <T v="title" tone="pastel">{price(SHOP.perMeal)}</T>
-        {save > 0 && <T tone="pastel">{t('plan.vsPlate', { p: price(PLATE), n: SUNDAY_PLAN.meals, save: price(save) })}</T>}
-        <T v="small" tone="pastelMuted">{t('plan.costNote')}</T>
+      <Card tone="navy">
+        <T v="bodyBold" tone="onNavy">{t('plan.perMeal')}</T>
+        <T v="hero" tone="yellow">{price(SHOP.perMeal)}</T>
+        {save > 0 && <T v="bodyBold" tone="onNavy">{t('plan.vsPlate', { p: price(PLATE), n: SUNDAY_PLAN.meals, save: price(save) })}</T>}
+        <T v="small" tone="onNavyMuted">{t('plan.costNote')}</T>
       </Card>
 
       <T v="subheading" accessibilityRole="header">{t('plan.order')}</T>
@@ -45,7 +45,7 @@ export default function Plan() {
         const m = MENU.find((x) => x.id === d.id)!;
         return (
           <Card key={d.id} onPress={() => router.push(`/recipe/${d.id}`)} label={`${i + 1}. ${pick(m.name)}`} style={s.dish}>
-            <Thumb source={IMG[m.img]} size={64} />
+            <Thumb source={IMG[m.img]} tint={DISH_TINT[m.id]} size={72} />
             <View style={{ flex: 1 }}>
               <T v="bodyBold">{i + 1}. {pick(m.name)}</T>
               <T v="small" tone="muted">{t('recipes.minutes', { n: m.mins })}</T>

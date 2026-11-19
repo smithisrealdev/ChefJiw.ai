@@ -24,6 +24,12 @@ export const IMG: Record<ImgKey, number> = {
   'dish-prik-khing': require('@/assets/images/food/dish-prik-khing.png'),
 };
 
+// พื้นสีสดหลังรูปจาน จานขาวในรูปจะเด่นขึ้น
+export const DISH_TINT: Record<string, string> = {
+  kaprao: '#FF8F6B', omelet: '#FFD84D', 'fried-rice': '#FFB35C', 'morning-glory': '#7BE0B5', 'tom-yum': '#FF8FA8',
+  'green-curry': '#8FDB8A', 'moo-palo': '#A7B0FF', 'prik-khing': '#FFB35C',
+};
+
 export const MASCOT = {
   elephant: require('@/assets/images/mascot/elephant.png'),
   mouse: require('@/assets/images/mascot/mouse.png'),

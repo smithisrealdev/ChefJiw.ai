@@ -32,8 +32,8 @@ export default function Me() {
   return (
     <Screen tint={colors.header.me} title={t('me.title')} mascot={MASCOT.elephant}>
       <View style={{ flexDirection: 'row', gap: space.sm }}>
-        <Card style={{ flex: 1 }}><T v="title">{runs.length}</T><T v="small" tone="muted">{t('me.cooked')}</T></Card>
-        <Card style={{ flex: 1 }}><T v="title">{avg}</T><T v="small" tone="muted">{t('me.avg')}</T></Card>
+        <Card tone="mint" style={{ flex: 1 }}><T v="hero" tone="pastel">{runs.length}</T><T v="smallBold" tone="pastel">{t('me.cooked')}</T></Card>
+        <Card tone="accent" style={{ flex: 1 }}><T v="hero" tone="pastel">{avg}</T><T v="smallBold" tone="pastel">{t('me.avg')}</T></Card>
       </View>
 
       <T v="subheading" accessibilityRole="header">{t('me.recent')}</T>

@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert, AppState, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Circle } from 'react-native-svg';
 
 import { Icon } from '@/components/icon';
 import { ApiNotice, Button, Card, IconButton, mmss, Sheet, Skeleton, T } from '@/components/ui';
@@ -15,7 +16,9 @@ import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY, freeLeft, localDay, spendOne } from '@/lib/quota';
 import { cancelTimer, putProgress, useSettings, type Progress } from '@/lib/settings';
 import { Image } from 'expo-image';
-import { fonts, onPastel, radius, space, type } from '@/theme/tokens';
+import { fonts, onPastel, radius, space, type, vivid } from '@/theme/tokens';
+
+const RING = 196, RING_R = RING / 2 - 10, RING_C = 2 * Math.PI * RING_R;
 
 export default function Cook() {
   useKeepAwake(); // หน้าจอไม่ดับเองตลอดการทำอาหาร
@@ -177,11 +180,16 @@ function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: st
 
   return (
     <Card tone={done ? 'done' : 'ai'} style={{ alignItems: 'center', gap: space.sm }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
-        <Icon name="clock" color={onPastel.ink} />
+      {/* วงแหวนหดตามเวลาที่เหลือ มองจากไกลก็รู้ว่าเหลือเท่าไร */}
+      <View style={{ width: RING, height: RING, alignItems: 'center', justifyContent: 'center' }}>
+        <Svg width={RING} height={RING} style={{ position: 'absolute', transform: [{ rotate: '-90deg' }] }} accessible={false}>
+          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke="rgba(36,33,43,0.14)" strokeWidth={14} fill="none" />
+          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke={done ? onPastel.success : vivid.indigo} strokeWidth={14} strokeLinecap="round" fill="none"
+            strokeDasharray={RING_C} strokeDashoffset={RING_C * (1 - Math.max(0, Math.min(1, left / seconds)))} />
+        </Svg>
         <T v="smallBold" tone="pastelMuted">{t('cook.timer')}</T>
+        <T v="hero" tone="pastel" accessibilityRole="header">{mmss(left)}</T>
       </View>
-      <T v="title" tone="pastel" style={{ fontSize: 44, lineHeight: 56, fontVariant: ['tabular-nums'] }} accessibilityRole="header">{mmss(left)}</T>
       {done ? <T v="bodyBold" tone="pastel">{t('cook.timerDone')}</T>
         : !endAt ? <Button label={t('cook.timerStart', { t: mmss(seconds) })} kind="onPastel" onPress={startTimer} />
         : <T v="bodyBold" tone="pastel" accessibilityLiveRegion="polite">{t('cook.timerLeft', { t: mmss(left) })}</T>}

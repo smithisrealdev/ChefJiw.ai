@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import type { ReactNode } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextProps, type TextStyle, type ViewStyle } from 'react-native';
+import { useEffect, useState, type ReactNode } from 'react';
+import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextProps, type TextStyle, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
@@ -9,10 +9,12 @@ import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
-import { fonts, onPastel, radius, space, touch, type } from '@/theme/tokens';
+import { fonts, onPastel, onTint, radius, space, touch, type, vivid } from '@/theme/tokens';
 
-type TextVariant = 'title' | 'heading' | 'subheading' | 'body' | 'bodyBold' | 'small' | 'smallBold' | 'step';
+type TextVariant = 'hero' | 'title' | 'heading' | 'subheading' | 'body' | 'bodyBold' | 'small' | 'smallBold' | 'step';
 const VARIANT: Record<TextVariant, TextStyle> = {
+  // ตัวเลขเด่นของจอ (ราคาต่อมื้อ เวลาที่เหลือ จำนวนจานที่ทำแล้ว)
+  hero: { fontFamily: fonts.heading, fontSize: type.hero, lineHeight: type.hero * 1.2, fontVariant: ['tabular-nums'] },
   title: { fontFamily: fonts.heading, fontSize: type.xxl, lineHeight: type.xxl * 1.3 },
   heading: { fontFamily: fonts.heading, fontSize: type.xl, lineHeight: type.xl * 1.35 },
   subheading: { fontFamily: fonts.heading, fontSize: type.lg, lineHeight: type.lg * 1.4 },
@@ -25,9 +27,9 @@ const VARIANT: Record<TextVariant, TextStyle> = {
 };
 
 /** ข้อความทั้งแอป ขยายตามขนาดตัวอักษรของเครื่องอัตโนมัติ; tone 'pastel' ใช้บนพื้นสีอ่อนที่ไม่เปลี่ยนตามธีม */
-export function T({ v = 'body', tone = 'ink', style, children, ...rest }: { v?: TextVariant; tone?: 'ink' | 'muted' | 'success' | 'warn' | 'pastel' | 'pastelMuted' | 'onPrimary'; style?: StyleProp<TextStyle>; children: ReactNode } & Omit<TextProps, 'style' | 'children'>) {
+export function T({ v = 'body', tone = 'ink', style, children, ...rest }: { v?: TextVariant; tone?: 'ink' | 'muted' | 'success' | 'warn' | 'pastel' | 'pastelMuted' | 'onPrimary' | 'onNavy' | 'onNavyMuted' | 'yellow'; style?: StyleProp<TextStyle>; children: ReactNode } & Omit<TextProps, 'style' | 'children'>) {
   const { colors } = useSettings();
-  const color = { ink: colors.ink, muted: colors.muted, success: colors.success, warn: colors.warn, pastel: onPastel.ink, pastelMuted: onPastel.muted, onPrimary: colors.onPrimary }[tone];
+  const color = { ink: colors.ink, muted: colors.muted, success: colors.success, warn: colors.warn, pastel: onPastel.ink, pastelMuted: onPastel.muted, onPrimary: colors.onPrimary, onNavy: '#FFFFFF', onNavyMuted: vivid.onNavyMuted, yellow: vivid.yellow }[tone];
   return <Text style={[VARIANT[v], { color }, style]} {...rest}>{children}</Text>;
 }
 
@@ -66,10 +68,10 @@ export function Chip({ label, selected, onPress }: { label: string; selected: bo
   );
 }
 
-/** การ์ดพื้นสี: soft = พื้นรองตามธีม; note/ai/done/danger/accent = พาสเทลที่ใช้ตัวอักษรเข้มเสมอ */
-export function Card({ tone = 'soft', children, style, onPress, label }: { tone?: 'soft' | 'note' | 'ai' | 'done' | 'danger' | 'accent' | 'surface'; children: ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; label?: string }) {
+/** การ์ดพื้นสี: soft = พื้นรองตามธีม; note/ai/done/danger/accent = พาสเทลที่ใช้ตัวอักษรเข้มเสมอ; navy/coral/mint = การ์ดเด่นสีสด (navy ใช้ตัวอักษรขาว) */
+export function Card({ tone = 'soft', children, style, onPress, label }: { tone?: 'soft' | 'note' | 'ai' | 'done' | 'danger' | 'accent' | 'surface' | 'navy' | 'coral' | 'mint'; children: ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; label?: string }) {
   const { colors } = useSettings();
-  const bg = { soft: colors.surfaceSoft, surface: colors.surface, note: colors.note, ai: colors.ai, done: colors.done, danger: colors.danger, accent: colors.accent }[tone];
+  const bg = { soft: colors.surfaceSoft, surface: colors.surface, note: colors.note, ai: colors.ai, done: colors.done, danger: colors.danger, accent: colors.accent, navy: vivid.navy, coral: vivid.coral, mint: vivid.mint }[tone];
   if (!onPress) return <View style={[s.card, { backgroundColor: bg }, style]}>{children}</View>;
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [s.card, { backgroundColor: bg, transform: [{ scale: pressed ? 0.98 : 1 }] }, style]}>
@@ -78,7 +80,19 @@ export function Card({ tone = 'soft', children, style, onPress, label }: { tone?
   );
 }
 
-/** หัวหน้าจอพร้อมมาสคอต พื้นพาสเทลประจำหน้า แล้วต่อด้วยแผ่นเนื้อหาสีพื้น */
+/** ลอยขึ้นลงช้าๆ ให้มาสคอตดูมีชีวิต หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว */
+export function Float({ children }: { children: ReactNode }) {
+  const [y] = useState(() => new Animated.Value(0));
+  useEffect(() => {
+    let loop: Animated.CompositeAnimation | undefined;
+    const step = (toValue: number) => Animated.timing(y, { toValue, duration: 1400, easing: Easing.inOut(Easing.sin), useNativeDriver: Platform.OS !== 'web' });
+    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => { if (!reduce) { loop = Animated.loop(Animated.sequence([step(-6), step(0)])); loop.start(); } }).catch(() => {});
+    return () => loop?.stop();
+  }, [y]);
+  return <Animated.View style={{ transform: [{ translateY: y }] }}>{children}</Animated.View>;
+}
+
+/** หัวหน้าจอพร้อมมาสคอต พื้นสีสดประจำหน้า แล้วต่อด้วยแผ่นเนื้อหาสีพื้น */
 export function Screen({ tint, title, subtitle, mascot, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; mascot?: number; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   const { colors, isDark } = useSettings();
   const insets = useSafeAreaInsets();
@@ -87,11 +101,11 @@ export function Screen({ tint, title, subtitle, mascot, onBack, backLabel, right
       <View style={[s.header, { paddingTop: insets.top + space.md }]}>
         <View style={{ flex: 1, gap: space.xs }}>
           {onBack && <View style={{ marginBottom: space.sm }}><IconButton icon="back" label={backLabel ?? ''} onPress={onBack} onPastelBg /></View>}
-          <T v="title" tone={isDark ? 'ink' : 'pastel'} accessibilityRole="header">{title}</T>
-          {subtitle && <T v="small" tone={isDark ? 'muted' : 'pastelMuted'}>{subtitle}</T>}
+          <T v="title" style={isDark ? undefined : { color: onTint(tint) }} accessibilityRole="header">{title}</T>
+          {subtitle && <T v="smallBold" tone="muted" style={isDark ? undefined : { color: onTint(tint) }}>{subtitle}</T>}
         </View>
         {right}
-        {mascot && <Image source={mascot} style={s.mascot} contentFit="contain" accessible={false} />}
+        {mascot && <Float><Image source={mascot} style={s.mascot} contentFit="contain" accessible={false} /></Float>}
       </View>
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
         <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: footer ? 120 : space.xxl }} keyboardShouldPersistTaps="handled">
@@ -153,6 +167,11 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
   );
 }
 
+/** ป้ายข้อมูลสั้นๆ พื้นขาว ใช้บนการ์ดสีสด */
+export function Pill({ label }: { label: string }) {
+  return <View style={s.pill}><Text style={{ fontFamily: fonts.bodySemi, fontSize: type.sm, color: onPastel.ink }}>{label}</Text></View>;
+}
+
 export const mmss = (s: number) => Math.floor(s / 60) + ':' + String(Math.max(0, s) % 60).padStart(2, '0');
 
 export function Thumb({ source, tint, size = 64 }: { source: number; tint?: string; size?: number }) {
@@ -168,9 +187,10 @@ const s = StyleSheet.create({
   iconButton: { width: touch.min, height: touch.min, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   chip: { minHeight: touch.min, paddingHorizontal: space.lg, borderRadius: radius.pill, justifyContent: 'center' },
   card: { borderRadius: radius.lg, padding: space.lg, gap: space.xs },
+  pill: { backgroundColor: '#FFFFFF', borderRadius: radius.pill, paddingHorizontal: space.md, minHeight: 30, justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: space.lg, paddingBottom: space.lg, gap: space.md },
   mascot: { width: 96, height: 139 },
-  sheet: { flex: 1, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, overflow: 'hidden' },
+  sheet: { flex: 1, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden' },
   footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: space.lg, paddingTop: space.sm },
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
   modal: { maxHeight: '88%', borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, paddingHorizontal: space.lg, paddingTop: space.lg },

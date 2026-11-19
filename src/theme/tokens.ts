@@ -15,7 +15,7 @@ export const light: Palette = {
   primary: '#24212B', onPrimary: '#FFFFFF',
   accent: '#FFE66D', onAccent: '#24212B', note: '#FFF3B0', ai: '#E9E6FF', done: '#C9F2CF', danger: '#FFE3D6',
   success: '#1E7A45', warn: '#8A3B12', flame: '#C2512E',
-  header: { home: '#FBEBD2', recipes: '#FFA9C6', cook: '#FFC98A', me: '#8FE3CF', cookFlow: '#FFD84D', market: '#8FD8F2' },
+  header: { home: '#4B5BEF', recipes: '#FF6B8B', cook: '#FF9A3D', me: '#22C58B', cookFlow: '#FFD84D', market: '#3DB8F5' },
 };
 
 export const dark: Palette = {
@@ -27,12 +27,21 @@ export const dark: Palette = {
   header: { home: '#17151D', recipes: '#17151D', cook: '#17151D', me: '#17151D', cookFlow: '#17151D', market: '#17151D' },
 };
 
+// สีสดประจำแอป ไม่เปลี่ยนตามธีม ใช้กับการ์ดเด่นของแต่ละจอ (จอละใบ) ตัวอักษรบนสีเหล่านี้เลือกด้วย onTint
+export const vivid = { indigo: '#4B5BEF', navy: '#1E1B3A', coral: '#FF7A59', yellow: '#FFD84D', mint: '#7BE0B5', onNavyMuted: '#C9C6E8' } as const;
+
+/** สีตัวอักษรบนพื้นสีสด: ขาวถ้าคอนทราสต์กับขาวถึง 4.5:1 ไม่อย่างนั้นใช้สีหมึก */
+export function onTint(hex: string): string {
+  const [r, g, b] = [1, 3, 5].map((i) => { const c = parseInt(hex.slice(i, i + 2), 16) / 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
+  return 1.05 / (0.2126 * r + 0.7152 * g + 0.0722 * b + 0.05) >= 4.5 ? '#FFFFFF' : '#24212B';
+}
+
 // สีข้อความบนพื้นพาสเทลที่ไม่เปลี่ยนตามธีม
 export const onPastel = { ink: '#24212B', muted: '#4F4A5C', success: '#1E7A45', warn: '#8A3B12' };
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
 export const radius = { sm: 16, lg: 24, pill: 999 } as const;
-export const type = { sm: 14, md: 16, lg: 18, xl: 20, xxl: 28 } as const;
+export const type = { sm: 14, md: 16, lg: 18, xl: 20, xxl: 28, hero: 44 } as const;
 export const touch = { min: 44, cook: 56 } as const;
 
 export const fonts = {

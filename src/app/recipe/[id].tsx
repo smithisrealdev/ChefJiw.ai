@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
-import { Button, Card, Chip, Screen, T, Thumb } from '@/components/ui';
+import { Button, Card, Chip, Float, Screen, T, Thumb } from '@/components/ui';
 import { IMG } from '@/data/images';
 import { buildRecipe, DEFAULT_OPTS, MENU, type ImgKey } from '@/data/recipes';
 import { cancelTimer, putProgress, useSettings } from '@/lib/settings';
@@ -33,7 +33,7 @@ export default function RecipeDetail() {
   return (
     <Screen tint={colors.header.cook} title={pick(r.name)} onBack={back} backLabel={t('detail.back')}
       subtitle={`${t('recipes.minutes', { n: r.mins })}${MENU.find((m) => m.id === r.id)?.easy ? ` · ${t('detail.easy')}` : ''} · ${t('detail.kcal', { n: r.kcal })}`}
-      right={<Thumb source={IMG[r.img]} size={96} />}
+      right={<Float><Thumb source={IMG[r.img]} size={104} /></Float>}
       footer={
         <Card tone="accent" style={s.buy}>
           <View style={{ flex: 1 }}>

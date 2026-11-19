@@ -1,15 +1,17 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
+import { Icon } from '@/components/icon';
 import { ResumeCard } from '@/components/resume-card';
-import { Button, Card, Screen, T, Thumb } from '@/components/ui';
+import { Button, Card, Float, Pill, Screen, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT } from '@/data/images';
-import { MENU, planShopping } from '@/data/recipes';
+import { MENU, planShopping, SUNDAY_PLAN } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import type { L } from '@/lib/i18n';
 import { useSettings } from '@/lib/settings';
-import { space } from '@/theme/tokens';
+import { radius, space } from '@/theme/tokens';
 
 // บทพูดเชฟช้างจากหน้าร้านในต้นแบบ
 const LINES: L[] = [
@@ -26,21 +28,42 @@ export default function Home() {
   const pickToday = MENU[0];
   return (
     <Screen tint={colors.header.home} title={t('home.title')} mascot={MASCOT.elephant}>
-      <Card tone="note">
-        <T v="smallBold" tone="pastelMuted">{t('home.chef')}</T>
-        <T v="subheading" tone="pastel" accessibilityRole="header">{pick(LINES[line % LINES.length])}</T>
-        <View style={{ flexDirection: 'row', gap: space.sm, marginTop: space.sm }}>
-          <Button kind="onPastel" label={t('detail.start')} onPress={() => router.push(`/recipe/${pickToday.id}`)} />
-          <Button kind="onPastelLight" label={t('home.next')} onPress={() => setLine(line + 1)} />
+      {/* จุดเด่นของจอ: จานแนะนำวันนี้ พร้อมบทพูดของเชฟและปุ่มเริ่มทำ */}
+      <Card tone="coral" style={{ gap: space.md }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <View style={{ flex: 1, gap: space.sm }}>
+            <T v="smallBold" tone="pastel">{t('home.today')}</T>
+            <T v="title" tone="pastel" accessibilityRole="header">{pick(pickToday.name)}</T>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+              <Pill label={t('recipes.minutes', { n: pickToday.mins })} />
+              <Pill label={price(pickToday.baht)} />
+            </View>
+          </View>
+          <Float><Image source={IMG[pickToday.img]} style={{ width: 116, height: 116 }} contentFit="contain" accessible={false} /></Float>
+        </View>
+        <View style={{ backgroundColor: '#FFFFFF', borderRadius: radius.sm, padding: space.md }}>
+          <T v="smallBold" tone="pastelMuted">{t('home.chef')}</T>
+          <T v="bodyBold" tone="pastel">{pick(LINES[line % LINES.length])}</T>
+        </View>
+        <View style={{ flexDirection: 'row', gap: space.sm }}>
+          <Button kind="onPastel" size="cook" label={t('detail.start')} onPress={() => router.push(`/recipe/${pickToday.id}`)} style={{ flex: 1, paddingHorizontal: space.md }} />
+          <Button kind="onPastelLight" size="cook" label={t('home.next')} onPress={() => setLine(line + 1)} style={{ paddingHorizontal: space.lg }} />
         </View>
       </Card>
       <ResumeCard />
-      <Card onPress={() => router.push('/plan')} label={t('plan.title')} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-        <Thumb source={IMG['dish-moo-palo']} size={64} />
+      <Card tone="navy" onPress={() => router.push('/plan')} label={`${t('plan.title')}, ${t('plan.perMeal')} ${price(PER_MEAL)}`} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View style={{ flex: 1 }}>
-          <T v="subheading">{t('plan.title')}</T>
-          <T v="small" tone="muted">{t('plan.openSub', { p: price(PER_MEAL) })}</T>
+          <T v="subheading" tone="onNavy">{t('plan.title')}</T>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.sm }}>
+            <T v="bodyBold" tone="onNavy">{t('plan.perMeal')}</T>
+            <T v="hero" tone="yellow">{price(PER_MEAL)}</T>
+          </View>
+          <T v="small" tone="onNavyMuted">{t('plan.sub')}</T>
         </View>
+        <View style={{ gap: space.xs }}>
+          {SUNDAY_PLAN.dishes.map((d) => <Thumb key={d.id} source={IMG[MENU.find((m) => m.id === d.id)!.img]} tint="rgba(255,255,255,0.12)" size={44} />)}
+        </View>
+        <Icon name="next" color="#FFFFFF" />
       </Card>
       {!BETA && (
         <Card onPress={() => router.push('/market')} label={t('market.open')} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
@@ -51,18 +74,12 @@ export default function Home() {
           </View>
         </Card>
       )}
-      <T v="subheading" accessibilityRole="header">{t('home.today')}</T>
-      <Card onPress={() => router.push(`/recipe/${pickToday.id}`)} label={pick(pickToday.name)} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-        <Thumb source={IMG[pickToday.img]} tint="#FFD9CC" size={72} />
+      <Card tone="mint" style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View style={{ flex: 1 }}>
-          <T v="subheading">{pick(pickToday.name)}</T>
-          <T v="small" tone="muted">{t('recipes.minutes', { n: pickToday.mins })} · {t('recipes.kcal', { n: pickToday.kcal })}</T>
+          <T v="hero" tone="pastel">{runs.length}</T>
+          <T v="bodyBold" tone="pastel">{t('home.cooked')}</T>
         </View>
-        <T v="subheading">{price(pickToday.baht)}</T>
-      </Card>
-      <Card>
-        <T v="title">{runs.length}</T>
-        <T tone="muted">{t('home.cooked')}</T>
+        <Image source={MASCOT.mouse} style={{ width: 64, height: 92 }} contentFit="contain" accessible={false} />
       </Card>
     </Screen>
   );
