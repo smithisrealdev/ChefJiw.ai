@@ -47,20 +47,27 @@ def legs(skin, sock, accent, feet, drop, only=None):
 LAYER = ['all']  # 'all' = ภาพเต็ม  'body' = ตัดส่วนที่ขยับแยกออก  ชื่อส่วน หรือ 'legL' 'legR' = วาดเฉพาะส่วนนั้น ใช้ทำภาพแยกชั้นให้แอปขยับทีละส่วน
 _n = [0]
 def person(skin, top, clothes, hair, accent, look=(0, 0), mouth=True, sock='#FFFFFF', back='', under_head='', arms_back='', arms_front='', hat='', front='', blush=0.85,
-           lean=0, tilt=0, feet=STAND, drop=0, ground='', legs_front=False, parts=None, split_legs=False):
+           lean=0, tilt=0, feet=STAND, drop=0, ground='', legs_front=False, parts=None, bparts=None, extras=None, split_legs=False, split_ground=False):
     """lean = เอนตัวท่อนบน (องศา) tilt = เอียงคอ feet = ตำแหน่งเท้า drop = ย่อตัวลง (นั่ง) legs_front = ขาอยู่หน้าตัว (นั่งเหยียดขามาข้างหน้า) ground = ของที่พื้น การกระโดดทำเป็นแอนิเมชันในแอป"""
     _n[0] += 1; cid = f'c{_n[0]}'
-    layer, parts = LAYER[0], parts or {}
+    # ส่วนที่แยกชั้นได้: parts = ของหน้าตัว bparts = ของหลังตัว (ทั้งคู่เอนตามตัว) extras = ของรอบตัว เช่น ดาว ฟองความคิด split_legs = ขาแต่ละข้าง split_ground = ของที่พื้น
+    layer, parts, bparts, extras = LAYER[0], parts or {}, bparts or {}, extras or {}
     fit = lambda inner: SVG(f'<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{inner}</g>')
-    if layer in parts: return fit(f'<g transform="translate(0 {drop}) rotate({lean} 240 384)">{parts[layer]}</g>')
+    upper = lambda inner: fit(f'<g transform="translate(0 {drop}) rotate({lean} 240 384)">{inner}</g>')
+    if layer in parts: return upper(parts[layer])
+    if layer in bparts: return upper(bparts[layer])
+    if layer in extras: return fit(extras[layer])
+    if layer == 'ground': return fit(ground)
     if layer in ('legL', 'legR'): return fit(legs(skin, sock, accent, feet, drop, only=('legL', 'legR').index(layer)))
-    moving = ''.join(parts.values()) if layer == 'all' else ''
-    both_legs = '' if (split_legs and layer == 'body') else legs(skin, sock, accent, feet, drop)
+    whole = layer == 'all'
+    moving, moving_back, around = (''.join(d.values()) if whole else '' for d in (parts, bparts, extras))
+    both_legs = '' if (split_legs and not whole) else legs(skin, sock, accent, feet, drop)
+    if split_ground and not whole: ground = ''
     return SVG(f'''<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{ground}<g>{'' if legs_front else both_legs}
-<g transform="translate(0 {drop}) rotate({lean} 240 384)">{back}{arms_back}
+<g transform="translate(0 {drop}) rotate({lean} 240 384)">{back}{moving_back}{arms_back}
 <clipPath id="{cid}"><path d="{TORSO}"/></clipPath><path d="{TORSO}" fill="{top}"/><g clip-path="url(#{cid})">{clothes}</g>
 <g transform="rotate({tilt} 240 236)">{under_head}<path d="{HEAD}" fill="{skin}"/>{hair}{hat}{face(look, mouth, blush)}</g>
-{arms_front}{moving}</g>{both_legs if legs_front else ''}</g>{front}</g>''')
+{arms_front}{moving}</g>{both_legs if legs_front else ''}</g>{front}{around}</g>''')
 
 # ---------- เชฟจิ๋ว: หมวกเชฟ ผมหน้าม้าปัดข้าง เสื้อแขนยาวฟ้า ผ้ากันเปื้อนเต็มตัวสีส้มมีกระเป๋า ----------
 S1, SKY, BROWN = '#FFE3C2', '#BFD9FF', '#6B4632'
@@ -84,14 +91,14 @@ def build():
       'cook': chef(lean=9, tilt=-6, feet=((186, 440, -8), (286, 440, 10)),
                    parts={'food': food(262, 346), 'wok': wok(262, 346, -10) + A1('L', 200, 340, -34, 12) + A1('R', 356, 328, 30, 8)}),
       # กระโดดตัวลอย แขนขากาง
-      'cheer': chef(feet=((170, 432, -22), (310, 432, 22)), arms_back=A1('L', 88, 172, -14, 16) + A1('R', 392, 172, 14, 16), hat=toque(-14),
-                    front=star(50, 96, 22) + star(432, 84, 26) + star(400, 22, 13) + star(96, 30, 12)),
+      'cheer': chef(feet=((170, 432, -22), (310, 432, 22)), bparts={'arms': A1('L', 88, 172, -14, 16) + A1('R', 392, 172, 14, 16)}, hat=toque(-14),
+                    extras={'stars': star(50, 96, 22) + star(432, 84, 26) + star(400, 22, 13) + star(96, 30, 12)}),
       # เอียงคอคิด เท้าไขว้
-      'think': chef(look=(10, -8), tilt=11, lean=3, feet=((214, 440, 0), (250, 438, -24)), arms_front=A1('L', 230, 334, -38, 16) + A1('R', 262, 268, 54, 44), hat=toque(4), blush=0.6,
-                    front=f'<circle cx="392" cy="112" r="8" fill="{HAT_D}"/><circle cx="414" cy="82" r="13" fill="{HAT_D}"/><circle cx="442" cy="40" r="22" fill="{HAT_D}"/>'),
+      'think': chef(look=(10, -8), tilt=11, lean=3, feet=((214, 440, 0), (250, 438, -24)), arms_front=A1('L', 230, 334, -38, 16), parts={'hand': A1('R', 262, 268, 54, 44)}, hat=toque(4), blush=0.6,
+                    extras={'bubbles': f'<circle cx="392" cy="112" r="8" fill="{HAT_D}"/><circle cx="414" cy="82" r="13" fill="{HAT_D}"/><circle cx="442" cy="40" r="22" fill="{HAT_D}"/>'}),
       # ผงะถอยหลัง ยกขาข้างหนึ่ง มือกุมแก้ม
       'oops': chef(lean=-10, tilt=-4, feet=((214, 440, 0), (318, 410, 34)), arms_front=A1('L', 170, 214, -44, 22) + A1('R', 310, 214, 44, 22), hat=toque(-20), blush=0.5,
-                   front='<path d="M408 96 q22 34 0 46 q-22 -12 0 -46 z" fill="#6CC5F5"/><path d="M56 122 l-22 -10 M50 156 l-24 2" stroke="#6CC5F5" stroke-width="7" stroke-linecap="round"/>'),
+                   extras={'sweat': '<path d="M408 96 q22 34 0 46 q-22 -12 0 -46 z" fill="#6CC5F5"/>', 'lines': '<path d="M56 122 l-22 -10 M50 156 l-24 2" stroke="#6CC5F5" stroke-width="7" stroke-linecap="round"/>'}),
     }
 
     # ---------- ใบเตย: หมวกบักเก็ต ผมเปียคู่ผูกโบว์ เสื้อยืดเขียวมินต์ เอี๊ยมกระโปรงยีนส์ติดกระดุมเหลือง ถุงผ้าใส่ผัก ----------
@@ -115,7 +122,7 @@ def build():
       # เดินกลับจากตลาด ก้าวขา มือหนึ่งหิ้วถุงผ้า อีกมือแกว่งข้างตัว
       'shop': toey(lean=5, tilt=-5, feet=((196, 442, -6), (290, 440, 14)), split_legs=True, arms_back=A2('L', 122, 336, -26, 4), arms_front=tote(390, 326) + A2('R', 382, 318, 22, -4), front=star(56, 150, 15)),
       # นั่งบนลังไม้ อ่านรายการของ แกว่งขา
-      'list': toey(tilt=7, feet=((196, 446, -14), (292, 434, 22)),
+      'list': toey(tilt=7, feet=((196, 446, -14), (292, 434, 22)), split_legs=True, split_ground=True,
                    ground=f'<rect x="126" y="384" width="228" height="80" rx="12" fill="{STRAW}"/><path d="M138 412 h204 M138 438 h204" stroke="{STRAW_D}" stroke-width="6" stroke-linecap="round"/>',
                    arms_front=f'<rect x="262" y="292" width="104" height="116" rx="14" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="5"/>'
                f'<path d="M280 322 l8 8 l14 -16 M280 354 l8 8 l14 -16" stroke="{GREEN}" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
@@ -141,19 +148,24 @@ def build():
       'sip': chim(tilt=-6, drop=40, legs_front=True, feet=((112, 448, -62), (368, 448, 62)), ground=f'<ellipse cx="240" cy="456" rx="214" ry="22" fill="#CFE3FF"/>',
                   arms_front=A3('L', 208, 338, -34, 14),
                   parts={'spoon': f'<path d="M312 206 L262 192" stroke="{WOOD}" stroke-width="11" stroke-linecap="round"/><ellipse cx="248" cy="188" rx="22" ry="14" fill="{WOOD}"/>' + A3('R', 316, 212, 46, 18)},
-                  front=heart(420, 150, 1.1) + heart(62, 184, 0.7)),
+                  extras={'hearts': heart(420, 150, 1.1) + heart(62, 184, 0.7)}),
       # กระโดดชูช้อน ขาข้างหนึ่งเตะไปข้างหลัง
-      'yum': chim(lean=7, tilt=-6, feet=((184, 436, -14), (318, 408, 46)), arms_back=A3('L', 96, 176, -14, 16), arms_front=bigspoon(384, 286, 14) + A3('R', 382, 300, 22, -2),
-                  front=star(52, 96, 20) + star(436, 26, 14) + star(108, 30, 11)),
+      'yum': chim(lean=7, tilt=-6, feet=((184, 436, -14), (318, 408, 46)), bparts={'arm': A3('L', 96, 176, -14, 16)}, parts={'spoon': bigspoon(384, 286, 14) + A3('R', 382, 300, 22, -2)},
+                  extras={'stars': star(52, 96, 20) + star(436, 26, 14) + star(108, 30, 11)}),
       # เอียงคอสงสัย เท้าเขี่ยพื้น
-      'hmm': chim(look=(-9, -7), tilt=-13, lean=-4, feet=((204, 440, 0), (296, 434, 30)), arms_front=bigspoon(368, 340, 22) + A3('R', 362, 340, 26, 2) + A3('L', 208, 338, -34, 14), blush=0.6,
-                  front=f'<circle cx="100" cy="92" r="7" fill="{HAT_D}"/><circle cx="76" cy="64" r="11" fill="{HAT_D}"/><circle cx="46" cy="28" r="16" fill="{HAT_D}"/>'),
+      'hmm': chim(look=(-9, -7), tilt=-13, lean=-4, feet=((204, 440, 0), (296, 434, 30)), arms_front=A3('L', 208, 338, -34, 14), parts={'spoon': bigspoon(368, 340, 22) + A3('R', 362, 340, 26, 2)}, blush=0.6,
+                  extras={'bubbles': f'<circle cx="100" cy="92" r="7" fill="{HAT_D}"/><circle cx="76" cy="64" r="11" fill="{HAT_D}"/><circle cx="46" cy="28" r="16" fill="{HAT_D}"/>'}),
     })
     return P
 
 POSES = build()
 # ท่าที่ขยับทีละส่วนทำเป็นหลายชั้น: ตัว (-body) กับส่วนที่ขยับ แอปวางซ้อนกันแล้วขยับแต่ละชั้นตาม LAYERS ที่ src/data/images.ts
-for name, layers in (('cook', ('body', 'wok', 'food')), ('shop', ('body', 'legL', 'legR')), ('sip', ('body', 'spoon'))):
+SPLIT = {
+    'cook': ('body', 'wok', 'food'), 'cheer': ('body', 'arms', 'stars'), 'think': ('body', 'hand', 'bubbles'), 'oops': ('body', 'sweat', 'lines'),
+    'shop': ('body', 'legL', 'legR'), 'list': ('body', 'ground', 'legL', 'legR'),
+    'sip': ('body', 'spoon', 'hearts'), 'yum': ('body', 'arm', 'spoon', 'stars'), 'hmm': ('body', 'spoon', 'bubbles'),
+}
+for name, layers in SPLIT.items():
     for layer in layers:
         LAYER[0] = layer; POSES[f'{name}-{layer}'] = build()[name]
 LAYER[0] = 'all'

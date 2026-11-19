@@ -47,19 +47,60 @@ export const MASCOT = {
 };
 
 export type Motion = 'bob' | 'jump' | 'sway' | 'shake';
-/** ท่าที่ขยับทีละส่วน: ภาพตัว แล้วซ้อนด้วยส่วนที่ขยับ (ทุกชั้นขนาดเท่ากัน วางทับกันพอดี) behind = อยู่หลังตัว */
-export type PartMove = 'toss' | 'fly' | 'stepL' | 'stepR' | 'sip';
+/** ทุกท่าแยกเป็นหลายชั้น: ภาพตัว แล้วซ้อนด้วยส่วนที่ขยับเอง (ทุกชั้นขนาดเท่ากัน วางทับกันพอดี) behind = อยู่หลังตัว
+ *  ชั้นทั้งหมดสร้างจาก assets/images/chef/src/draw.py (ตาราง SPLIT) */
+export type PartMove = 'toss' | 'fly' | 'stepL' | 'stepR' | 'sip' | 'tap' | 'puff' | 'drip' | 'pump' | 'twinkle' | 'still';
 export type Layers = { body: number; parts: { source: number; move: PartMove; behind?: boolean }[] };
-export const LAYERS = {
-  // เชฟจิ๋วผัดกระทะ: กระทะกับแขนกระดกขึ้น ของในกระทะลอยขึ้นสูงกว่า
+export type MascotName = keyof typeof MASCOT;
+export const LAYERS: Record<MascotName, Layers> = {
+  // เชฟจิ๋วผัดกระทะ: กระทะกับแขนกระดกขึ้น ผักลอยขึ้นสูงกว่า
   cook: { body: require('@/assets/images/chef/cook-body.png'), parts: [
-    { source: require('@/assets/images/chef/cook-food.png'), move: 'fly' }, { source: require('@/assets/images/chef/cook-wok.png'), move: 'toss' }] },
+    { source: require('@/assets/images/chef/cook-food.png'), move: 'fly' },
+    { source: require('@/assets/images/chef/cook-wok.png'), move: 'toss' },
+  ] },
+  // เชฟจิ๋วดีใจ: แขนชูขึ้นลง ดาววิบวับ
+  cheer: { body: require('@/assets/images/chef/cheer-body.png'), parts: [
+    { source: require('@/assets/images/chef/cheer-arms.png'), move: 'pump', behind: true },
+    { source: require('@/assets/images/chef/cheer-stars.png'), move: 'twinkle' },
+  ] },
+  // เชฟจิ๋วคิด: มือเคาะคาง ฟองความคิดลอย
+  think: { body: require('@/assets/images/chef/think-body.png'), parts: [
+    { source: require('@/assets/images/chef/think-hand.png'), move: 'tap' },
+    { source: require('@/assets/images/chef/think-bubbles.png'), move: 'puff' },
+  ] },
+  // เชฟจิ๋วตกใจ: เหงื่อหยด เส้นตกใจกะพริบ
+  oops: { body: require('@/assets/images/chef/oops-body.png'), parts: [
+    { source: require('@/assets/images/chef/oops-sweat.png'), move: 'drip' },
+    { source: require('@/assets/images/chef/oops-lines.png'), move: 'twinkle' },
+  ] },
   // ใบเตยเดิน: ขาซ้ายขวายกสลับกัน
   shop: { body: require('@/assets/images/chef/shop-body.png'), parts: [
-    { source: require('@/assets/images/chef/shop-legL.png'), move: 'stepL', behind: true }, { source: require('@/assets/images/chef/shop-legR.png'), move: 'stepR', behind: true }] },
-  // น้องชิมชิม: ช้อนกับแขนลดลงแล้วยกกลับมาที่ปาก
-  sip: { body: require('@/assets/images/chef/sip-body.png'), parts: [{ source: require('@/assets/images/chef/sip-spoon.png'), move: 'sip' }] },
-} satisfies Record<string, Layers>;
+    { source: require('@/assets/images/chef/shop-legL.png'), move: 'stepL', behind: true },
+    { source: require('@/assets/images/chef/shop-legR.png'), move: 'stepR', behind: true },
+  ] },
+  // ใบเตยนั่งบนลัง: แกว่งขาสลับกัน
+  list: { body: require('@/assets/images/chef/list-body.png'), parts: [
+    { source: require('@/assets/images/chef/list-ground.png'), move: 'still', behind: true },
+    { source: require('@/assets/images/chef/list-legL.png'), move: 'stepL', behind: true },
+    { source: require('@/assets/images/chef/list-legR.png'), move: 'stepR', behind: true },
+  ] },
+  // น้องชิมชิม: ช้อนลดลงแล้วยกกลับมาที่ปาก หัวใจลอย
+  sip: { body: require('@/assets/images/chef/sip-body.png'), parts: [
+    { source: require('@/assets/images/chef/sip-spoon.png'), move: 'sip' },
+    { source: require('@/assets/images/chef/sip-hearts.png'), move: 'puff' },
+  ] },
+  // น้องชิมดีใจ: แขนกับช้อนชูขึ้นลง ดาววิบวับ
+  yum: { body: require('@/assets/images/chef/yum-body.png'), parts: [
+    { source: require('@/assets/images/chef/yum-arm.png'), move: 'pump', behind: true },
+    { source: require('@/assets/images/chef/yum-spoon.png'), move: 'pump' },
+    { source: require('@/assets/images/chef/yum-stars.png'), move: 'twinkle' },
+  ] },
+  // น้องชิมสงสัย: ช้อนเคาะ ฟองความคิดลอย
+  hmm: { body: require('@/assets/images/chef/hmm-body.png'), parts: [
+    { source: require('@/assets/images/chef/hmm-spoon.png'), move: 'tap' },
+    { source: require('@/assets/images/chef/hmm-bubbles.png'), move: 'puff' },
+  ] },
+};
 /** ฉากเต็มความกว้างใต้ชื่อหน้าจอ: ภาพพื้นหลังโปร่งใสที่วาดให้เข้ากับสีหัวจอ แล้ววางตัวละครทับทีละตัวเพื่อให้ขยับได้
  *  ตำแหน่งเป็นสัดส่วนของฉาก (ซ้าย บน กว้าง) ตัวละครเป็นภาพจัตุรัส */
 export const SCENE = {
@@ -67,14 +108,14 @@ export const SCENE = {
   home: {
     source: require('@/assets/images/chef/scene-home.png'), ratio: 780 / 360,
     cast: [
-      { source: MASCOT.shop, layers: LAYERS.shop, left: 0.008, top: 0.46, width: 0.246, motion: 'bob', delay: 400 },
-      { source: MASCOT.cook, layers: LAYERS.cook, left: 0.344, top: 0.278, width: 0.326, motion: 'bob', delay: 0 },
-      { source: MASCOT.yum, left: 0.759, top: 0.528, width: 0.215, motion: 'jump', delay: 900 },
+      { name: 'shop', left: 0.008, top: 0.46, width: 0.246, motion: 'bob', delay: 400 },
+      { name: 'cook', left: 0.344, top: 0.278, width: 0.326, motion: 'bob', delay: 0 },
+      { name: 'yum', left: 0.759, top: 0.528, width: 0.215, motion: 'jump', delay: 900 },
     ],
   },
   // แผงตลาด (หัวจอสีส้ม): ใบเตยเดินเลือกของ
   plan: {
     source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300,
-    cast: [{ source: MASCOT.shop, layers: LAYERS.shop, left: 0.038, top: 0.233, width: 0.295, motion: 'bob', delay: 0 }],
+    cast: [{ name: 'shop', left: 0.038, top: 0.233, width: 0.295, motion: 'bob', delay: 0 }],
   },
-} satisfies Record<string, { source: number; ratio: number; cast: { source: number; layers?: Layers; left: number; top: number; width: number; motion: Motion; delay: number }[] }>;
+} satisfies Record<string, { source: number; ratio: number; cast: { name: MascotName; left: number; top: number; width: number; motion: Motion; delay: number }[] }>;

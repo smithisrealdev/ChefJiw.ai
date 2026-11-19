@@ -5,7 +5,7 @@ import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, Scroll
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
-import { MASCOT, type Layers, type Motion, type PartMove, type SCENE } from '@/data/images';
+import { LAYERS, type MascotName, type Motion, type PartMove, type SCENE } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -99,6 +99,17 @@ const MOVES: Record<Motion | PartMove, { steps: [number, number, Ease][]; rest: 
   stepR: { steps: [[0, 400, 'sin'], [-1, 200, 'up'], [0, 200, 'down']], rest: 0 },
   // ชิม: ลดช้อนลง ค้างไว้ครู่หนึ่ง แล้วยกกลับมาที่ปากและค้างนานกว่า
   sip: { steps: [[1, 420, 'sin'], [1, 350, 'sin'], [0, 420, 'sin']], rest: 1400 },
+  // เคาะ (มือเคาะคาง ช้อนเคาะ): สองครั้งแล้วพัก
+  tap: { steps: [[-1, 160, 'up'], [0, 160, 'down'], [-1, 160, 'up'], [0, 160, 'down']], rest: 1500 },
+  // ลอยช้าๆ (ฟองความคิด หัวใจ)
+  puff: { steps: [[-1, 1300, 'sin'], [0, 1300, 'sin']], rest: 0 },
+  // หยดเหงื่อไหลลงแล้วหายไป แล้วเริ่มใหม่ที่เดิม
+  drip: { steps: [[1, 800, 'down'], [0, 1, 'sin']], rest: 900 },
+  // ชูแขนขึ้นลง จังหวะเดียวกับ jump
+  pump: { steps: [[-1, 240, 'up'], [0, 240, 'down'], [-0.6, 180, 'up'], [0, 180, 'down']], rest: 900 },
+  // วิบวับ (ดาว เส้นตกใจ)
+  twinkle: { steps: [[1, 450, 'sin'], [0, 450, 'sin']], rest: 250 },
+  still: { steps: [], rest: 0 },
 };
 /** วนการขยับชุดหนึ่งไปเรื่อยๆ หลังหน่วง delay หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว */
 function useMove(move: keyof typeof MOVES, delay = 0) {
@@ -107,6 +118,7 @@ function useMove(move: keyof typeof MOVES, delay = 0) {
     let loop: Animated.CompositeAnimation | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const { steps, rest } = MOVES[move];
+    if (!steps.length) return;
     const frames = steps.map(([toValue, duration, ease]) => Animated.timing(v, { toValue, duration, easing: EASE[ease], useNativeDriver: Platform.OS !== 'web' }));
     AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
       if (!reduce) timer = setTimeout(() => { loop = Animated.loop(Animated.sequence([...frames, Animated.delay(rest)])); loop.start(); }, delay);
@@ -133,26 +145,29 @@ export function Float({ children, motion = 'bob', delay = 0 }: { children: React
 }
 
 // ระยะที่แต่ละส่วนขยับ เป็นสัดส่วนของขนาดภาพ ตัวละครจึงขยับเท่ากันไม่ว่าจะแสดงเล็กหรือใหญ่
-const REACH: Record<PartMove, number> = { toss: 0.035, fly: 0.11, stepL: 0.035, stepR: 0.035, sip: 0.09 };
-/** ชั้นหนึ่งของตัวละครที่ขยับเอง: กระทะกระดก ของในกระทะลอย ขายกสลับข้าง หรือช้อนยกขึ้นลง */
+const REACH: Record<PartMove, number> = { toss: 0.035, fly: 0.11, stepL: 0.035, stepR: 0.035, sip: 0.09, tap: 0.03, puff: 0.03, drip: 0.1, pump: 0.04, twinkle: 0, still: 0 };
+/** ชั้นหนึ่งของตัวละครที่ขยับเอง */
 function Part({ source, move, width }: { source: number; move: PartMove; width: number }) {
   const v = useMove(move);
   const lift = { translateY: Animated.multiply(v, width * REACH[move]) };
-  const transform = move === 'toss' ? [lift, { rotate: v.interpolate({ inputRange: [-1, 0], outputRange: ['-6deg', '0deg'] }) }]
-    : move === 'sip' ? [lift, { translateX: Animated.multiply(v, width * 0.05) }, { rotate: v.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '8deg'] }) }]
-    : [lift];
-  return <Animated.View style={[StyleSheet.absoluteFill, { transform }]}><Image source={source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} /></Animated.View>;
+  const style =
+    move === 'toss' ? { transform: [lift, { rotate: v.interpolate({ inputRange: [-1, 0], outputRange: ['-6deg', '0deg'] }) }] }
+    : move === 'sip' ? { transform: [lift, { translateX: Animated.multiply(v, width * 0.05) }, { rotate: v.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '8deg'] }) }] }
+    : move === 'twinkle' ? { opacity: v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.45] }), transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] }) }] }
+    : move === 'drip' ? { opacity: v.interpolate({ inputRange: [0, 0.6, 1], outputRange: [1, 1, 0] }), transform: [lift] }
+    : { transform: [lift] };
+  return <Animated.View style={[StyleSheet.absoluteFill, style]}><Image source={source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} /></Animated.View>;
 }
 
-/** ภาพตัวละครจัตุรัส ถ้าส่ง layers มา ส่วนที่แยกชั้นไว้จะขยับเอง (เช่น ผัดกระทะ ก้าวขา) */
-export function Mascot({ source, layers, size }: { source: number; layers?: Layers; size: number | '100%' }) {
+/** ตัวละครหนึ่งท่า ภาพจัตุรัส: ซ้อนชั้นของท่านั้น แล้วแต่ละส่วนขยับเอง (ผัดกระทะ ก้าวขา ยกช้อน ดาววิบวับ ฯลฯ) */
+export function Mascot({ name, size }: { name: MascotName; size: number | '100%' }) {
   const [width, setWidth] = useState(typeof size === 'number' ? size : 0);
-  if (!layers) return <Image source={source} style={{ width: size, aspectRatio: 1 }} contentFit="contain" accessible={false} />;
+  const { body, parts } = LAYERS[name];
   return (
     <View style={{ width: size, aspectRatio: 1 }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      {layers.parts.filter((p) => p.behind).map((p, k) => <Part key={k} source={p.source} move={p.move} width={width} />)}
-      <Image source={layers.body} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
-      {layers.parts.filter((p) => !p.behind).map((p, k) => <Part key={k} source={p.source} move={p.move} width={width} />)}
+      {parts.filter((p) => p.behind).map((p, k) => <Part key={k} source={p.source} move={p.move} width={width} />)}
+      <Image source={body} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
+      {parts.filter((p) => !p.behind).map((p, k) => <Part key={k} source={p.source} move={p.move} width={width} />)}
     </View>
   );
 }
@@ -177,7 +192,7 @@ export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel
           <Image source={scene.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
           {scene.cast.map((c, k) => (
             <View key={k} style={{ position: 'absolute', left: `${c.left * 100}%`, top: `${c.top * 100}%`, width: `${c.width * 100}%`, aspectRatio: 1 }}>
-              <Float motion={c.motion} delay={c.delay}><Mascot source={c.source} layers={'layers' in c ? c.layers : undefined} size="100%" /></Float>
+              <Float motion={c.motion} delay={c.delay}><Mascot name={c.name} size="100%" /></Float>
             </View>
           ))}
         </View>
@@ -216,7 +231,7 @@ export function Skeleton({ lines = 2, label }: { lines?: number; label: string }
   return (
     <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={[s.card, { backgroundColor: colors.surfaceSoft, gap: space.sm }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
-        <Float motion="sway"><Image source={MASCOT.think} style={{ width: 48, height: 48 }} contentFit="contain" accessible={false} /></Float>
+        <Mascot name="think" size={48} />
         <T v="smallBold" tone="muted">{label}</T>
       </View>
       {Array.from({ length: lines }, (_, k) => <View key={k} style={{ height: 14, width: k === lines - 1 ? '60%' : '100%', borderRadius: radius.pill, backgroundColor: colors.line }} />)}
@@ -239,7 +254,7 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
           <T v="subheading" style={{ color: kind === 'offline' ? onPastel.ink : onPastel.warn }}>{title}</T>
           <T tone="pastel">{body}</T>
         </View>
-        <Float motion="shake"><Image source={MASCOT.oops} style={{ width: 72, height: 72 }} contentFit="contain" accessible={false} /></Float>
+        <Float motion="shake"><Mascot name="oops" size={72} /></Float>
       </View>
       {onRetry && (kind === 'offline' || kind === 'failed') && <Button kind="onPastel" label={t('common.retry')} onPress={onRetry} style={{ alignSelf: 'flex-start' }} />}
       {kind === 'unauthorized' && <Button kind="onPastel" label={t('me.signIn')} onPress={() => router.push('/login')} style={{ alignSelf: 'flex-start' }} />}

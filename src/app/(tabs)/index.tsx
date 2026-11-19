@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { Icon } from '@/components/icon';
 import { ResumeCard } from '@/components/resume-card';
 import { Button, Card, Float, Mascot, Pill, Screen, T, Thumb } from '@/components/ui';
-import { IMG, LAYERS, MASCOT, SCENE } from '@/data/images';
+import { IMG, MASCOT, SCENE } from '@/data/images';
 import { MENU, planShopping } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import type { L } from '@/lib/i18n';
@@ -58,7 +58,7 @@ export default function Home() {
           <T v="hero" tone="yellow">{price(PER_MEAL)}</T>
           <T v="small" tone="onNavyMuted">{t('plan.sub')}</T>
         </View>
-        <Float><Mascot source={MASCOT.shop} layers={LAYERS.shop} size={104} /></Float>
+        <Float><Mascot name="shop" size={104} /></Float>
         <Icon name="next" color="#FFFFFF" />
       </Card>
       {!BETA && (
@@ -75,7 +75,7 @@ export default function Home() {
           <T v="hero" tone="pastel">{runs.length}</T>
           <T v="bodyBold" tone="pastel">{t('home.cooked')}</T>
         </View>
-        {runs.length ? <Float motion="jump"><Mascot source={MASCOT.cheer} size={96} /></Float> : <Mascot source={MASCOT.cook} layers={LAYERS.cook} size={96} />}
+        {runs.length ? <Float motion="jump"><Mascot name="cheer" size={96} /></Float> : <Mascot name="cook" size={96} />}
       </Card>
     </Screen>
   );

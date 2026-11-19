@@ -1,11 +1,10 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
-import { Button, Card, Float, Screen, T, Thumb } from '@/components/ui';
-import { DISH_TINT, IMG, MASCOT, SCENE } from '@/data/images';
+import { Button, Card, Mascot, Screen, T, Thumb } from '@/components/ui';
+import { DISH_TINT, IMG, SCENE } from '@/data/images';
 import { MENU, planShopping, SUNDAY_PLAN } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
@@ -61,7 +60,7 @@ export default function Plan() {
           <T v="subheading" accessibilityRole="header">{t('plan.shop')}</T>
           <T v="small" tone="muted">{t('detail.haveHint')}</T>
         </View>
-        <Float motion="sway"><Image source={MASCOT.list} style={{ width: 84, height: 84 }} contentFit="contain" accessible={false} /></Float>
+        <Mascot name="list" size={84} />
       </View>
       {SHOP.items.map((g) => {
         const on = have.includes(g.id);

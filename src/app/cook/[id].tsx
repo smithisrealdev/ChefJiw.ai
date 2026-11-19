@@ -9,13 +9,11 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { Icon } from '@/components/icon';
 import { ApiNotice, Button, Card, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
-import { LAYERS, MASCOT } from '@/data/images';
 import { buildRecipe, MENU, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY, freeLeft, localDay, spendOne } from '@/lib/quota';
 import { cancelTimer, putProgress, useSettings, type Progress } from '@/lib/settings';
-import { Image } from 'expo-image';
 import { fonts, onPastel, radius, space, type, vivid } from '@/theme/tokens';
 
 const RING = 196, RING_R = RING / 2 - 10, RING_C = 2 * Math.PI * RING_R;
@@ -187,7 +185,7 @@ function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: st
           <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke={done ? onPastel.success : vivid.indigo} strokeWidth={14} strokeLinecap="round" fill="none"
             strokeDasharray={RING_C} strokeDashoffset={RING_C * (1 - Math.max(0, Math.min(1, left / seconds)))} />
         </Svg>
-        {done ? <Float motion="jump"><Image source={MASCOT.cheer} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} /></Float> : <>
+        {done ? <Float motion="jump"><Mascot name="cheer" size={120} /></Float> : <>
           <T v="smallBold" tone="pastelMuted">{t('cook.timer')}</T>
           <T v="hero" tone="pastel" accessibilityRole="header">{mmss(left)}</T>
         </>}
@@ -301,9 +299,8 @@ function Taste({ r }: { r: Recipe }) {
           <T v="title" accessibilityRole="header">{score === null ? t('taste.title') : t('taste.result')}</T>
           {score === null && <T tone="muted">{t('taste.intro')}</T>}
         </View>
-        {score !== null && score >= 4 ? <Float motion="jump"><Image source={MASCOT.yum} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} /></Float>
-          : score === null ? <Mascot source={MASCOT.sip} layers={LAYERS.sip} size={120} />
-          : <Float motion="sway"><Image source={MASCOT.hmm} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} /></Float>}
+        {score !== null && score >= 4 ? <Float motion="jump"><Mascot name="yum" size={120} /></Float>
+          : <Mascot name={score === null ? 'sip' : 'hmm'} size={120} />}
       </View>
       {score !== null && (
         <Card tone="accent" style={{ alignItems: 'center' }}>
