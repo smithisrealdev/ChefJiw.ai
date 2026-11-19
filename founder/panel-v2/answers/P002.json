@@ -1,0 +1,13 @@
+{
+  "id": "P002",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I already cook Thai food for my family every week, and the two free dishes are ones I can make without looking. I might try the free month, but for green curry or tom yum a free YouTube clip does the job, so I'd cancel before paying 99 baht every month.",
+  "objection": "Will the dish actually come out right? I cook the whole week's food on Sunday, so if the curry comes out wrong my family eats it all week and the ingredient money is gone. I'm not sure an app's recipe tastes like the Thai food we eat at home.",
+  "would_change_my_mind": "If the Sunday cook-ahead plan came every week instead of once a month, with one shopping list that shows I really spend less than buying ready-made.",
+  "price_too_cheap": 19,
+  "price_cheap": 39,
+  "price_expensive": 79,
+  "price_too_expensive": 149
+}
