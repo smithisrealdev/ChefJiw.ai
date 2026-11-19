@@ -58,7 +58,7 @@ export default function Home() {
           <T v="hero" tone="yellow">{price(PER_MEAL)}</T>
           <T v="small" tone="onNavyMuted">{t('plan.sub')}</T>
         </View>
-        <Float><Mascot name="shop" size={104} /></Float>
+        <Mascot name="shop" size={104} />
         <Icon name="next" color="#FFFFFF" />
       </Card>
       {!BETA && (

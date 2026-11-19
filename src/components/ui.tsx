@@ -5,7 +5,7 @@ import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, Scroll
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
-import { LAYERS, type MascotName, type Motion, type PartMove, type SCENE } from '@/data/images';
+import { LAYERS, type BodyMove, type MascotName, type Motion, type Part, type PartMove, type SCENE } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -86,7 +86,7 @@ export function Card({ tone = 'soft', children, style, onPress, label }: { tone?
 type Ease = 'sin' | 'up' | 'down';
 const EASE = { sin: Easing.inOut(Easing.sin), up: Easing.out(Easing.quad), down: Easing.in(Easing.quad) };
 // แต่ละจังหวะ: [ค่าปลายทาง, เวลา (ms), การเร่ง] แล้วพัก rest ก่อนวนใหม่
-const MOVES: Record<Motion | PartMove, { steps: [number, number, Ease][]; rest: number }> = {
+const MOVES: Record<Motion | PartMove | BodyMove, { steps: [number, number, Ease][]; rest: number }> = {
   bob: { steps: [[-6, 1400, 'sin'], [0, 1400, 'sin']], rest: 0 },
   sway: { steps: [[1, 800, 'sin'], [-1, 1600, 'sin'], [0, 800, 'sin']], rest: 0 },
   jump: { steps: [[-20, 240, 'up'], [0, 240, 'down'], [-12, 180, 'up'], [0, 180, 'down']], rest: 900 },
@@ -110,6 +110,14 @@ const MOVES: Record<Motion | PartMove, { steps: [number, number, Ease][]; rest: 
   // วิบวับ (ดาว เส้นตกใจ)
   twinkle: { steps: [[1, 450, 'sin'], [0, 450, 'sin']], rest: 250 },
   still: { steps: [], rest: 0 },
+  // ขาแกว่งตอนนั่ง: สองข้างสวนทางกัน
+  swingL: { steps: [[1, 450, 'sin'], [0, 450, 'sin'], [-1, 450, 'sin'], [0, 450, 'sin']], rest: 0 },
+  swingR: { steps: [[-1, 450, 'sin'], [0, 450, 'sin'], [1, 450, 'sin'], [0, 450, 'sin']], rest: 0 },
+  // ทั้งตัว: หายใจ, โยกตัวตอนเดิน (รอบเท่ากับ stepL/stepR ขาข้างที่ลอยคือข้างที่ไม่ได้รับน้ำหนัก), โยกช้าๆ ตอนคิด, ยืดตัวตามจังหวะผัด (รอบเท่ากับ toss)
+  breathe: { steps: [[1, 1300, 'sin'], [0, 1300, 'sin']], rest: 0 },
+  waddle: { steps: [[1, 200, 'sin'], [-1, 400, 'sin'], [0, 200, 'sin']], rest: 0 },
+  ponder: { steps: [[1, 1500, 'sin'], [-1, 3000, 'sin'], [0, 1500, 'sin']], rest: 0 },
+  squash: { steps: [[1, 200, 'up'], [0, 260, 'down']], rest: 740 },
 };
 /** วนการขยับชุดหนึ่งไปเรื่อยๆ หลังหน่วง delay หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว */
 function useMove(move: keyof typeof MOVES, delay = 0) {
@@ -144,31 +152,37 @@ export function Float({ children, motion = 'bob', delay = 0 }: { children: React
   );
 }
 
-// ระยะที่แต่ละส่วนขยับ เป็นสัดส่วนของขนาดภาพ ตัวละครจึงขยับเท่ากันไม่ว่าจะแสดงเล็กหรือใหญ่
-const REACH: Record<PartMove, number> = { toss: 0.035, fly: 0.11, stepL: 0.035, stepR: 0.035, sip: 0.09, tap: 0.03, puff: 0.03, drip: 0.1, pump: 0.04, twinkle: 0, still: 0 };
-/** ชั้นหนึ่งของตัวละครที่ขยับเอง */
-function Part({ source, move, width }: { source: number; move: PartMove; width: number }) {
-  const v = useMove(move);
-  const lift = { translateY: Animated.multiply(v, width * REACH[move]) };
-  const style =
-    move === 'toss' ? { transform: [lift, { rotate: v.interpolate({ inputRange: [-1, 0], outputRange: ['-6deg', '0deg'] }) }] }
-    : move === 'sip' ? { transform: [lift, { translateX: Animated.multiply(v, width * 0.05) }, { rotate: v.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '8deg'] }) }] }
-    : move === 'twinkle' ? { opacity: v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.45] }), transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] }) }] }
-    : move === 'drip' ? { opacity: v.interpolate({ inputRange: [0, 0.6, 1], outputRange: [1, 1, 0] }), transform: [lift] }
-    : { transform: [lift] };
-  return <Animated.View style={[StyleSheet.absoluteFill, style]}><Image source={source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} /></Animated.View>;
+/** ชั้นหนึ่งของตัวละครที่ขยับเอง: หมุนรอบข้อต่อ (pivot) และหรือยกขึ้นลง ระยะเป็นสัดส่วนของขนาดภาพ จึงขยับเท่ากันทุกขนาด */
+function Limb({ part, width }: { part: Part; width: number }) {
+  const v = useMove(part.move);
+  const deg = part.deg ?? 0;
+  const transform = [
+    { translateY: Animated.multiply(v, width * (part.lift ?? 0)) },
+    { translateX: Animated.multiply(v, part.move === 'sip' ? width * -0.02 : 0) },
+    { rotate: v.interpolate({ inputRange: [-1, 1], outputRange: [`${-deg}deg`, `${deg}deg`] }) },
+    { scale: part.move === 'twinkle' ? v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] }) : 1 },
+  ];
+  const opacity = part.move === 'twinkle' ? v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.45] })
+    : part.move === 'drip' ? v.interpolate({ inputRange: [0, 0.6, 1], outputRange: [1, 1, 0] }) : 1;
+  const origin = part.pivot ? `${part.pivot[0] * 100}% ${part.pivot[1] * 100}%` : 'center';
+  return <Animated.View style={[StyleSheet.absoluteFill, { opacity, transformOrigin: origin, transform }]}><Image source={part.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} /></Animated.View>;
 }
 
-/** ตัวละครหนึ่งท่า ภาพจัตุรัส: ซ้อนชั้นของท่านั้น แล้วแต่ละส่วนขยับเอง (ผัดกระทะ ก้าวขา ยกช้อน ดาววิบวับ ฯลฯ) */
+/** ตัวละครหนึ่งท่า ภาพจัตุรัส: ทั้งตัวขยับไปด้วยกันก่อน (หายใจ โยกตัว) แล้วแขนขาและของในมือขยับรอบข้อต่อของตัวเอง จึงดูเป็นร่างเดียว */
 export function Mascot({ name, size }: { name: MascotName; size: number | '100%' }) {
   const [width, setWidth] = useState(typeof size === 'number' ? size : 0);
-  const { body, parts } = LAYERS[name];
+  const { body, parts, sway } = LAYERS[name];
+  const v = useMove(sway ?? 'still');
+  const whole = sway === 'breathe' ? [{ scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.022] }) }, { scaleX: v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.99] }) }]
+    : sway === 'squash' ? [{ scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.03] }) }]
+    : sway ? [{ rotate: v.interpolate({ inputRange: [-1, 1], outputRange: sway === 'waddle' ? ['-3deg', '3deg'] : ['-2deg', '2deg'] }) }]
+    : [];
   return (
-    <View style={{ width: size, aspectRatio: 1 }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      {parts.filter((p) => p.behind).map((p, k) => <Part key={k} source={p.source} move={p.move} width={width} />)}
+    <Animated.View style={{ width: size, aspectRatio: 1, transformOrigin: 'bottom', transform: whole }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      {parts.filter((p) => p.behind).map((p, k) => <Limb key={k} part={p} width={width} />)}
       <Image source={body} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
-      {parts.filter((p) => !p.behind).map((p, k) => <Part key={k} source={p.source} move={p.move} width={width} />)}
-    </View>
+      {parts.filter((p) => !p.behind).map((p, k) => <Limb key={k} part={p} width={width} />)}
+    </Animated.View>
   );
 }
 
@@ -192,7 +206,7 @@ export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel
           <Image source={scene.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
           {scene.cast.map((c, k) => (
             <View key={k} style={{ position: 'absolute', left: `${c.left * 100}%`, top: `${c.top * 100}%`, width: `${c.width * 100}%`, aspectRatio: 1 }}>
-              <Float motion={c.motion} delay={c.delay}><Mascot name={c.name} size="100%" /></Float>
+              {'motion' in c && c.motion ? <Float motion={c.motion}><Mascot name={c.name} size="100%" /></Float> : <Mascot name={c.name} size="100%" />}
             </View>
           ))}
         </View>

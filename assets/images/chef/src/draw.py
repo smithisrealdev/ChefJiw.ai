@@ -91,7 +91,7 @@ def build():
       'cook': chef(lean=9, tilt=-6, feet=((186, 440, -8), (286, 440, 10)),
                    parts={'food': food(262, 346), 'wok': wok(262, 346, -10) + A1('L', 200, 340, -34, 12) + A1('R', 356, 328, 30, 8)}),
       # กระโดดตัวลอย แขนขากาง
-      'cheer': chef(feet=((170, 432, -22), (310, 432, 22)), bparts={'arms': A1('L', 88, 172, -14, 16) + A1('R', 392, 172, 14, 16)}, hat=toque(-14),
+      'cheer': chef(feet=((170, 432, -22), (310, 432, 22)), bparts={'armL': A1('L', 88, 172, -14, 16), 'armR': A1('R', 392, 172, 14, 16)}, hat=toque(-14),
                     extras={'stars': star(50, 96, 22) + star(432, 84, 26) + star(400, 22, 13) + star(96, 30, 12)}),
       # เอียงคอคิด เท้าไขว้
       'think': chef(look=(10, -8), tilt=11, lean=3, feet=((214, 440, 0), (250, 438, -24)), arms_front=A1('L', 230, 334, -38, 16), parts={'hand': A1('R', 262, 268, 54, 44)}, hat=toque(4), blush=0.6,
@@ -161,7 +161,7 @@ def build():
 POSES = build()
 # ท่าที่ขยับทีละส่วนทำเป็นหลายชั้น: ตัว (-body) กับส่วนที่ขยับ แอปวางซ้อนกันแล้วขยับแต่ละชั้นตาม LAYERS ที่ src/data/images.ts
 SPLIT = {
-    'cook': ('body', 'wok', 'food'), 'cheer': ('body', 'arms', 'stars'), 'think': ('body', 'hand', 'bubbles'), 'oops': ('body', 'sweat', 'lines'),
+    'cook': ('body', 'wok', 'food'), 'cheer': ('body', 'armL', 'armR', 'stars'), 'think': ('body', 'hand', 'bubbles'), 'oops': ('body', 'sweat', 'lines'),
     'shop': ('body', 'legL', 'legR'), 'list': ('body', 'ground', 'legL', 'legR'),
     'sip': ('body', 'spoon', 'hearts'), 'yum': ('body', 'arm', 'spoon', 'stars'), 'hmm': ('body', 'spoon', 'bubbles'),
 }
@@ -227,3 +227,19 @@ market = scene(780, 300, ''.join([
   star(248, 120, 13, '#FFFFFF'),
 ]))
 open('scene-plan.svg', 'w').write(market)
+
+# จุดหมุนของส่วนที่หมุนรอบข้อต่อ (หัวไหล่ สะโพก) เป็นสัดส่วนของภาพ ใส่ใน LAYERS ที่ src/data/images.ts แอปจึงหมุนแขนขารอบข้อต่อจริง ไม่ใช่เลื่อนทั้งท่อน
+import math
+def pivot(x, y, lean=0, drop=0, upper=True, small=False):
+    if upper:
+        a = math.radians(lean); dx, dy = x - 240, y - 384
+        x, y = 240 + dx * math.cos(a) - dy * math.sin(a), 384 + dx * math.sin(a) + dy * math.cos(a)
+    y += drop
+    x, y = 240 + (x - 240) * 0.92, 470 + (y - 470) * 0.92
+    if small: x, y = 240 + (x - 240) * 0.88, 464 + (y - 464) * 0.88
+    return [round(x / 480, 3), round(y / 480, 3)]
+L, R = SHOULDER['L'], SHOULDER['R']
+for label, p in [('cook wok', pivot(262, 346, lean=9)), ('cheer armL', pivot(*L)), ('cheer armR', pivot(*R)), ('think hand', pivot(*R, lean=3)),
+                 ('list legL', pivot(208, 372, upper=False)), ('list legR', pivot(272, 372, upper=False)), ('sip spoon', pivot(*R, drop=40, small=True)),
+                 ('yum arm', pivot(*L, lean=7, small=True)), ('yum spoon', pivot(*R, lean=7, small=True)), ('hmm spoon', pivot(*R, lean=-4, small=True))]:
+    print(label, p)
