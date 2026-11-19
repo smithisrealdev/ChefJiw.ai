@@ -13,7 +13,7 @@ import type { L } from '@/lib/i18n';
 import { useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
 
-// บทพูดเชฟช้างจากหน้าร้านในต้นแบบ
+// บทพูดเชฟจิ๋วจากหน้าร้านในต้นแบบ
 const LINES: L[] = [
   { th: 'ยินดีต้อนรับ! วันนี้ทำกะเพราหมูสับไข่ดาวกันไหม?', en: 'Welcome! Shall we make basil pork with fried egg today?' },
   { th: 'ใช้เวลา 15 นาที เดี๋ยวพาทำทีละขั้น', en: 'It takes 15 minutes. I will guide you step by step.' },
@@ -27,7 +27,7 @@ export default function Home() {
   const [line, setLine] = useState(0);
   const pickToday = MENU[0];
   return (
-    <Screen tint={colors.header.home} title={t('home.title')} mascot={MASCOT.elephant}>
+    <Screen tint={colors.header.home} title={t('home.title')} mascot={MASCOT.hi}>
       {/* จุดเด่นของจอ: จานแนะนำวันนี้ พร้อมบทพูดของเชฟและปุ่มเริ่มทำ */}
       <Card tone="coral" style={{ gap: space.md }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
@@ -79,7 +79,7 @@ export default function Home() {
           <T v="hero" tone="pastel">{runs.length}</T>
           <T v="bodyBold" tone="pastel">{t('home.cooked')}</T>
         </View>
-        <Image source={MASCOT.mouse} style={{ width: 64, height: 92 }} contentFit="contain" accessible={false} />
+        <Image source={runs.length ? MASCOT.cheer : MASCOT.cook} style={{ width: 96, height: 96 }} contentFit="contain" accessible={false} />
       </Card>
     </Screen>
   );

@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { Button, Card, Screen, T, Thumb } from '@/components/ui';
-import { DISH_TINT, IMG, MASCOT } from '@/data/images';
+import { DISH_TINT, IMG } from '@/data/images';
 import { MENU, planShopping, SUNDAY_PLAN } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
@@ -22,7 +22,7 @@ export default function Plan() {
   const back = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   return (
-    <Screen tint={colors.header.cook} title={t('plan.title')} subtitle={t('plan.sub')} mascot={MASCOT.elephant} onBack={back} backLabel={t('tab.home')}
+    <Screen tint={colors.header.cook} title={t('plan.title')} subtitle={t('plan.sub')} onBack={back} backLabel={t('tab.home')}
       footer={
         <Card tone="accent" style={s.foot}>
           <View style={{ flex: 1 }}>

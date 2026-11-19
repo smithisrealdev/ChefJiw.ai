@@ -4,7 +4,6 @@ import { View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { ApiNotice, Button, Card, Screen, T } from '@/components/ui';
-import { MASCOT } from '@/data/images';
 import { api, ApiError, type ApiErrorKind, type Provider } from '@/lib/api';
 import { FREE_PER_DAY, freeLeft, localDay } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
@@ -32,7 +31,7 @@ export default function Login() {
   const signOut = async () => { await api.signOut(); set({ signedIn: false, member: false }); };
 
   return (
-    <Screen tint={isDark ? colors.bg : colors.ai} title={signedIn ? t('login.done') : t('login.title')} mascot={MASCOT.elephant} onBack={close} backLabel={t('login.close')}>
+    <Screen tint={isDark ? colors.bg : colors.ai} title={signedIn ? t('login.done') : t('login.title')} onBack={close} backLabel={t('login.close')}>
       {signedIn ? (
         <>
           <Card tone="done"><T v="subheading" tone="pastel">{t('login.doneBody', { n: freeLeft(asked, localDay()) })}</T></Card>

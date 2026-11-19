@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ApiNotice, Button, Card, Screen, T } from '@/components/ui';
-import { MASCOT } from '@/data/images';
 import { api, ApiError, type ApiErrorKind, type Plan } from '@/lib/api';
 import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
@@ -37,7 +36,7 @@ export default function Paywall() {
   const plans: [Plan, string, string][] = [['monthly', t('pay.monthly'), t('pay.priceMonthly')], ['yearly', t('pay.yearly'), t('pay.priceYearly')]];
 
   return (
-    <Screen tint={colors.header.cook} title={t('pay.title')} subtitle={t('pay.sub')} mascot={MASCOT.elephant} onBack={close} backLabel={t('login.close')}>
+    <Screen tint={colors.header.cook} title={t('pay.title')} subtitle={t('pay.sub')} onBack={close} backLabel={t('login.close')}>
       <Card>
         <View style={s.tr}>
           <T v="smallBold" tone="muted" style={{ flex: 1 }}>{t('pay.what')}</T>

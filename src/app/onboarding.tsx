@@ -36,7 +36,7 @@ export default function Onboarding() {
       <View style={[s.top, { paddingTop: insets.top + space.md }]}>
         <Button kind={isDark ? 'secondary' : 'onPastelLight'} label={t('ob.skip')} onPress={() => finish('/')} />
       </View>
-      <Image source={MASCOT.elephant} style={s.mascot} contentFit="contain" accessible={false} />
+      <Image source={MASCOT.hi} style={s.mascot} contentFit="contain" accessible={false} />
       <View style={[s.sheet, { backgroundColor: colors.bg, paddingBottom: Math.max(insets.bottom, space.lg) }]}>
         <ScrollView contentContainerStyle={{ gap: space.md }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }} accessibilityLabel={t('ob.count', { n: step + 1, total: 4 })}>
@@ -97,7 +97,7 @@ export default function Onboarding() {
 
 const s = StyleSheet.create({
   top: { alignItems: 'flex-end', paddingHorizontal: space.lg },
-  mascot: { width: 150, height: 218, alignSelf: 'center' },
+  mascot: { width: 200, height: 200, alignSelf: 'center' },
   sheet: { flex: 1, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: space.lg },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   dish: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.sm, paddingRight: space.lg, borderRadius: radius.lg, borderWidth: 3 },

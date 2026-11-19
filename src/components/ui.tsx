@@ -5,6 +5,7 @@ import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, Scroll
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
+import { MASCOT } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -140,7 +141,10 @@ export function Skeleton({ lines = 2, label }: { lines?: number; label: string }
   const { colors } = useSettings();
   return (
     <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={[s.card, { backgroundColor: colors.surfaceSoft, gap: space.sm }]}>
-      <T v="smallBold" tone="muted">{label}</T>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+        <Image source={MASCOT.think} style={{ width: 48, height: 48 }} contentFit="contain" accessible={false} />
+        <T v="smallBold" tone="muted">{label}</T>
+      </View>
       {Array.from({ length: lines }, (_, k) => <View key={k} style={{ height: 14, width: k === lines - 1 ? '60%' : '100%', borderRadius: radius.pill, backgroundColor: colors.line }} />)}
     </View>
   );
@@ -156,9 +160,12 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
   }[kind];
   return (
     <Card tone={kind === 'offline' ? 'note' : 'danger'} style={{ gap: space.sm }}>
-      <View accessibilityRole="alert" accessibilityLiveRegion="polite">
-        <T v="subheading" style={{ color: kind === 'offline' ? onPastel.ink : onPastel.warn }}>{title}</T>
-        <T tone="pastel">{body}</T>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+        <View accessibilityRole="alert" accessibilityLiveRegion="polite" style={{ flex: 1 }}>
+          <T v="subheading" style={{ color: kind === 'offline' ? onPastel.ink : onPastel.warn }}>{title}</T>
+          <T tone="pastel">{body}</T>
+        </View>
+        <Image source={MASCOT.oops} style={{ width: 72, height: 72 }} contentFit="contain" accessible={false} />
       </View>
       {onRetry && (kind === 'offline' || kind === 'failed') && <Button kind="onPastel" label={t('common.retry')} onPress={onRetry} style={{ alignSelf: 'flex-start' }} />}
       {kind === 'unauthorized' && <Button kind="onPastel" label={t('me.signIn')} onPress={() => router.push('/login')} style={{ alignSelf: 'flex-start' }} />}
@@ -189,7 +196,7 @@ const s = StyleSheet.create({
   card: { borderRadius: radius.lg, padding: space.lg, gap: space.xs },
   pill: { backgroundColor: '#FFFFFF', borderRadius: radius.pill, paddingHorizontal: space.md, minHeight: 30, justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: space.lg, paddingBottom: space.lg, gap: space.md },
-  mascot: { width: 96, height: 139 },
+  mascot: { width: 128, height: 128 },
   sheet: { flex: 1, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden' },
   footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: space.lg, paddingTop: space.sm },
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
