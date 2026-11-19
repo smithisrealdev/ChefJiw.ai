@@ -1,0 +1,13 @@
+{
+  "id": "P002",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "I'd download it and try the free green curry, since I already know basil pork by heart, but the thing I'd actually pay for is the Sunday plans and I can't try one before paying. Until I see a whole week's batch come out right for my family, I'll keep cooking what I know and watching free videos.",
+  "objection": "Will a whole Sunday batch come out right at my family's size? One free curry doesn't prove the other 12 dishes, and if my Sunday cooking goes wrong we eat it all week or I end up buying 50-baht plates anyway.",
+  "would_change_my_mind": "Let me cook one full Sunday plan free, with amounts for my whole family, and see it come out right.",
+  "price_too_cheap": 20,
+  "price_cheap": 49,
+  "price_expensive": 99,
+  "price_too_expensive": 150
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P007",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "No monthly fee is good and 99 baht is only two plates of kra pao, but I already watch cooking clips every night for free and basil pork I already make without an app. I cook to spend less, so I don't pay for recipes unless I can see first that it saves me money, and nothing in the free part shows me that.",
+  "objection": "My kitchen is tiny and I only have one pan. 'Most dishes need one pan' means some don't, and three dishes that keep all week, where would I even keep that much food?",
+  "would_change_my_mind": "Let me try one Sunday cook-ahead plan for free. If the shopping list really comes out cheaper per meal than a 50-baht plate using only my one pan, I would pay the 99.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 149,
+  "price_too_expensive": 199
+}
