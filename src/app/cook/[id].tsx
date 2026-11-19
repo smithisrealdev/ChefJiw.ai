@@ -1,0 +1,252 @@
+import * as Haptics from 'expo-haptics';
+import { useKeepAwake } from 'expo-keep-awake';
+import * as Notifications from 'expo-notifications';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, AppState, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { Icon } from '@/components/icon';
+import { Button, Card, IconButton, Sheet, T } from '@/components/ui';
+import { MASCOT } from '@/data/images';
+import { buildRecipe, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
+import { useSettings } from '@/lib/settings';
+import { Image } from 'expo-image';
+import { onPastel, radius, space } from '@/theme/tokens';
+
+const mmss = (s: number) => Math.floor(s / 60) + ':' + String(Math.max(0, s) % 60).padStart(2, '0');
+
+export default function Cook() {
+  useKeepAwake(); // หน้าจอไม่ดับเองตลอดการทำอาหาร
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { progress, set, t, colors } = useSettings();
+  const p = progress?.recipe === id ? progress : { recipe: id, o1: 1, o2: 0, adapt: [], step: 0, total: 0 };
+  const r = buildRecipe(id, p.o1, p.o2, p.adapt);
+  const [taste, setTaste] = useState(false);
+  if (!r) return null;
+  return taste ? <Taste r={r} /> : <Steps r={r} start={Math.min(p.step, r.steps.length - 1)} onFinish={() => setTaste(true)}
+    onStep={(step) => set({ progress: { ...p, step, total: r.steps.length } })} t={t} colors={colors} />;
+}
+
+function Steps({ r, start, onStep, onFinish, t, colors }: { r: Recipe; start: number; onStep: (i: number) => void; onFinish: () => void; t: ReturnType<typeof useSettings>['t']; colors: ReturnType<typeof useSettings>['colors'] }) {
+  const { pick, isDark } = useSettings();
+  const insets = useSafeAreaInsets();
+  const [i, setI] = useState(start);
+  const [askOpen, setAskOpen] = useState(false);
+  const step = r.steps[i], prev = i > 0 ? r.steps[i - 1] : null, last = i === r.steps.length - 1;
+  const heat = currentHeat(r.steps, i);
+  const ink = isDark ? colors.ink : onPastel.ink;
+
+  const go = (n: number) => { setI(n); onStep(n); };
+  const exit = () => {
+    const leave = () => (router.canGoBack() ? router.back() : router.replace('/cook'));
+    if (Platform.OS === 'web') { if (window.confirm(`${t('cook.exitTitle')}\n${t('cook.exitBody')}`)) leave(); return; }
+    Alert.alert(t('cook.exitTitle'), t('cook.exitBody'), [{ text: t('cook.exitStay'), style: 'cancel' }, { text: t('cook.exitLeave'), onPress: leave }]);
+  };
+
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.header.cookFlow }}>
+      <View style={[s.top, { paddingTop: insets.top + space.sm }]}>
+        <IconButton icon="close" label={t('cook.close')} onPress={exit} onPastelBg />
+        <T v="subheading" style={{ color: ink, flex: 1, textAlign: 'center' }}>{t('cook.step', { n: step.phase, total: r.phases })}</T>
+        {/* ปุ่มถามเชฟอยู่ที่เดิมทุกขั้น */}
+        <Pressable accessibilityRole="button" onPress={() => setAskOpen(true)} style={[s.ask, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+          <Icon name="chat" color={ink} size={20} />
+          <T v="smallBold" style={{ color: ink }}>{t('cook.ask')}</T>
+        </Pressable>
+      </View>
+      <View style={s.bar} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        {Array.from({ length: r.phases }, (_, k) => <View key={k} style={[s.seg, { backgroundColor: k < step.phase ? ink : 'rgba(36,33,43,0.18)' }]} />)}
+      </View>
+
+      <View style={[s.sheet, { backgroundColor: colors.bg }]}>
+        <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: space.xl }}>
+          {prev && (
+            <Card tone="done">
+              <T v="smallBold" tone="pastelMuted">{t('cook.lesson')} · {pick(prev.title)}</T>
+              <T tone="pastel">{pick(prev.why)}</T>
+            </Card>
+          )}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm, flexWrap: 'wrap' }}>
+            <T v="heading" style={{ flex: 1 }} accessibilityRole="header">{pick(step.title)}</T>
+            {heat !== null && <HeatBadge heat={heat} t={t} />}
+          </View>
+          <T v="step">{pick(step.do)}</T>
+          {step.gather && (
+            <Card>
+              <T v="smallBold" tone="muted">{t('cook.gather')}</T>
+              {step.gather.map((g) => <T key={g.th} v="bodyBold">• {pick(g)}</T>)}
+            </Card>
+          )}
+          <Card tone="note">
+            <T v="smallBold" tone="pastelMuted">{t('cook.see')}</T>
+            <T v="bodyBold" tone="pastel">{pick(step.see)}</T>
+          </Card>
+          {step.timer && <Timer key={step.id} seconds={step.timer} t={t} />}
+        </ScrollView>
+        {/* ปุ่มหลักปุ่มเดียวต่อขั้น ครึ่งล่างของจอ ไม่มีการปัดเปลี่ยนขั้น */}
+        <View style={[s.foot, { paddingBottom: Math.max(insets.bottom, space.md), borderTopColor: colors.line }]}>
+          <Button size="cook" label={last ? t('cook.finish') : t('cook.done')} onPress={() => { Haptics.selectionAsync().catch(() => {}); if (last) onFinish(); else go(i + 1); }} />
+          {i > 0 && <Pressable accessibilityRole="button" onPress={() => go(i - 1)} style={s.link}><T v="bodyBold" tone="muted">{t('cook.back')}</T></Pressable>}
+        </View>
+      </View>
+
+      <AskSheet key={step.id} visible={askOpen} onClose={() => setAskOpen(false)} r={r} step={step} />
+    </View>
+  );
+}
+
+function currentHeat(steps: Step[], i: number): Heat | null {
+  for (let k = i; k >= 0; k--) if (steps[k].heat !== undefined) return steps[k].heat as Heat;
+  return null;
+}
+
+/** ระดับไฟบอกทั้งคำและจำนวนเปลวไฟ ไม่ใช้สีอย่างเดียว */
+function HeatBadge({ heat, t }: { heat: Heat; t: ReturnType<typeof useSettings>['t'] }) {
+  const { colors } = useSettings();
+  return (
+    <View style={[s.heat, { backgroundColor: colors.surfaceSoft }]} accessible accessibilityLabel={t(`cook.heat${heat}`)}>
+      {heat === 0 ? <Icon name="close" color={colors.muted} size={18} /> : Array.from({ length: heat }, (_, k) => <Icon key={k} name="flame" color={colors.flame} size={18} />)}
+      <T v="smallBold">{t(`cook.heat${heat}`)}</T>
+    </View>
+  );
+}
+
+/** จับเวลาจากเวลาจริงของเครื่อง จึงเดินต่อแม้สลับแอปหรือล็อกจอ และตั้งการแจ้งเตือนไว้ล่วงหน้า */
+function Timer({ seconds, t }: { seconds: number; t: ReturnType<typeof useSettings>['t'] }) {
+  const [endAt, setEndAt] = useState<number | null>(null);
+  const [now, setNow] = useState(0); // ตั้งค่าจริงตอนกดเริ่ม
+  const noteId = useRef<string | null>(null);
+  const left = endAt ? Math.ceil((endAt - now) / 1000) : seconds;
+  const done = endAt !== null && left <= 0;
+
+  useEffect(() => {
+    if (!endAt || done) return;
+    const tick = setInterval(() => setNow(Date.now()), 250);
+    const sub = AppState.addEventListener('change', () => setNow(Date.now()));
+    return () => { clearInterval(tick); sub.remove(); };
+  }, [endAt, done]);
+  useEffect(() => { if (done) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); }, [done]);
+  useEffect(() => () => { if (noteId.current) Notifications.cancelScheduledNotificationAsync(noteId.current).catch(() => {}); }, []);
+
+  const startTimer = async () => {
+    setEndAt(Date.now() + seconds * 1000); setNow(Date.now());
+    if (Platform.OS === 'web') return;
+    try {
+      const perm = await Notifications.requestPermissionsAsync();
+      if (perm.granted) noteId.current = await Notifications.scheduleNotificationAsync({
+        content: { title: t('cook.timerNotify'), body: t('cook.timerDone'), sound: true },
+        trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds },
+      });
+    } catch { /* ไม่มีสิทธิ์แจ้งเตือน ตัวจับเวลาในแอปยังทำงาน */ }
+  };
+
+  return (
+    <Card tone={done ? 'done' : 'ai'} style={{ alignItems: 'center', gap: space.sm }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
+        <Icon name="clock" color={onPastel.ink} />
+        <T v="smallBold" tone="pastelMuted">{t('cook.timer')}</T>
+      </View>
+      <T v="title" tone="pastel" style={{ fontSize: 44, lineHeight: 56, fontVariant: ['tabular-nums'] }} accessibilityRole="header">{mmss(left)}</T>
+      {done ? <T v="bodyBold" tone="pastel">{t('cook.timerDone')}</T>
+        : !endAt ? <Button label={t('cook.timerStart', { t: mmss(seconds) })} kind="onPastel" onPress={startTimer} />
+        : <T v="bodyBold" tone="pastel" accessibilityLiveRegion="polite">{t('cook.timerLeft', { t: mmss(left) })}</T>}
+    </Card>
+  );
+}
+
+/** คำตอบที่เตรียมไว้ขึ้นทันทีโดยไม่ต้องใช้เน็ต และเหตุฉุกเฉินเข้าถึงได้ในสองแตะ */
+function AskSheet({ visible, onClose, r, step }: { visible: boolean; onClose: () => void; r: Recipe; step: Step }) {
+  const { t, pick } = useSettings();
+  const [open, setOpen] = useState<number | null>(null);
+  const [safety, setSafety] = useState(false);
+  return (
+    <Sheet visible={visible} onClose={onClose} title={t('ask.title')} closeLabel={t('ask.back')}>
+      <Pressable accessibilityRole="button" accessibilityState={{ expanded: safety }} onPress={() => setSafety(!safety)} style={s.safetyBtn}>
+        <Icon name="alert" color={onPastel.warn} />
+        <T v="bodyBold" style={{ color: onPastel.warn }}>{t('ask.emergency')}</T>
+      </Pressable>
+      {safety && SAFETY.map(([q, a]) => (
+        <Card key={q.th} tone="danger">
+          <T v="subheading" style={{ color: onPastel.warn }}>{pick(q)}</T>
+          <T v="step" tone="pastel" style={{ fontSize: 18 }}>{pick(a)}</T>
+        </Card>
+      ))}
+      <T v="smallBold" tone="muted" style={{ marginTop: space.sm }}>{t('ask.often')}</T>
+      {r.qa(step).map(([q, a], k) => (
+        <Card key={q.th} tone={open === k ? 'note' : 'soft'} onPress={() => setOpen(open === k ? null : k)} label={pick(q)}>
+          <T v="bodyBold" tone={open === k ? 'pastel' : 'ink'}>{pick(q)}</T>
+          {open === k && <T tone="pastel">{pick(a)}</T>}
+        </Card>
+      ))}
+      <T v="small" tone="muted">{t('ask.typeSoon')}</T>
+    </Sheet>
+  );
+}
+
+function Taste({ r }: { r: Recipe }) {
+  const { t, pick, colors, set, runs, progress } = useSettings();
+  const insets = useSafeAreaInsets();
+  const [ans, setAns] = useState<(number | null)[]>(r.senses.map(() => null));
+  const [score, setScore] = useState<number | null>(null);
+  const submit = () => {
+    const sc = tasteScore(ans as number[]);
+    setScore(sc);
+    set({ runs: [...runs, { recipe: r.id, score: sc, at: Date.now() }], progress: progress?.recipe === r.id ? null : progress });
+  };
+  return (
+    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: space.lg, paddingTop: insets.top + space.lg, gap: space.md, paddingBottom: insets.bottom + space.xl }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+        <View style={{ flex: 1, gap: space.xs }}>
+          <T v="title" accessibilityRole="header">{score === null ? t('taste.title') : t('taste.result')}</T>
+          {score === null && <T tone="muted">{t('taste.intro')}</T>}
+        </View>
+        <Image source={MASCOT.mouse} style={{ width: 96, height: 139 }} contentFit="contain" accessible={false} />
+      </View>
+      {score !== null && (
+        <Card tone="accent" style={{ alignItems: 'center' }}>
+          <T v="title" tone="pastel" style={{ fontSize: 44, lineHeight: 56 }}>{score.toFixed(1)}</T>
+          <T v="bodyBold" tone="pastel">{t('taste.outOf')}</T>
+        </Card>
+      )}
+      {r.senses.map((sense, k) => (
+        <View key={sense.label.th} style={{ gap: space.sm }}>
+          <T v="subheading">{pick(sense.label)}</T>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+            {sense.options.map((o, j) => (
+              <Pressable key={j} accessibilityRole="radio" accessibilityState={{ checked: ans[k] === j, disabled: score !== null }} disabled={score !== null}
+                onPress={() => setAns(ans.map((a, x) => (x === k ? j : a)))}
+                style={[s.opt, { backgroundColor: ans[k] === j ? colors.primary : colors.surfaceSoft }]}>
+                <T v="bodyBold" style={{ color: ans[k] === j ? colors.onPrimary : colors.ink }}>{pick(o)}</T>
+              </Pressable>
+            ))}
+          </View>
+          {score !== null && (
+            <Card tone={ans[k] === 1 ? 'done' : 'note'}>
+              <T tone="pastel">{ans[k] === 1 ? t('taste.good', { text: pick(sense.good) }) : pick(sense.tips[ans[k] === 0 ? 0 : 1])}</T>
+            </Card>
+          )}
+        </View>
+      ))}
+      {score === null
+        ? <Button size="cook" label={t('taste.submit')} disabled={ans.some((a) => a === null)} onPress={submit} />
+        : <>
+            <Button size="cook" label={t('taste.again')} onPress={() => router.replace('/recipes')} />
+            <Button kind="secondary" label={t('taste.home')} onPress={() => router.replace('/')} />
+          </>}
+    </ScrollView>
+  );
+}
+
+const s = StyleSheet.create({
+  top: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg },
+  ask: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill },
+  bar: { flexDirection: 'row', gap: 6, paddingHorizontal: space.lg, paddingVertical: space.md },
+  seg: { flex: 1, height: 8, borderRadius: radius.pill },
+  sheet: { flex: 1, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, overflow: 'hidden' },
+  foot: { paddingHorizontal: space.lg, paddingTop: space.md, gap: space.xs, borderTopWidth: StyleSheet.hairlineWidth },
+  link: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  heat: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 36, paddingHorizontal: space.md, borderRadius: radius.pill },
+  safetyBtn: { flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'flex-start', minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: '#FFE3D6' },
+  opt: { minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, justifyContent: 'center' },
+});
