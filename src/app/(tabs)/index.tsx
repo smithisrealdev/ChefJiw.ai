@@ -7,7 +7,7 @@ import { Icon } from '@/components/icon';
 import { ResumeCard } from '@/components/resume-card';
 import { Button, Card, Float, Pill, Screen, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT } from '@/data/images';
-import { MENU, planShopping, SUNDAY_PLAN } from '@/data/recipes';
+import { MENU, planShopping } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import type { L } from '@/lib/i18n';
 import { useSettings } from '@/lib/settings';
@@ -60,14 +60,12 @@ export default function Home() {
           </View>
           <T v="small" tone="onNavyMuted">{t('plan.sub')}</T>
         </View>
-        <View style={{ gap: space.xs }}>
-          {SUNDAY_PLAN.dishes.map((d) => <Thumb key={d.id} source={IMG[MENU.find((m) => m.id === d.id)!.img]} tint="rgba(255,255,255,0.12)" size={44} />)}
-        </View>
+        <Image source={MASCOT.shop} style={{ width: 104, height: 104 }} contentFit="contain" accessible={false} />
         <Icon name="next" color="#FFFFFF" />
       </Card>
       {!BETA && (
         <Card onPress={() => router.push('/market')} label={t('market.open')} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
-          <Thumb source={MASCOT.capybara} size={64} />
+          <Thumb source={MASCOT.shop} size={64} />
           <View style={{ flex: 1 }}>
             <T v="subheading">{t('market.open')}</T>
             <T v="small" tone="muted">{t('market.openSub')}</T>

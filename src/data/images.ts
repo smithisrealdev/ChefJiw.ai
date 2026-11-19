@@ -30,13 +30,19 @@ export const DISH_TINT: Record<string, string> = {
   'green-curry': '#8FDB8A', 'moo-palo': '#A7B0FF', 'prik-khing': '#FFB35C',
 };
 
-// เชฟจิ๋ว ตัวละครหลัก หนึ่งท่าต่อหนึ่งจังหวะ ใช้เฉพาะตอนที่ท่านั้นมีความหมาย ไม่แปะทุกหน้า
+// ทีมเชฟ ตัวละครสามตัว แต่ละตัวดูแลงานของตัวเอง ใช้เฉพาะจังหวะที่ท่านั้นมีความหมาย ไม่แปะทุกหน้า
 export const MASCOT = {
+  // เชฟจิ๋ว: พาทำอาหาร
   hi: require('@/assets/images/chef/hi.png'), // ทักทาย: หน้าร้าน หน้าแนะนำแอป
   cook: require('@/assets/images/chef/cook.png'), // ยังไม่เคยทำจานไหน
-  cheer: require('@/assets/images/chef/cheer.png'), // สำเร็จ: ครบเวลา ทำจบจาน
+  cheer: require('@/assets/images/chef/cheer.png'), // สำเร็จ: ครบเวลา ทำจานแรกแล้ว
   think: require('@/assets/images/chef/think.png'), // กำลังรอคำตอบ
   oops: require('@/assets/images/chef/oops.png'), // มีอะไรผิดพลาด
-  taste: require('@/assets/images/chef/taste.png'), // ชิมให้คะแนน
-  capybara: require('@/assets/images/mascot/capybara.png'),
+  // ป้างอบ: จ่ายตลาด
+  shop: require('@/assets/images/chef/shop.png'), // แผนวันอาทิตย์ ราคาตลาด
+  list: require('@/assets/images/chef/list.png'), // รายการของที่ต้องซื้อ
+  // น้องชิม: ให้คะแนนตอนทำจบจาน
+  sip: require('@/assets/images/chef/sip.png'), // กำลังถามเรื่องรสชาติ
+  yum: require('@/assets/images/chef/yum.png'), // คะแนนดี
+  hmm: require('@/assets/images/chef/hmm.png'), // ยังปรับได้อีก
 };

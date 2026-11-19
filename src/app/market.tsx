@@ -38,7 +38,7 @@ export default function Market() {
   const back = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   return (
-    <Screen tint={colors.header.market} title={t('market.title')} subtitle={t('market.sample')} mascot={MASCOT.capybara} onBack={back} backLabel={t('tab.home')}
+    <Screen tint={colors.header.market} title={t('market.title')} subtitle={t('market.sample')} mascot={MASCOT.shop} onBack={back} backLabel={t('tab.home')}
       footer={
         <Card tone="accent" style={s.foot}>
           <View style={{ flex: 1 }}>

@@ -301,7 +301,7 @@ function Taste({ r }: { r: Recipe }) {
           <T v="title" accessibilityRole="header">{score === null ? t('taste.title') : t('taste.result')}</T>
           {score === null && <T tone="muted">{t('taste.intro')}</T>}
         </View>
-        <Image source={score === null ? MASCOT.taste : MASCOT.cheer} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} />
+        <Image source={score === null ? MASCOT.sip : score >= 4 ? MASCOT.yum : MASCOT.hmm} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} />
       </View>
       {score !== null && (
         <Card tone="accent" style={{ alignItems: 'center' }}>
