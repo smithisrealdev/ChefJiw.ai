@@ -1,5 +1,5 @@
 // ถามเชฟช้าง: ต้องเข้าสู่ระบบ ฟรีวันละ 3 คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวคืนสิทธิ์
-import { admin, anthropic, cors, finalText, FREE_PER_DAY, isLang, isText, json, localDay, MODEL, requireUser } from '../_shared/common.ts';
+import { admin, chat, cors, FREE_PER_DAY, isLang, isText, json, localDay, requireUser } from '../_shared/common.ts';
 
 const SYSTEM = `You are Chef Elephant, the cooking coach inside a step-by-step cooking app for home cooks in Thailand and beyond.
 The person is cooking right now, often with messy hands, so answer in 2 to 4 short, plain sentences they can act on at the stove.
@@ -22,16 +22,15 @@ Deno.serve(async (req) => {
   if (!allowed) return json({ error: 'quota' }, 429);
 
   try {
-    const msg = await anthropic.beta.messages.create({
-      model: MODEL,
+    const answer = await chat({
       max_tokens: 2000,
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-      output_config: { effort: 'low' },
-      system: SYSTEM,
-      messages: [{ role: 'user', content: `Language: ${lang === 'th' ? 'Thai' : 'English'}\nDish: ${recipe}\nCurrent step: ${step}\n\nQuestion:\n${question}` }],
+      reasoning: { effort: 'low' },
+      messages: [
+        { role: 'system', content: SYSTEM },
+        { role: 'user', content: `Language: ${lang === 'th' ? 'Thai' : 'English'}\nDish: ${recipe}\nCurrent step: ${step}\n\nQuestion:\n${question}` },
+      ],
     });
-    return json({ answer: finalText(msg) });
+    return json({ answer });
   } catch (e) {
     await admin.rpc('refund_ai_call', { p_user: user.id, p_day: day });
     console.error('ask failed', e);

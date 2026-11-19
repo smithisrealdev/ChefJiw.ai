@@ -1,13 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { createClient, type User } from '@supabase/supabase-js';
 
-export const MODEL = 'claude-opus-5-5';
+export const MODEL = 'anthropic/claude-opus-5.5'; // ผ่าน OpenRouter
 export const FREE_PER_DAY = 3;
 export const COUNTRIES = ['TH', 'JP', 'US'] as const;
 export type Country = (typeof COUNTRIES)[number];
 
-// อ่าน ANTHROPIC_API_KEY จาก secret ของ edge function
-export const anthropic = new Anthropic();
 export const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
 export const cors = {
@@ -35,10 +32,17 @@ export const isText = (v: unknown, max: number): v is string => typeof v === 'st
 export const isLang = (v: unknown): v is 'th' | 'en' => v === 'th' || v === 'en';
 export const isCountry = (v: unknown): v is Country => COUNTRIES.includes(v as Country);
 
-/** ข้อความตอบสุดท้ายจากโมเดล โยน error เมื่อถูกปฏิเสธหรือไม่มีข้อความ */
-export function finalText(msg: { stop_reason: string | null; content: { type: string; text?: string }[] }) {
-  if (msg.stop_reason === 'refusal') throw new Error('refusal');
-  const text = msg.content.filter((b) => b.type === 'text').map((b) => b.text ?? '').join('').trim();
+/** เรียกโมเดลผ่าน OpenRouter (key อยู่ใน secret OPENROUTER_API_KEY ของ edge function) คืนข้อความตอบ โยน error เมื่อล้มเหลว ถูกกรอง หรือว่าง */
+export async function chat(body: Record<string, unknown>): Promise<string> {
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${Deno.env.get('OPENROUTER_API_KEY')}`, 'Content-Type': 'application/json', 'X-Title': 'ChefJiw' },
+    body: JSON.stringify({ model: MODEL, ...body }),
+  });
+  if (!res.ok) throw new Error(`openrouter ${res.status}: ${(await res.text()).slice(0, 300)}`);
+  const choice = (await res.json()).choices?.[0];
+  if (choice?.finish_reason === 'content_filter') throw new Error('refusal');
+  const text = String(choice?.message?.content ?? '').trim();
   if (!text) throw new Error('empty');
   return text;
 }

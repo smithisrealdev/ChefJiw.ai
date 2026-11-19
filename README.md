@@ -40,15 +40,15 @@ npm test
 | `supabase/functions/ask` | ถามเชฟช้าง: ต้องเข้าสู่ระบบ ฟรีวันละ 3 คำถาม สมาชิกไม่จำกัด ล้มเหลวคืนสิทธิ์ |
 | `supabase/functions/menus` | คิดเมนูจากของที่มี (นับรวมในโควตาเดียวกัน) |
 | `supabase/functions/prices` | อ่านราคาล่าสุดของประเทศ |
-| `supabase/functions/update-prices` | งานรายวัน ให้ Claude ค้นราคาจากเว็บแล้วบันทึก |
+| `supabase/functions/update-prices` | งานรายวัน ค้นราคาจากเว็บผ่านปลั๊กอิน web ของ OpenRouter แล้วบันทึก |
 
-โมเดลที่ใช้คือ `claude-opus-5-5` ตั้งไว้ที่ `supabase/functions/_shared/common.ts`
+โมเดลคือ `anthropic/claude-opus-5.5` เรียกผ่าน OpenRouter ตั้งไว้ที่ `supabase/functions/_shared/common.ts`
 
 โปรเจกต์จริง: `jqfjqsvpjzcktfrnvobo` (migration ทั้งหมด ฟังก์ชันทั้งสี่ และงาน cron รายวัน deploy แล้ว)
 
 ที่เจ้าของโปรเจกต์ต้องตั้งเองใน Dashboard:
 
-1. Edge Functions > Secrets: เพิ่ม `ANTHROPIC_API_KEY` (ถ้าไม่มี ถามเชฟ คิดเมนู และอัปเดตราคา จะตอบ error)
+1. Edge Functions > Secrets: เพิ่ม `OPENROUTER_API_KEY` (ถ้าไม่มี ถามเชฟ คิดเมนู และอัปเดตราคา จะตอบ error)
 2. Auth > Providers: เปิด Google และ Apple แล้วเพิ่ม `chefjiw://auth` ใน Auth > URL Configuration > Redirect URLs (LINE ต้องตั้งเป็น custom OIDC provider ภายหลัง)
 
 ตั้งโปรเจกต์ใหม่จากศูนย์: รัน migration ตามลำดับ (ก่อนไฟล์ cron ให้เก็บ `project_url` ใน Vault ดูหัวไฟล์) deploy ฟังก์ชันทั้งสี่ (`update-prices` ปิด verify JWT เพราะตรวจ secret จาก Vault เอง) แล้วทำสองข้อบน

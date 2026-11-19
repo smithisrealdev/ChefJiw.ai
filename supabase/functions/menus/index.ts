@@ -1,5 +1,5 @@
 // คิดเมนูจากของที่มี: นับรวมในโควตาเดียวกับการถามเชฟ เพราะใช้โมเดลเหมือนกัน
-import { admin, anthropic, cors, finalText, FREE_PER_DAY, isCountry, isLang, isText, json, localDay, MODEL, requireUser } from '../_shared/common.ts';
+import { admin, chat, cors, FREE_PER_DAY, isCountry, isLang, isText, json, localDay, requireUser } from '../_shared/common.ts';
 
 const SCHEMA = {
   type: 'object',
@@ -35,19 +35,19 @@ Deno.serve(async (req) => {
   if (!allowed) return json({ error: 'quota' }, 429);
 
   try {
-    const msg = await anthropic.beta.messages.create({
-      model: MODEL,
+    const text = await chat({
       max_tokens: 4000,
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-      output_config: { effort: 'low', format: { type: 'json_schema', schema: SCHEMA } },
-      system: 'You suggest simple home dishes from ingredients someone already has. Prefer dishes from their country first, then one or two from other cuisines. Keep missing ingredients to staples they can buy easily.',
-      messages: [{
-        role: 'user',
-        content: `Country: ${country}\nLanguage for dish names, cuisine and missing items: ${lang === 'th' ? 'Thai' : 'English'}\nIngredients I have: ${have.join(', ')}\n\nSuggest 3 dishes. "country" is the cuisine name, e.g. "Thai food". "missing" lists main ingredients I still need (empty if none).`,
-      }],
+      reasoning: { effort: 'low' },
+      response_format: { type: 'json_schema', json_schema: { name: 'menu_ideas', strict: true, schema: SCHEMA } },
+      messages: [
+        { role: 'system', content: 'You suggest simple home dishes from ingredients someone already has. Prefer dishes from their country first, then one or two from other cuisines. Keep missing ingredients to staples they can buy easily.' },
+        {
+          role: 'user',
+          content: `Country: ${country}\nLanguage for dish names, cuisine and missing items: ${lang === 'th' ? 'Thai' : 'English'}\nIngredients I have: ${have.join(', ')}\n\nSuggest 3 dishes. "country" is the cuisine name, e.g. "Thai food". "missing" lists main ingredients I still need (empty if none).`,
+        },
+      ],
     });
-    const parsed = JSON.parse(finalText(msg));
+    const parsed = JSON.parse(text);
     return json({ ideas: parsed.ideas.slice(0, 5) });
   } catch (e) {
     await admin.rpc('refund_ai_call', { p_user: user.id, p_day: day });
