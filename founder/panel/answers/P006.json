@@ -1,0 +1,13 @@
+{
+  "id": "P006",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I've been cooking kra pao and khai jiao since I was a kid, I don't need my phone to tell me when the egg is done. On busy days I just buy a 50-baht plate anyway, so 99 baht a month for questions I'd never ask makes no sense.",
+  "objection": "Only two dishes, and they're the two every Thai already knows. The free 3 questions a day is already more than I'd ever use, so the paid part gives me nothing.",
+  "would_change_my_mind": "Lots of new dishes I can't already cook, all doable in my one pan with cheap ingredients, so cooking at home actually beats buying a plate. More questions alone won't do it.",
+  "price_too_cheap": 10,
+  "price_cheap": 29,
+  "price_expensive": 49,
+  "price_too_expensive": 79
+}
