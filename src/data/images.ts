@@ -33,7 +33,7 @@ export const DISH_TINT: Record<string, string> = {
 // ฉากเต็มความกว้างใต้ชื่อหน้าจอ พื้นโปร่งใส วาดให้เข้ากับสีหัวจอของหน้านั้น
 export const SCENE = {
   home: { source: require('@/assets/images/chef/scene-home.png'), ratio: 780 / 360 }, // ครัวของทีมเชฟ (หัวจอสีน้ำเงิน)
-  plan: { source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300 }, // แผงตลาดของป้างอบ (หัวจอสีส้ม)
+  plan: { source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300 }, // แผงตลาดที่ใบเตยไปซื้อของ (หัวจอสีส้ม)
 };
 
 // ทีมเชฟ ตัวละครสามตัว แต่ละตัวดูแลงานของตัวเอง ใช้เฉพาะจังหวะที่ท่านั้นมีความหมาย ไม่แปะทุกหน้า
@@ -44,7 +44,7 @@ export const MASCOT = {
   cheer: require('@/assets/images/chef/cheer.png'), // สำเร็จ: ครบเวลา ทำจานแรกแล้ว
   think: require('@/assets/images/chef/think.png'), // กำลังรอคำตอบ
   oops: require('@/assets/images/chef/oops.png'), // มีอะไรผิดพลาด
-  // ป้างอบ: จ่ายตลาด
+  // ใบเตย: จ่ายตลาด
   shop: require('@/assets/images/chef/shop.png'), // แผนวันอาทิตย์ ราคาตลาด
   list: require('@/assets/images/chef/list.png'), // รายการของที่ต้องซื้อ
   // น้องชิม: ให้คะแนนตอนทำจบจาน

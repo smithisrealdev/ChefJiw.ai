@@ -46,19 +46,40 @@ def person(skin, skin_d, legs, shoes, outfit, hair, e, m, back='', arms_back='',
 {hair}{hat}{face(e, m, blush)}
 {arms_front}{front}''')
 
-# ---------- เชฟจิ๋ว: หมวกเชฟ ผมสั้นสีน้ำตาล เสื้อเชฟขาว ผ้าพันคอเหลือง ผ้ากันเปื้อนส้ม ----------
-S1, S1_D, JACKET, BROWN = '#FFE3C2', '#F6CFA3', '#E9E5F8', '#6B4632'
-chef_outfit = (JACKET, f'<path d="M184 420 V320 Q184 296 208 296 H272 Q296 296 296 320 V420 Z" fill="{CORAL}"/><rect x="216" y="340" width="48" height="34" rx="12" fill="{CORAL_L}"/>'
-               f'<path d="M206 268 Q240 300 274 268 L262 258 Q240 268 218 258 Z" fill="{YEL}"/>')
-chef_hair = f'<path d="M116 204 C104 150 146 100 196 98 L284 98 C334 100 376 150 364 204 C352 176 334 160 312 154 Q256 176 212 148 Q160 150 116 204 Z" fill="{BROWN}"/>'
+# ---------- ชุดวัยรุ่นแนวเกาหลี: ฮู้ดตัวโคร่งแขนยาวคลุมมือ กระโปรงพลีท ถุงเท้ายาว ผ้าใบพื้นหนา กิ๊บติดผม ----------
+def hoodie(color, dark, pocket=True):
+    return (f'<path d="M222 282 v34 M258 282 v34" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><circle cx="222" cy="320" r="5" fill="#FFFFFF"/><circle cx="258" cy="320" r="5" fill="#FFFFFF"/>'
+            + (f'<path d="M196 346 Q240 334 284 346 L296 392 Q240 402 184 392 Z" fill="none" stroke="{dark}" stroke-width="6" stroke-linejoin="round"/>' if pocket else ''))
+hood = lambda color: f'<ellipse cx="240" cy="280" rx="108" ry="30" fill="{color}"/>'
+def skirt(color, dark):
+    return f'<path d="M110 356 Q240 342 370 356 V440 H110 Z" fill="{color}"/><path d="M170 356 V430 M216 352 V430 M264 352 V430 M310 356 V430" stroke="{dark}" stroke-width="5" stroke-linecap="round"/>'
+def sneakers(accent):  # ผ้าใบขาวพื้นหนา มีแถบสี
+    return ''.join(f'<ellipse cx="{x}" cy="442" rx="40" ry="19" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="4"/><path d="M{x-30} 452 q30 9 60 0" stroke="{accent}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M{x-8} 432 l10 12" stroke="{accent}" stroke-width="6" stroke-linecap="round"/>' for x in (196, 284))
+socks = lambda c: f'<path d="M178 402 h52 M250 402 h52 M178 414 h52 M250 414 h52" stroke="{c}" stroke-width="5"/>'
+clip = lambda x, y, r, c: f'<g transform="rotate({r} {x} {y})"><rect x="{x-17}" y="{y-5}" width="34" height="9" rx="4.5" fill="{c}"/><rect x="{x-17}" y="{y+9}" width="34" height="9" rx="4.5" fill="{c}"/></g>'
+
+def kperson(skin, hair, color, dark, e, m, accent, lower='', behind='', hat='', sock_c=None, **k):
+    """คนหนึ่งคนในชุดฮู้ด: lower = กระโปรงหรือผ้ากันเปื้อนที่ทับตัวเสื้อ behind = ผมยาวที่อยู่หลังตัว"""
+    blush = k.pop('blush', 0.85)
+    body = person(skin, skin, '#FFFFFF', '#FFFFFF', (color, hoodie(color, dark, not lower) + lower), hood(color) + hair, e, m, hat=hat, blush=blush,
+                  sock=socks(sock_c or accent), back=behind + k.pop('back', ''), **k)
+    # รองเท้าผ้าใบวาดทับวงรีรองเท้าพื้นฐาน และฮู้ดต้องอยู่หลังหัว จึงย้ายวงรีฮู้ดไปไว้ก่อนหัว
+    h = hood(color); head = body.index('<ellipse cx="240" cy="190"')
+    body = body.replace(h, '', 1); body = body[:head] + h + body[head:]
+    return body.replace(f'<ellipse cx="198" cy="444" rx="38" ry="17" fill="#FFFFFF"/><ellipse cx="282" cy="444" rx="38" ry="17" fill="#FFFFFF"/>', sneakers(accent))
+
+# เชฟจิ๋ว: หมวกเชฟใบเล็ก ผมหน้าม้าฟู ฮู้ดฟ้าอ่อน ผ้ากันเปื้อนส้มครึ่งตัว ผ้าใบแถบส้ม
+S1, SKY, SKY_D, BROWN = '#FFE3C2', '#BFD9FF', '#8FB6F2', '#6B4632'
+chef_hair = (f'<path d="M112 210 C98 146 150 92 240 92 C330 92 382 146 368 210 C360 182 344 166 322 160 Q296 186 262 158 Q232 184 200 156 Q166 180 140 164 C126 174 116 190 112 210 Z" fill="{BROWN}"/>')
+apron = f'<path d="M172 440 V352 Q240 338 308 352 V440 Z" fill="{CORAL}"/><rect x="214" y="368" width="52" height="34" rx="12" fill="{CORAL_L}"/><path d="M172 352 Q240 338 308 352" stroke="#E9603F" stroke-width="6" fill="none"/>'
 def toque(rot=-8):
     return (f'<g transform="translate(0 -52) rotate({rot} 240 140)"><path d="M184 152 Q240 134 296 152 L296 122 Q240 106 184 122 Z" fill="{HAT_D}" stroke="{HAT_D}" stroke-width="5" stroke-linejoin="round"/>'
             f'<path d="M180 124 C146 108 152 58 194 58 C202 20 278 20 286 58 C328 58 334 108 300 124 Q240 106 180 124 Z" fill="{HAT}" stroke="{HAT_D}" stroke-width="5" stroke-linejoin="round"/>'
             f'<path d="M214 64 q6 22 0 42 M266 64 q-6 22 0 42" stroke="{HAT_D}" stroke-width="5" stroke-linecap="round" fill="none"/></g>')
 def chef(e, m, **k):
     k.setdefault('hat', toque())
-    return person(S1, S1_D, '#3B3950', INK, chef_outfit, chef_hair, e, m, **k)
-A1 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S1, JACKET)
+    return kperson(S1, chef_hair, SKY, SKY_D, e, m, CORAL, lower=apron, **k)
+A1 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S1, SKY, 0.84)
 ladle = lambda x, y, r: f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y+30} V{y-70}" stroke="{WOOD}" stroke-width="11" stroke-linecap="round"/><path d="M{x-24} {y-74} a24 24 0 0 0 48 0 z" fill="{WOOD}"/></g>'
 wok = lambda x, y: (f'<path d="M{x-74} {y} q74 62 148 0 z" fill="{INK}"/><path d="M{x+70} {y+2} l52 -14" stroke="{INK}" stroke-width="14" stroke-linecap="round"/>'
                     f'<circle cx="{x-30}" cy="{y-26}" r="10" fill="{GREEN_L}"/><circle cx="{x+2}" cy="{y-46}" r="10" fill="{CORAL}"/><circle cx="{x+30}" cy="{y-24}" r="10" fill="{YEL}"/><circle cx="{x-8}" cy="{y-14}" r="9" fill="{GREEN}"/>'
@@ -68,48 +89,45 @@ POSES = {
              front=f'<path d="M56 196 q-12 -14 -8 -32 M80 180 q-6 -12 -2 -26" stroke="{YEL}" stroke-width="7" stroke-linecap="round" fill="none"/>'),
   'cook': chef('dot', 'smile', arms_front=wok(262, 372) + A1('L', 196, 366, -30, 16) + A1('R', 372, 356, 26, 10)),
   'cheer': chef('happy', 'open', arms_back=A1('L', 92, 196, -18, 14) + A1('R', 388, 196, 18, 14), hat=toque(-14), front=star(54, 128, 22) + star(430, 116, 26) + star(404, 44, 13) + star(96, 60, 12)),
-  'think': chef(('dot', 9, -8), 'dash', arms_front=A1('L', 214, 372, -34, 20) + A1('R', 284, 258, 46, 16), hat=toque(6), blush=0.6,
+  'think': chef(('dot', 9, -8), 'dash', arms_front=A1('L', 214, 372, -34, 20) + A1('R', 284, 262, 46, 16), hat=toque(6), blush=0.6,
                 front=f'<circle cx="384" cy="120" r="8" fill="{HAT_D}"/><circle cx="408" cy="88" r="13" fill="{HAT_D}"/><circle cx="438" cy="42" r="22" fill="{HAT_D}"/>'),
-  'oops': chef('squeeze', 'wavy', arms_front=A1('L', 172, 238, -42, 26) + A1('R', 308, 238, 42, 26), hat=toque(-18), blush=0.5,
+  'oops': chef('squeeze', 'wavy', arms_front=A1('L', 172, 242, -42, 26) + A1('R', 308, 242, 42, 26), hat=toque(-18), blush=0.5,
                front='<path d="M414 96 q22 34 0 46 q-22 -12 0 -46 z" fill="#6CC5F5"/><path d="M60 120 l-22 -10 M54 154 l-24 2" stroke="#6CC5F5" stroke-width="7" stroke-linecap="round"/>'),
 }
 
-# ---------- ป้างอบ: งอบ ผมมวยสีเทา เสื้อเขียวลายจุด ผ้าถุงม่วง รองเท้าแตะ ถือตะกร้า ----------
-S2, S2_D, GREY, PURPLE, PURPLE_L = '#F4C79A', '#E7B07C', '#8B8089', '#8E6FD8', '#B9A4F0'
-ngob_outfit = (GREEN, ''.join(f'<circle cx="{x}" cy="{y}" r="6" fill="{GREEN_L}"/>' for x, y in [(196, 292), (240, 284), (284, 292), (218, 316), (262, 316)])
-               + f'<path d="M120 338 Q240 322 360 338 V430 H120 Z" fill="{PURPLE}"/><path d="M130 362 q14 -12 28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 M130 390 h230" stroke="{PURPLE_L}" stroke-width="6" fill="none" stroke-linecap="round"/>')
-ngob_hair = (f'<circle cx="336" cy="110" r="30" fill="{GREY}"/><path d="M116 204 C104 150 146 100 196 98 L284 98 C334 100 376 150 364 204 C348 164 304 148 240 148 C176 148 132 164 116 204 Z" fill="{GREY}"/>')
-ngob_hat = (f'<path d="M84 136 Q240 -40 396 136 Q240 172 84 136 Z" fill="{STRAW}"/><path d="M146 116 Q240 16 334 116 M194 128 Q240 70 286 128" stroke="{STRAW_D}" stroke-width="6" fill="none" stroke-linecap="round"/>'
-            f'<path d="M100 138 Q240 168 380 138" stroke="{STRAW_D}" stroke-width="7" fill="none" stroke-linecap="round"/>')
-def auntie(e, m, **k):
-    return person(S2, S2_D, S2, CORAL, ngob_outfit, ngob_hair, e, m, hat=ngob_hat, **k)
-A2 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S2, GREEN, 0.42)
-basket = lambda x, y: (f'<path d="M{x-46} {y} q46 -74 92 0" stroke="{STRAW_D}" stroke-width="9" fill="none" stroke-linecap="round"/>'
-    f'<path d="M{x-30} {y-4} q-22 -44 6 -62 q26 20 8 62 z" fill="{GREEN}"/><path d="M{x-4} {y-4} q-8 -54 26 -66 q20 30 -4 66 z" fill="{GREEN_L}"/>'
-    f'<path d="M{x+18} {y} l22 -52 q10 4 6 14 l-12 40 z" fill="{CORAL}"/>'
-    f'<path d="M{x-52} {y-6} h104 l-12 62 q-40 12 -80 0 z" fill="{STRAW}"/><path d="M{x-48} {y+14} h96 M{x-44} {y+34} h88" stroke="{STRAW_D}" stroke-width="6" stroke-linecap="round"/>')
+# ใบเตย: คนจ่ายตลาด หมวกบักเก็ตครีม ผมยาวหน้าม้า ฮู้ดเขียวมินต์ กระโปรงพลีทครีม ถุงผ้าใส่ผัก
+S2, MINT, MINT_D, CREAM, CREAM_D, DARKHAIR = '#FFDDBE', '#8FE3C0', '#55C79A', '#FFF3DC', '#EAD9B4', '#4A3A36'
+toey_behind = f'<path d="M124 190 C104 280 110 340 136 372 H344 C370 340 376 280 356 190 Z" fill="{DARKHAIR}"/>'
+toey_hair = f'<path d="M112 214 C100 150 152 96 240 96 C328 96 380 150 368 214 C356 184 340 170 318 166 Q240 190 162 166 C140 170 124 184 112 214 Z" fill="{DARKHAIR}"/>'
+bucket = (f'<path d="M96 132 Q240 96 384 132 Q396 150 372 156 Q240 126 108 156 Q84 150 96 132 Z" fill="{CREAM_D}"/>'
+          f'<path d="M140 136 C132 60 186 26 240 26 C294 26 348 60 340 136 Q240 110 140 136 Z" fill="{CREAM}"/><path d="M146 112 Q240 88 334 112" stroke="{CREAM_D}" stroke-width="6" fill="none"/>')
+def toey(e, m, **k):
+    return kperson(S2, toey_hair, MINT, MINT_D, e, m, GREEN, lower=skirt(CREAM, CREAM_D), behind=toey_behind, hat=bucket, **k)
+A2 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S2, MINT, 0.84)
+tote = lambda x, y: (f'<path d="M{x-26} {y-4} q26 -66 52 0" stroke="{CREAM_D}" stroke-width="8" fill="none" stroke-linecap="round"/>'
+    f'<path d="M{x-28} {y+2} q-22 -46 6 -64 q26 20 8 64 z" fill="{GREEN}"/><path d="M{x-2} {y+2} q-8 -56 26 -68 q20 30 -4 68 z" fill="{GREEN_L}"/><path d="M{x+18} {y+4} l22 -54 q10 4 6 14 l-12 42 z" fill="{CORAL}"/>'
+    f'<path d="M{x-48} {y} h96 l-6 74 q-42 10 -84 0 z" fill="{CREAM}" stroke="{CREAM_D}" stroke-width="4" stroke-linejoin="round"/>' + heart(x, y + 40, 0.8, CORAL))
 POSES.update({
-  'shop': auntie('happy', 'open', arms_back=A2('L', 96, 232, -22, 12), arms_front=basket(392, 372) + A2('R', 384, 352, 22, -2), front=star(58, 176, 15)),
-  'list': auntie('dot', 'smile', arms_front=f'<rect x="262" y="318" width="110" height="122" rx="14" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="5"/>'
+  'shop': toey('happy', 'open', arms_back=A2('L', 96, 232, -22, 12), arms_front=tote(392, 356) + A2('R', 384, 352, 22, -2), front=star(58, 176, 15)),
+  'list': toey('dot', 'smile', arms_front=f'<rect x="262" y="318" width="110" height="122" rx="14" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="5"/>'
            f'<path d="M282 350 l8 8 l14 -16 M282 384 l8 8 l14 -16" stroke="{GREEN}" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
            f'<path d="M318 352 h36 M318 386 h36 M284 418 h70" stroke="{HAT_D}" stroke-width="7" stroke-linecap="round"/>' + A2('R', 352, 380, 30, 0) + A2('L', 196, 372, -30, 18)),
 })
 
-# ---------- น้องชิม: ผมมวยคู่ผูกโบว์ส้ม ชุดเหลือง ผ้ากันเปื้อนขาวลายหัวใจ ถุงเท้าลาย รองเท้าชมพู ถือช้อนใหญ่ ----------
-S3, S3_D, BLACK = '#FFDCCB', '#F5BFAF', '#3A2F33'
-chim_outfit = (YEL, f'<path d="M190 420 L196 300 Q240 282 284 300 L290 420 Z" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="5" stroke-linejoin="round"/>' + heart(240, 352, 0.9, CORAL))
-chim_hair = (f'<circle cx="136" cy="100" r="40" fill="{BLACK}"/><circle cx="344" cy="100" r="40" fill="{BLACK}"/><rect x="146" y="122" width="36" height="18" rx="9" fill="{CORAL}" transform="rotate(-40 164 131)"/><rect x="298" y="122" width="36" height="18" rx="9" fill="{CORAL}" transform="rotate(40 316 131)"/>'
-             f'<path d="M114 206 C98 138 160 84 240 84 C320 84 382 138 366 206 C354 170 330 154 306 152 Q270 176 240 152 Q210 176 174 152 C150 154 126 170 114 206 Z" fill="{BLACK}"/>')
-chim_sock = f'<path d="M185 404 h46 M249 404 h46 M185 416 h46 M249 416 h46" stroke="{CORAL}" stroke-width="5"/>'
+# น้องชิม: นักชิม ผมมวยคู่ติดกิ๊บ ฮู้ดเหลือง กระโปรงพลีทชมพู ถุงเท้าลาย ผ้าใบแถบชมพู ถือช้อนใหญ่
+S3, BUTTER, BUTTER_D, ROSE, ROSE_D, BLACK = '#FFDCCB', '#FFE27A', '#F2C744', '#FFB3C4', '#F58CA5', '#3A2F33'
+chim_hair = (f'<circle cx="136" cy="100" r="40" fill="{BLACK}"/><circle cx="344" cy="100" r="40" fill="{BLACK}"/>'
+             f'<path d="M114 206 C98 138 160 84 240 84 C320 84 382 138 366 206 C354 170 330 154 306 152 Q270 176 240 152 Q210 176 174 152 C150 154 126 170 114 206 Z" fill="{BLACK}"/>'
+             + clip(316, 138, 24, CORAL))
 def chim(e, m, **k):
     k.setdefault('blush', 0.95)
-    inner = person(S3, S3_D, '#FFFFFF', PINK, chim_outfit, chim_hair, e, m, sock=chim_sock, **k)
+    inner = kperson(S3, chim_hair, BUTTER, BUTTER_D, e, m, ROSE_D, lower=skirt(ROSE, ROSE_D) + heart(240, 322, 0.8, CORAL), sock_c=ROSE_D, **k)
     body = inner[inner.index('>') + 1:inner.rindex('</svg>')]
-    return SVG(f'<g transform="translate(240 460) scale(0.86) translate(-240 -460)">{body}</g>')  # ตัวเล็กกว่าผู้ใหญ่
-A3 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S3, YEL, 0.4)
+    return SVG(f'<g transform="translate(240 464) scale(0.86) translate(-240 -464)">{body}</g>')  # ตัวเล็กกว่าพี่ๆ
+A3 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S3, BUTTER, 0.84)
 bigspoon = lambda x, y, r: f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y+24} v-150" stroke="{WOOD}" stroke-width="13" stroke-linecap="round"/><ellipse cx="{x}" cy="{y-150}" rx="28" ry="38" fill="{WOOD}"/></g>'
 POSES.update({
-  'sip': chim('happy', '', arms_front=f'<path d="M318 244 L262 226" stroke="{WOOD}" stroke-width="12" stroke-linecap="round"/><ellipse cx="246" cy="222" rx="24" ry="15" fill="{WOOD}"/>' + A3('R', 322, 248, 44, 22) + A3('L', 200, 368, -30, 18),
+  'sip': chim('happy', '', arms_front=f'<path d="M318 244 L262 226" stroke="{WOOD}" stroke-width="12" stroke-linecap="round"/><ellipse cx="246" cy="222" rx="24" ry="15" fill="{WOOD}"/>' + A3('R', 322, 250, 44, 22) + A3('L', 200, 368, -30, 18),
               front=heart(420, 120, 1.1) + heart(66, 150, 0.7)),
   'yum': chim('happy', 'open', arms_back=A3('L', 96, 208, -18, 14), arms_front=bigspoon(384, 322, 12) + A3('R', 382, 336, 22, 0), front=star(60, 130, 20) + star(436, 60, 14) + star(110, 66, 11)),
   'hmm': chim(('dot', -8, -7), 'dash', arms_front=bigspoon(372, 372, 22) + A3('R', 366, 372, 24, 4) + A3('L', 198, 368, -30, 18), blush=0.6,
@@ -156,7 +174,7 @@ home = scene(780, 360, ''.join([
 ]))
 open('scene-home.svg', 'w').write(home)
 
-# แผงตลาดของป้างอบ (หัวจอแผนวันอาทิตย์ สีส้ม)
+# แผงตลาดที่ใบเตยไปซื้อของ (หัวจอแผนวันอาทิตย์ สีส้ม)
 O1, O2 = '#EE7F22', '#FFC98A'
 crate = lambda x, y, w: f'<rect x="{x}" y="{y}" width="{w}" height="78" rx="10" fill="{STRAW}"/><path d="M{x+6} {y+26} h{w-12} M{x+6} {y+52} h{w-12}" stroke="{STRAW_D}" stroke-width="6" stroke-linecap="round"/>'
 market = scene(780, 300, ''.join([
