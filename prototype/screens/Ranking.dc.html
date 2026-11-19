@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>อันดับเมนูสัปดาห์นี้</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@500;600;700&amp;family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#C2512E}a:hover{color:#8F3A20}
+button{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
+.mali{font-family:'Mali','IBM Plex Sans Thai Looped',sans-serif}
+.bot .tap{position:absolute;inset:0;padding:0;margin:0;border:0;background:transparent;cursor:pointer}
+.bot .shadow{position:absolute;left:16%;right:16%;bottom:-5px;height:11px;border-radius:50%;background:rgba(60,45,70,.16);display:block}
+.bot .emote{position:absolute;left:50%;top:-22px;width:26px;height:24px;margin-left:-13px;z-index:2}
+.bot .em{display:none;position:absolute;left:0;top:0}
+.bot .eh,.bot .es,.bot .mo{display:none}
+.bot .legL,.bot .legR,.bot .armL,.bot .armR,.bot .head,.bot .tail,.bot .earL,.bot .earR,.bot .eo,.bot .bodyg,.bot .trunk{transform-box:fill-box}
+.bot .legL,.bot .legR{transform-origin:50% 0}
+.bot .armL,.bot .armR{transform-origin:50% 6%}
+.bot .head{transform-origin:50% 92%;animation:nod 3.6s ease-in-out infinite}
+.bot .bodyg{transform-origin:50% 100%;animation:breathe 2.6s ease-in-out infinite}
+.bot .tail{transform-origin:0 100%;animation:tail 1.8s ease-in-out infinite}
+.bot .earL{transform-origin:100% 50%;animation:earL 3s ease-in-out infinite}
+.bot .earR{transform-origin:0 50%;animation:earR 3s ease-in-out infinite}
+.bot .trunk{transform-origin:50% 0;animation:trunk 2.8s ease-in-out infinite}
+.bot .eo{transform-origin:50% 50%;animation:blink 4.2s linear infinite}
+.bot .armL{animation:idleArmL 2.6s ease-in-out infinite}
+.bot .armR{animation:idleArmR 2.6s ease-in-out infinite}
+@keyframes nod{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.03,.97)}}
+@keyframes tail{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(14deg)}}
+@keyframes earL{0%,80%,100%{transform:rotate(0)}88%{transform:rotate(-14deg)}94%{transform:rotate(6deg)}}
+@keyframes earR{0%,80%,100%{transform:rotate(0)}88%{transform:rotate(14deg)}94%{transform:rotate(-6deg)}}
+@keyframes trunk{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(7deg)}}
+@keyframes blink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+@keyframes idleArmL{0%,100%{transform:rotate(0)}50%{transform:rotate(4deg)}}
+@keyframes idleArmR{0%,100%{transform:rotate(0)}50%{transform:rotate(-4deg)}}
+@keyframes stepA{0%,100%{transform:rotate(24deg)}50%{transform:rotate(-24deg)}}
+@keyframes stepB{0%,100%{transform:rotate(-24deg)}50%{transform:rotate(24deg)}}
+@keyframes swingA{0%,100%{transform:rotate(-26deg)}50%{transform:rotate(22deg)}}
+@keyframes swingB{0%,100%{transform:rotate(26deg)}50%{transform:rotate(-22deg)}}
+@keyframes bounce{0%,50%,100%{transform:translateY(0)}25%,75%{transform:translateY(-4px)}}
+.walking .legL{animation:stepA .56s ease-in-out infinite}
+.walking .legR{animation:stepB .56s ease-in-out infinite}
+.walking .armL{animation:swingA .56s ease-in-out infinite}
+.walking .armR{animation:swingB .56s ease-in-out infinite}
+.walking .hopper{animation:bounce .56s ease-in-out infinite}
+.walking .head{animation:nod .56s ease-in-out infinite}
+@keyframes hop{0%,100%{transform:translateY(0) scale(1,1)}20%{transform:translateY(0) scale(1.06,.92)}50%{transform:translateY(-18px) scale(.97,1.04)}80%{transform:translateY(0) scale(1.05,.94)}}
+@keyframes wave{0%,100%{transform:rotate(118deg)}50%{transform:rotate(148deg)}}
+@keyframes emote{0%{opacity:0;transform:translateY(8px) scale(.5)}25%{opacity:1;transform:translateY(0) scale(1.1)}80%{opacity:1;transform:translateY(-4px) scale(1)}100%{opacity:0;transform:translateY(-12px) scale(1)}}
+.mood-happy .hopper,.mood-love .hopper{animation:hop .6s ease-out 2}
+.mood-happy .armL,.mood-wave .armL{animation:wave .4s ease-in-out infinite}
+.mood-happy .eo,.mood-love .eo,.mood-wave .eo,.mood-sleepy .eo{display:none}
+.mood-happy .eh,.mood-love .eh,.mood-wave .eh{display:inline}
+.mood-happy .ms,.mood-wow .ms,.mood-sing .ms,.mood-wave .ms{display:none}
+.mood-happy .mo,.mood-wow .mo,.mood-sing .mo,.mood-wave .mo{display:inline}
+.mood-sleepy .es{display:inline}
+.mood-sleepy .head{animation:nod 5s ease-in-out infinite}
+.mood-wow .eo{animation:none;transform:scale(1.35)}
+.mood-wow .hopper{animation:hop .5s ease-out 1}
+.mood-sing .head{animation:nod .9s ease-in-out infinite}
+.mood-love .em-heart,.mood-sing .em-note,.mood-wow .em-wow,.mood-sleepy .em-zzz{display:block;animation:emote 2.4s ease-out infinite}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1)}}
+.spark{position:absolute;display:block;animation:twinkle 2.8s ease-in-out infinite;pointer-events:none}
+@keyframes steam{0%{opacity:0;transform:translateY(6px) scale(.7)}25%{opacity:.9}100%{opacity:0;transform:translateY(-34px) scale(1.4)}}
+.steam{position:absolute;display:block;width:10px;height:16px;border-radius:50%;background:#FFFFFF;animation:steam 2.6s ease-out infinite;pointer-events:none}
+@keyframes cardIn0{from{opacity:0;transform:translateY(10px) scale(.96)}}
+@keyframes cardIn1{from{opacity:0;transform:translateY(10px) scale(.96)}}
+.card0{animation:cardIn0 .35s cubic-bezier(.2,.9,.3,1.2) both}
+.card1{animation:cardIn1 .35s cubic-bezier(.2,.9,.3,1.2) both}
+.num{font-variant-numeric:tabular-nums}
+.bot .armN,.bot .armF{animation:idleSwing 2.6s ease-in-out infinite}
+@keyframes idleSwing{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.bot.w-stir .armN{animation:stir2 .52s ease-in-out infinite}
+@keyframes stir2{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(9deg)}}
+.bot.w-stir .armF{animation:none}
+.bot.w-taste .armN{animation:none;transition:transform .5s ease-in-out;transform:rotate(0deg)}
+.bot.w-taste.p-eat .armN{transform:rotate(-80deg)}
+.bot.w-taste.p-rest .armN{transform:rotate(16deg)}
+.bot.w-point .armF{animation:point2 1.3s ease-in-out infinite}
+@keyframes point2{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.bot.w-place .armF{animation:place2 1.6s ease-in-out infinite}
+@keyframes place2{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(12deg)}}
+@keyframes carryF{0%,100%{transform:rotate(44deg)}50%{transform:rotate(64deg)}}
+@keyframes carryN{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.bot.walking .armF{animation:carryF .56s ease-in-out infinite}
+.bot.walking .armN{animation:carryN .56s ease-in-out infinite}
+.bot.w-place .armN{animation:idleSwing 2.6s ease-in-out infinite}
+.bot.steady .hopper{animation:none}
+@keyframes toss{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.toss{animation:toss .52s ease-in-out infinite}.toss.t2{animation-delay:.17s}.toss.t3{animation-delay:.34s}
+@keyframes wokshake{0%,100%{transform:translateX(0)}50%{transform:translateX(-2.500px)}}
+.wokpan{animation:wokshake .52s ease-in-out infinite}
+@keyframes dropin{0%{opacity:0;transform:translate(-10px,-12px) scale(.8)}15%{opacity:1}45%{opacity:1;transform:translate(8px,6px) scale(1)}60%,100%{opacity:0;transform:translate(8px,18px) scale(1)}}
+.dropin{animation:dropin 1.6s ease-in-out infinite}
+@keyframes needle{0%,100%{transform:rotate(-40deg)}50%{transform:rotate(50deg)}}
+.needle{transform-box:view-box;transform-origin:32px 16.500px;animation:needle 2.6s ease-in-out infinite}
+@keyframes popIn{from{opacity:0;transform:scale(.6)}}
+.press{transition:transform .12s ease-out}
+.press:active{transform:scale(.94)}
+.still *,.still *::before,.still *::after{animation:none !important;transition:none !important}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}}
+button:focus-visible,a:focus-visible{outline:3px solid #24212B;outline-offset:2px}
+a.btn{text-decoration:none;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+.chips::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #FFB199; font-family: 'IBM Plex Sans Thai Looped', sans-serif; color: #24212B">
+<sc-if value="{{solo}}" hint-placeholder-val="{{true}}"><a class="press btn" aria-label="กลับหน้าร้าน" style="position: absolute; left: 12px; top: 50px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF" href="Restaurant.dc.html"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#24212B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a></sc-if><sc-if value="{{inApp}}" hint-placeholder-val="{{false}}"><button class="press btn" aria-label="กลับหน้าร้าน" style="border: 0; margin: 0; font: inherit; text-align: inherit; cursor: pointer; padding: 0; color: inherit; position: absolute; left: 12px; top: 50px; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF" onClick="{{go.Restaurant}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#24212B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></button></sc-if>
+<div style="position: absolute; left: 68px; top: 50px; width: 204px; display: flex; flex-direction: column; gap: 2px">
+<h1 class="mali" style="margin: 0; font-size: 24px; font-weight: 700; line-height: 1.3">อันดับสัปดาห์นี้</h1>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #3F3A4A">ข้อมูลตัวอย่าง ยังไม่ใช่ของจริง</p>
+</div>
+<div class="bot mood-calm" style="position: absolute; left: 276px; top: 4px; width: 96px; height: 139px; transform: scale(0.9); transform-origin: 50% 100%"><span style="display: block; transform: scaleX(-1)"><svg viewBox="0 -24 120 174" width="96" height="139" aria-hidden="true" style="display:block;overflow:visible"><g transform="translate(0 -22)"><path class="tail" d="M32 126 l-14 -10 l2 12 z" fill="#FFD24D" stroke="#FFD24D" stroke-width="4" stroke-linejoin="round"></path><ellipse cx="54" cy="145" rx="27" ry="6.500" fill="#DDAA6A"></ellipse><rect x="33" y="145" width="6" height="27" rx="3" fill="#DDAA6A"></rect><rect x="69" y="145" width="6" height="27" rx="3" fill="#DDAA6A"></rect><ellipse cx="54" cy="142" rx="27" ry="6.500" fill="#F9DDAE"></ellipse><rect x="62" y="121" width="30" height="15" rx="7.500" fill="#FFA94D"></rect><rect x="79" y="123" width="14" height="27" rx="7" fill="#FFA94D"></rect><g transform="translate(78 97)"><g class="armF"><g transform="rotate(-72)"><rect x="-7" y="-4" width="14" height="32" rx="7" fill="#FFFFFF"></rect><circle cx="0" cy="24" r="7" fill="#FFD24D"></circle></g></g></g><g transform="translate(62 0) scale(1.150 1) translate(-62 0)"><g class="bodyg"><g transform="translate(60 134) scale(1.2 1.1) translate(-60 -134)"><ellipse cx="60" cy="108" rx="30" ry="27" fill="#FFE27A"></ellipse><path d="M38 99 Q65 86 92 99 L94 126 Q65 138 36 126 Z" fill="#FFFFFF"></path><circle cx="59" cy="110" r="2.600" fill="#8FD3B6"></circle><circle cx="59" cy="121" r="2.600" fill="#8FD3B6"></circle><circle cx="71" cy="110" r="2.600" fill="#8FD3B6"></circle><circle cx="71" cy="121" r="2.600" fill="#8FD3B6"></circle></g></g></g><rect x="54" y="126" width="32" height="15" rx="7.500" fill="#FFA94D"></rect><rect x="73" y="128" width="14" height="27" rx="7" fill="#FFA94D"></rect><g class="head"><ellipse cx="60" cy="59" rx="43" ry="34" fill="#FFE27A"></ellipse><g transform="translate(62.0 1) scale(0.62)"><circle cx="-14" cy="12" r="11" fill="#FFFFFF"></circle><circle cx="0" cy="8" r="13" fill="#FFFFFF"></circle><circle cx="14" cy="12" r="11" fill="#FFFFFF"></circle><rect x="-17" y="12" width="34" height="16" rx="4" fill="#FFFFFF"></rect></g><ellipse cx="39" cy="70" rx="7.500" ry="5" fill="#FFA08A"></ellipse><ellipse cx="93" cy="70" rx="4.5" ry="4.4" fill="#FFA08A"></ellipse><circle class="eo" cx="49" cy="60" r="4.6" fill="#2E2A28"></circle><circle class="eo" cx="47.5" cy="58.3" r="1.6" fill="#FFFFFF"></circle><path class="eh" d="M44 61.5 Q49 54.5 54 61.5" fill="none" stroke="#2E2A28" stroke-width="2.800" stroke-linecap="round"></path><path class="es" d="M44 61 L54 61" fill="none" stroke="#2E2A28" stroke-width="2.800" stroke-linecap="round"></path><circle class="eo" cx="88" cy="60" r="4.0" fill="#2E2A28"></circle><circle class="eo" cx="86.7" cy="58.6" r="1.4" fill="#FFFFFF"></circle><path class="eh" d="M83 61.5 Q88 54.5 93 61.5" fill="none" stroke="#2E2A28" stroke-width="2.800" stroke-linecap="round"></path><path class="es" d="M83 61 L93 61" fill="none" stroke="#2E2A28" stroke-width="2.800" stroke-linecap="round"></path><path class="ms" d="M63 66.500 Q70 62.500 77 66.500 Q70 74 63 66.500 Z" fill="#FFA94D"></path><g class="mo"><path d="M63 66 Q70 61.500 77 66 Q70 78 63 66 Z" fill="#FFA94D"></path><ellipse cx="70" cy="69.500" rx="3.200" ry="2.600" fill="#C2512E"></ellipse></g></g><path d="M49 86 Q65 95 81 86 L76 99 L65 93 L54 99 Z" fill="#8FD3B6"></path><g transform="translate(56 99)"><g class="armN"><g transform="rotate(-58)"><rect x="-1.500" y="20" width="3" height="22" rx="1.500" fill="#B9B6C9"></rect><ellipse cx="0" cy="44" rx="5.500" ry="7" fill="#D9D6E6"></ellipse><rect x="-7" y="-4" width="14" height="32" rx="7" fill="#FFFFFF"></rect><circle cx="0" cy="24" r="7" fill="#FFD24D"></circle></g></g></g></g></svg></span></div>
+<div style="position: absolute; left: 16px; right: 16px; top: 150px; height: 52px; box-sizing: border-box; padding: 4px; display: flex; gap: 4px; background: #FFFFFF; border-radius: 18px">
+<sc-for list="{{segs}}" as="seg" hint-placeholder-count="2"><button class="press mali" onClick="{{seg.pick}}" aria-pressed="{{seg.on}}" style="flex: 1 1 0; height: 44px; padding: 0; border: 0; border-radius: 14px; background: {{seg.bg}}; color: {{seg.fg}}; font-size: 16px; font-weight: 700; cursor: pointer">{{seg.label}}</button></sc-for>
+</div>
+<div style="position: absolute; left: 0; right: 0; top: 214px; bottom: 0; box-sizing: border-box; padding: 14px 0 0; display: flex; flex-direction: column; gap: 10px; background: #FFFFFF; border-radius: 28px 28px 0 0">
+<span style="padding: 0 20px; font-size: 14px; color: #6B6777">{{hint}}</span>
+<div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 2px 16px 104px">
+<sc-if value="{{isMenus}}" hint-placeholder-val="{{true}}">
+<sc-for list="{{menus}}" as="item" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 10px; min-height: 68px; box-sizing: border-box; padding: 8px 8px 8px 12px; border-radius: 20px; background: #F5F3FC">
+<span class="mali num" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 999px; background: {{item.badge}}; font-size: 17px; font-weight: 700">{{item.rank}}</span>
+<img src="{{item.img}}" alt="" width="52" height="52" style="flex: 0 0 auto; display: block">
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column">
+<span class="mali" style="font-size: 17px; font-weight: 700; line-height: 1.35">{{item.name}}</span>
+<span class="num" style="font-size: 14px; line-height: 1.45; color: #6B6777">{{item.meta}}</span>
+</span>
+<button class="press" onClick="{{item.like}}" aria-pressed="{{item.liked}}" aria-label="{{item.likeLabel}}" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 16px; background: #FFFFFF; cursor: pointer"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.500s-7.500-4.600-7.500-10.200A4.300 4.300 0 0 1 12 7.600a4.300 4.300 0 0 1 7.500 2.700c0 5.600-7.500 10.200-7.500 10.200z" fill="{{item.heartFill}}" stroke="{{item.heartStroke}}" stroke-width="2.2" stroke-linejoin="round"></path></svg></button>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{isChefs}}" hint-placeholder-val="{{false}}">
+<sc-for list="{{chefs}}" as="item" hint-placeholder-count="5">
+<div style="display: flex; align-items: center; gap: 10px; min-height: 68px; box-sizing: border-box; padding: 8px 8px 8px 12px; border-radius: 20px; padding-right: 14px; background: {{item.bg}}">
+<span class="mali num" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 999px; background: {{item.badge}}; font-size: 17px; font-weight: 700">{{item.rank}}</span>
+<span style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column">
+<span class="mali" style="font-size: 17px; font-weight: 700; line-height: 1.35">{{item.name}}</span>
+<span class="num" style="font-size: 14px; line-height: 1.45; color: #4F4A5C">{{item.meta}}</span>
+</span>
+<span class="mali num" style="flex: 0 0 auto; font-size: 16px; font-weight: 700">{{item.lv}}</span>
+</div>
+</sc-for>
+</sc-if>
+</div>
+</div>
+<sc-if value="{{solo}}" hint-placeholder-val="{{true}}"><a class="press btn mali" style="position: absolute; left: 12px; right: 12px; bottom: 16px; display: flex; align-items: center; justify-content: center; height: 56px; border-radius: 20px; background: #24212B; color: #FFFFFF; font-weight: 700; font-size: 18px" href="Cook.dc.html">ทำเมนูอันดับ 1 เลย</a></sc-if><sc-if value="{{inApp}}" hint-placeholder-val="{{false}}"><button class="press btn mali" style="border: 0; margin: 0; font: inherit; text-align: inherit; cursor: pointer; padding: 0; position: absolute; left: 12px; right: 12px; bottom: 16px; display: flex; align-items: center; justify-content: center; height: 56px; border-radius: 20px; background: #24212B; color: #FFFFFF; font-weight: 700; font-size: 18px" onClick="{{go.Cook}}">ทำเมนูอันดับ 1 เลย</button></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"app":{"editor":null},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tab: 'menus', liked: {} }; }
+  save() { const a = this.props.app; return (a && a.save) || { xp: 520, runs: [], pickN: 0 }; }
+  prof() {
+    const d = this.save(), runs = d.runs || [], into = d.xp % 200;
+    const of = (name) => runs.filter((r) => r.name === name);
+    return { runs, level: Math.floor(d.xp / 200) + 1, into, left: 200 - into, pct: Math.round(into / 2) + '%', cooked: 7 + runs.length,
+      count: (name) => of(name).length, best: (name) => of(name).reduce((m, r) => Math.max(m, r.score), 0), last: runs[runs.length - 1] || null };
+  }
+  renderVals() {
+    const v = this.pageVals(), app = this.props.app, inApp = !!(app && app.go), go = {};
+    ["Restaurant", "Recipes", "Cook", "Market", "Ranking", "Calories", "Me"].forEach((n) => { go[n] = inApp ? () => app.go(n) : null; });
+    return Object.assign(v, { inApp, solo: !inApp, go });
+  }
+  pageVals() {
+    const s = this.state;
+    const PIC = { 'กะเพราหมูสับไข่ดาว': '/_blob/6c2552b0403b97e680de31c0a2deaa28', 'ไข่เจียวหมูสับ': '/_blob/57d72c67af1ee4e1b933a4afefac4e80', 'ข้าวผัดไข่': '/_blob/a64862a8c02a9f44b151cc9981fc09f1', 'ผัดผักบุ้งไฟแดง': '/_blob/0be76187f19ed08abc65a51059154705', 'ต้มยำกุ้ง': '/_blob/841f9e64f4da943f588bffe8f5e331c1', 'แกงเขียวหวานไก่': '/_blob/56a522461fd3bec4f8eb3b88ebaecd86' };
+    const badge = (i) => ['#FFC93D', '#D5D2E0', '#FFB38A'][i] || '#FFFFFF', P = this.prof();
+    const menus = [
+      ['กะเพราหมูสับไข่ดาว', '4.8', '1,240'], ['ไข่เจียวหมูสับ', '4.7', '980'], ['ต้มยำกุ้ง', '4.6', '720'],
+      ['ข้าวผัดไข่', '4.5', '610'], ['แกงเขียวหวานไก่', '4.5', '430'], ['ผัดผักบุ้งไฟแดง', '4.3', '390'],
+    ].map(([name, star, made], i) => {
+      const liked = !!s.liked[name];
+      return {
+        rank: i + 1, name, img: PIC[name], badge: badge(i), meta: star + ' ดาว · ' + (P.best(name) ? 'คุณทำได้ ' + P.best(name).toFixed(1) : 'ทำแล้ว ' + made + ' ครั้ง'), liked,
+        heartFill: liked ? '#FF5C7A' : '#FFFFFF', heartStroke: liked ? '#C8324F' : '#6B6777',
+        likeLabel: (liked ? 'เลิกถูกใจ ' : 'ถูกใจ ') + name,
+        like: () => this.setState({ liked: Object.assign({}, s.liked, { [name]: !liked }) }),
+      };
+    });
+    const chefs = [
+      ['ครัวบ้านส้ม', 14, 96], ['แม่ครัวมือใหม่', 12, 81], ['หนุ่มหอพัก', 11, 77], ['คุณ', P.level, P.cooked], ['ครัวเล็กริมคลอง', 2, 5],
+    ].map(([name, lv, made], i) => ({
+      rank: i + 1, name, badge: badge(i), meta: 'ทำแล้ว ' + made + ' เมนู', lv: 'เลเวล ' + lv,
+      bg: name === 'คุณ' ? '#FFE66D' : '#F5F3FC',
+    }));
+    const defs = [['menus', 'เมนูฮิต'], ['chefs', 'เชฟเลเวลสูง']];
+    return {
+      isMenus: s.tab === 'menus', isChefs: s.tab === 'chefs', menus, chefs,
+      hint: s.tab === 'menus' ? 'แตะหัวใจเพื่อโหวตเมนูที่ชอบ' : 'ทำอาหารครบเมนูเพื่อเก็บเลเวล',
+      segs: defs.map(([id, label]) => ({ label, on: s.tab === id, bg: s.tab === id ? '#24212B' : '#FFFFFF', fg: s.tab === id ? '#FFFFFF' : '#24212B', pick: () => this.setState({ tab: id }) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

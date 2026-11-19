@@ -1,0 +1,21 @@
+.num{font-variant-numeric:tabular-nums}
+.bot.w-stir .armR{animation:stirArm .52s ease-in-out infinite}
+@keyframes stirArm{0%,100%{transform:rotate(-52deg)}50%{transform:rotate(-72deg)}}
+.bot.w-taste .armR{animation:none;transition:transform .5s ease-in-out;transform:rotate(-50deg)}
+.bot.w-taste.p-eat .armR{transform:rotate(-146deg)}
+.bot.w-taste.p-rest .armR{transform:rotate(-16deg)}
+.bot.w-point .armR{animation:pointArm 1.3s ease-in-out infinite}
+@keyframes pointArm{0%,100%{transform:rotate(-52deg)}50%{transform:rotate(-66deg)}}
+.bot.w-place .armR{animation:placeArm 1.6s ease-in-out infinite}
+.bot.w-place .armL{animation:placeArmL 1.6s ease-in-out infinite}
+@keyframes placeArm{0%,100%{transform:rotate(-24deg)}45%,60%{transform:rotate(-58deg)}}
+@keyframes placeArmL{0%,100%{transform:rotate(10deg)}45%,60%{transform:rotate(-6deg)}}
+@keyframes toss{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.toss{animation:toss .52s ease-in-out infinite}.toss.t2{animation-delay:.17s}.toss.t3{animation-delay:.34s}
+@keyframes wokshake{0%,100%{transform:translateX(0)}50%{transform:translateX(-2.500px)}}
+.wokpan{animation:wokshake .52s ease-in-out infinite}
+@keyframes dropin{0%{opacity:0;transform:translate(-10px,-12px) scale(.8)}15%{opacity:1}45%{opacity:1;transform:translate(8px,6px) scale(1)}60%,100%{opacity:0;transform:translate(8px,18px) scale(1)}}
+.dropin{animation:dropin 1.6s ease-in-out infinite}
+@keyframes needle{0%,100%{transform:rotate(-40deg)}50%{transform:rotate(50deg)}}
+.needle{transform-box:view-box;transform-origin:32px 16.500px;animation:needle 2.6s ease-in-out infinite}
+@keyframes popIn{from{opacity:0;transform:scale(.6)}}

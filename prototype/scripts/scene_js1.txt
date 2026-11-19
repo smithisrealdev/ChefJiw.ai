@@ -1,0 +1,7 @@
+    this.state = {{ beat: 0, cheer: {{}}, who: 'elephant', line: 0, n: 0 }};
+  }}
+  componentDidMount() {{
+    const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if ((this.props.motion ?? true) && !reduce) this.iv = setInterval(() => this.setState({{ beat: this.state.beat + 1 }}), 2600);
+  }}
+  componentWillUnmount() {{ clearInterval(this.iv); clearTimeout(this.tt); }}

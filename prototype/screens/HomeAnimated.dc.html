@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>หน้าแรก — ห้องครัวของทีมเชฟ</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@500;600;700&amp;family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#C2512E}a:hover{color:#8F3A20}
+button{font-family:inherit;color:inherit;-webkit-tap-highlight-color:transparent}
+.mali{font-family:'Mali','IBM Plex Sans Thai Looped',sans-serif}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.018,.978)}}
+.breathe{transform-origin:50% 100%;animation:breathe 2.8s ease-in-out infinite}
+@keyframes blink{0%,92%,100%{transform:scaleY(0)}94%{transform:scaleY(1)}96%{transform:scaleY(0)}}
+.lid{position:absolute;display:block;box-sizing:border-box;border-radius:50%;border-bottom:2px solid #4A3428;transform-origin:50% 0;transform:scaleY(0);animation:blink 4.4s linear infinite}
+@keyframes hopE{0%,78%,100%{transform:translateY(0) scale(1,1)}82%{transform:translateY(0) scale(1.05,.93)}87%{transform:translateY(-16px) scale(.97,1.04)}92%{transform:translateY(0) scale(1.06,.92)}96%{transform:translateY(0) scale(.99,1.01)}}
+@keyframes shadowE{0%,82%,92%,100%{transform:scale(1);opacity:1}87%{transform:scale(.7);opacity:.55}}
+.hopE{transform-origin:50% 100%;animation:hopE 6.5s ease-in-out 1.2s infinite}
+.shadowE{animation:shadowE 6.5s ease-in-out 1.2s infinite}
+@keyframes hopF{0%,74%,100%{transform:translateY(0) scale(1,1)}78%{transform:translateY(0) scale(1.08,.9)}84%{transform:translateY(-22px) scale(.95,1.06)}90%{transform:translateY(0) scale(1.1,.88)}95%{transform:translateY(0) scale(.98,1.02)}}
+@keyframes shadowF{0%,78%,90%,100%{transform:scale(1);opacity:1}84%{transform:scale(.6);opacity:.5}}
+.hopF{transform-origin:50% 100%;animation:hopF 4.4s ease-in-out .4s infinite}
+.shadowF{animation:shadowF 4.4s ease-in-out .4s infinite}
+@keyframes nomC{0%,70%,100%{transform:rotate(0)}74%{transform:rotate(-4deg)}78%{transform:rotate(4deg)}82%{transform:rotate(-3deg)}86%{transform:rotate(2deg)}90%{transform:rotate(0)}}
+.nomC{transform-origin:50% 100%;animation:nomC 5s ease-in-out 2s infinite}
+@keyframes swayK{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+.swayK{transform-origin:50% 100%;animation:swayK 4.6s ease-in-out infinite}
+@keyframes tapJumpA{0%{transform:none}30%{transform:translateY(-18px) scale(.97,1.05)}60%{transform:translateY(0) scale(1.06,.92)}100%{transform:none}}
+@keyframes tapJumpB{0%{transform:none}30%{transform:translateY(-18px) scale(.97,1.05)}60%{transform:translateY(0) scale(1.06,.92)}100%{transform:none}}
+.tapA{animation:tapJumpA .55s ease-out}
+.tapB{animation:tapJumpB .55s ease-out}
+@keyframes charIn{0%{opacity:0;transform:translateY(14px) scale(.8)}70%{opacity:1;transform:translateY(-3px) scale(1.03)}100%{opacity:1;transform:none}}
+.mascot{transition:transform .15s ease-out;animation:charIn .6s cubic-bezier(.2,.9,.3,1.3) backwards}
+.mascot:active{transform:scale(.95)}
+@keyframes walkF{0%,6%{transform:translateX(0)}44%,56%{transform:translateX(84px)}94%,100%{transform:translateX(0)}}
+@keyframes walkFFlip{0%,49.9%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}
+@keyframes walkC{0%,8%{transform:translateX(0)}42%,58%{transform:translateX(-44px)}92%,100%{transform:translateX(0)}}
+@keyframes walkCFlip{0%,49.9%{transform:scaleX(-1)}50%,100%{transform:scaleX(1)}}
+@keyframes walkE{0%,10%{transform:translateX(0)}40%,60%{transform:translateX(44px)}90%,100%{transform:translateX(0)}}
+@keyframes walkEFlip{0%,49.9%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}
+@keyframes walkK{0%,5%{transform:translateX(0)}45%,55%{transform:translateX(118px)}95%,100%{transform:translateX(0)}}
+@keyframes walkKFlip{0%,49.9%{transform:scaleX(1)}50%,100%{transform:scaleX(-1)}}
+.walkF{animation:walkF 11s ease-in-out 1s infinite}.walkFFlip{animation:walkFFlip 11s linear 1s infinite}
+.walkC{animation:walkC 15s ease-in-out 2s infinite}.walkCFlip{animation:walkCFlip 15s linear 2s infinite}
+.walkE{animation:walkE 13s ease-in-out 3s infinite}.walkEFlip{animation:walkEFlip 13s linear 3s infinite}
+.walkK{animation:walkK 19s ease-in-out .5s infinite}.walkKFlip{animation:walkKFlip 19s linear .5s infinite}
+@keyframes step{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-3px) rotate(1.5deg)}}
+.step{transform-origin:50% 100%;animation:step .5s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.bob{animation:bob 1.9s ease-in-out infinite}
+.badge{transition:transform .15s ease-out}
+.badge:active{transform:scale(.9)}
+@keyframes steam{0%{opacity:0;transform:translateY(6px) scale(.7,.8)}20%{opacity:.8}100%{opacity:0;transform:translateY(-48px) scale(1.5,1.3)}}
+.steam{position:absolute;display:block;width:12px;height:22px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.95),rgba(255,255,255,0));animation:steam 2.8s ease-out infinite;pointer-events:none}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.3) rotate(0deg)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
+.spark{position:absolute;display:block;animation:twinkle 2.6s ease-in-out infinite;pointer-events:none}
+@keyframes drift{0%{opacity:0;transform:translate(0,0)}20%{opacity:.9}80%{opacity:.7}100%{opacity:0;transform:translate(14px,-46px)}}
+.mote{position:absolute;display:block;width:4px;height:4px;border-radius:50%;background:#FFF3C4;box-shadow:0 0 6px rgba(255,236,160,.9);animation:drift 7s ease-in-out infinite;pointer-events:none}
+@keyframes beam{0%,100%{opacity:.25}50%{opacity:.6}}
+.beam{position:absolute;display:block;transform-origin:50% 0;background:linear-gradient(to bottom,rgba(255,244,200,0),rgba(255,240,190,.55) 30%,rgba(255,236,170,0));mix-blend-mode:screen;filter:blur(6px);animation:beam 5.5s ease-in-out infinite;pointer-events:none}
+@keyframes popIn0{0%{opacity:0;transform:translateY(8px) scale(.7)}60%{opacity:1;transform:translateY(0) scale(1.04)}100%{opacity:1;transform:none}}
+@keyframes popIn1{0%{opacity:0;transform:translateY(8px) scale(.7)}60%{opacity:1;transform:translateY(0) scale(1.04)}100%{opacity:1;transform:none}}
+@keyframes popIn2{0%{opacity:0;transform:translateY(8px) scale(.7)}60%{opacity:1;transform:translateY(0) scale(1.04)}100%{opacity:1;transform:none}}
+.pop0{transform-origin:28% 100%;animation:popIn0 .6s cubic-bezier(.2,.9,.3,1.25) .5s both}
+.pop1{transform-origin:28% 100%;animation:popIn1 .5s cubic-bezier(.2,.9,.3,1.25) both}
+.pop2{transform-origin:28% 100%;animation:popIn2 .5s cubic-bezier(.2,.9,.3,1.25) both}
+.btn3d{transition:transform .12s ease-out}
+.btn3d:active{transform:translateY(3px) scale(.98)}
+@keyframes dropIn{0%{opacity:0;transform:translateY(-14px)}100%{opacity:1;transform:none}}
+@keyframes riseIn{0%{opacity:0;transform:translateY(26px)}100%{opacity:1;transform:none}}
+.hud{animation:dropIn .5s ease-out .1s both}
+.dock{animation:riseIn .55s cubic-bezier(.2,.9,.3,1.2) .2s both}
+.dockItem{transition:transform .15s ease-out}
+.dockItem:active{transform:scale(.88)}
+.cookBtn{transition:transform .15s ease-out;animation:riseIn .6s cubic-bezier(.2,.9,.3,1.3) .3s backwards}
+.cookBtn:active{transform:scale(.92)}
+@keyframes pulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.45);opacity:0}}
+.pulse{position:absolute;inset:-4px;border-radius:50%;border:3px solid #E9805C;animation:pulse 2.2s ease-out infinite;pointer-events:none}
+@keyframes wiggle{0%,86%,100%{transform:rotate(0)}89%{transform:rotate(-10deg)}92%{transform:rotate(9deg)}95%{transform:rotate(-5deg)}}
+.potIcon{transform-origin:50% 70%;animation:wiggle 3.2s ease-in-out infinite}
+@keyframes sheetUp{0%{transform:translateY(100%)}100%{transform:translateY(0)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{animation:sheetUp .5s cubic-bezier(.2,.9,.25,1.08) both}
+.scrim{animation:fade .25s ease-out both}
+@keyframes ring{from{stroke-dashoffset:251.3}}
+.ring{animation:ring 1.1s cubic-bezier(.3,.8,.3,1) .25s both}
+@keyframes grow{from{transform:scaleX(0)}}
+.bar{transform-origin:0 50%;animation:grow .9s cubic-bezier(.3,.8,.3,1) .3s both}
+@keyframes rowIn{from{opacity:0;transform:translateY(10px)}}
+.row{animation:rowIn .4s ease-out both}
+.still *,.still *::before,.still *::after{animation:none !important}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;animation-delay:0s !important;transition-duration:.001ms !important}}
+</style>
+</helmet>
+<div class="{{motionClass}}" style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #6B4A36; font-family: 'IBM Plex Sans Thai Looped', sans-serif; color: #4A3428">
+
+<img src="/_blob/cb16e629ff039d92b913042e1bcac80c" alt="ครัวกลางสวนในเรือนกระจก พื้นไม้ ต้นไม้ใบใหญ่" style="position: absolute; left: -86px; top: 0; width: 563px; height: 844px; display: block">
+
+<span class="beam" style="left: 30px; top: -20px; width: 70px; height: 520px; transform: rotate(-24deg)"></span>
+<span class="beam" style="left: 120px; top: -20px; width: 40px; height: 460px; transform: rotate(-22deg); animation-delay: 1.8s"></span>
+
+<span class="mote" style="left: 214px; top: 520px; animation-delay: 0s"></span>
+<span class="mote" style="left: 246px; top: 430px; animation-delay: 1.4s; animation-duration: 8.5s"></span>
+<span class="mote" style="left: 188px; top: 360px; animation-delay: 2.6s"></span>
+<span class="mote" style="left: 272px; top: 330px; animation-delay: 3.9s; animation-duration: 9s"></span>
+<span class="mote" style="left: 230px; top: 610px; animation-delay: 5.1s"></span>
+<span class="mote" style="left: 296px; top: 400px; animation-delay: .8s; animation-duration: 10s"></span>
+<span class="mote" style="left: 168px; top: 600px; animation-delay: 4.4s; animation-duration: 8s"></span>
+<span class="mote" style="left: 258px; top: 560px; animation-delay: 6.2s"></span>
+
+<span class="steam" style="left: 362px; top: 322px; animation-delay: 0s"></span>
+<span class="steam" style="left: 372px; top: 318px; animation-delay: .9s"></span>
+
+<div class="walkF" style="position: absolute; left: 221px; top: 394px; width: 59px; height: 76px; z-index: 5">
+<button class="badge" aria-label="แคลอรี่วันนี้" onClick="{{openCalorie}}" style="position: absolute; left: 50%; top: -46px; width: 44px; height: 44px; margin: 0 0 0 -22px; padding: 0; border: 0; background: transparent; cursor: pointer; z-index: 2"><span class="bob" style="display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 36px; height: 36px; margin: 4px; border-radius: 50%; background: #E2F5E5; border: 2px solid #9ED3A9; box-shadow: 0 3px 0 rgba(60,40,25,.3); animation-delay: .5s"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-8 5-13 15-14-.5 9.5-6 15-14 14z" fill="#8FD19E" stroke="#2F6B3A" stroke-width="1.8" stroke-linejoin="round"></path><path d="M6 18c3-4 6-6.5 9.5-8.5" fill="none" stroke="#2F6B3A" stroke-width="1.6" stroke-linecap="round"></path></svg></span></button>
+<button class="mascot" aria-label="โค้ชกบ — ดูแคลอรี่วันนี้" onClick="{{openCalorie}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; margin: 0; border: 0; background: transparent; cursor: pointer; animation-delay: .55s">
+<span class="walkFFlip" style="position: absolute; inset: 0; display: block"><span class="step" style="position: absolute; inset: 0; display: block">
+<span class="shadowF" style="position: absolute; left: 14%; right: 14%; bottom: -4px; height: 9px; border-radius: 50%; background: rgba(40,25,15,.3); filter: blur(2px); display: block"></span>
+<span class="hopF" style="position: absolute; inset: 0; display: block">
+<span class="breathe" style="position: absolute; inset: 0; display: block; animation-duration: 2.2s">
+<img src="/_blob/8d835b9032e8a7c484da38d3abc87496" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block">
+<span class="lid" style="left: 15.95%; top: 9.93%; width: 11.39%; height: 9.4%; background: #cdda72; animation-duration: 5.2s; animation-delay: 1.3s"></span>
+<span class="lid" style="left: 58.57%; top: 17.1%; width: 11.89%; height: 9.81%; background: #ccd971; animation-duration: 5.2s; animation-delay: 1.3s"></span>
+</span>
+</span>
+</span></span>
+</button>
+</div>
+
+<div class="walkC" style="position: absolute; left: 260px; top: 435px; width: 80px; height: 140px; z-index: 6">
+<button class="badge" aria-label="เมนูยอดฮิตสัปดาห์นี้" onClick="{{openRanking}}" style="position: absolute; left: 50%; top: -46px; width: 44px; height: 44px; margin: 0 0 0 -22px; padding: 0; border: 0; background: transparent; cursor: pointer; z-index: 2"><span class="bob" style="display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 36px; height: 36px; margin: 4px; border-radius: 50%; background: #FFE6EA; border: 2px solid #F2B3C0; box-shadow: 0 3px 0 rgba(60,40,25,.3); animation-delay: 1s"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.5l-5.2 2.7 1-5.8L3.6 9.3l5.8-.8z" fill="#FFC94D" stroke="#B9822A" stroke-width="1.4" stroke-linejoin="round"></path></svg></span></button>
+<button class="mascot" aria-label="นักชิมแมว — ดูเมนูยอดฮิต" onClick="{{openRanking}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; margin: 0; border: 0; background: transparent; cursor: pointer; animation-delay: .45s">
+<span class="walkCFlip" style="position: absolute; inset: 0; display: block"><span class="step" style="position: absolute; inset: 0; display: block">
+<span style="position: absolute; left: 12%; right: 12%; bottom: -5px; height: 11px; border-radius: 50%; background: rgba(40,25,15,.3); filter: blur(2px); display: block"></span>
+<span class="nomC" style="position: absolute; inset: 0; display: block">
+<span class="breathe" style="position: absolute; inset: 0; display: block; animation-duration: 2.4s">
+<img src="/_blob/badc31b72ebea76e0ca6502ebeca1bc8" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block">
+<span class="lid" style="left: 18.42%; top: 34.82%; width: 10.56%; height: 6.97%; background: #c1926c; animation-duration: 3.7s; animation-delay: .6s"></span>
+<span class="lid" style="left: 56.72%; top: 38.04%; width: 10.56%; height: 7.31%; background: #c0926c; animation-duration: 3.7s; animation-delay: .6s"></span>
+</span>
+</span>
+</span></span>
+</button>
+</div>
+
+<div class="walkE" style="position: absolute; left: 28px; top: 399px; width: 134px; height: 186px; z-index: 7">
+<button class="mascot" aria-label="เชฟช้าง — แนะนำเมนูวันนี้" onClick="{{tapElephant}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; margin: 0; border: 0; background: transparent; cursor: pointer; animation-delay: .25s">
+<span class="walkEFlip" style="position: absolute; inset: 0; display: block"><span class="step" style="position: absolute; inset: 0; display: block">
+<span class="{{tapClass}}" style="position: absolute; inset: 0; display: block; transform-origin: 50% 100%">
+<span class="shadowE" style="position: absolute; left: 14%; right: 14%; bottom: -5px; height: 13px; border-radius: 50%; background: rgba(40,25,15,.3); filter: blur(2px); display: block"></span>
+<span class="hopE" style="position: absolute; inset: 0; display: block">
+<span class="breathe" style="position: absolute; inset: 0; display: block">
+<img src="/_blob/52e94df06ddfa72fcbb235826c4ef0f2" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block">
+<span class="lid" style="left: 41.65%; top: 46.5%; width: 7.66%; height: 6.65%; background: #afc1ee; animation-duration: 4.4s; animation-delay: 2.1s"></span>
+<span class="lid" style="left: 71.1%; top: 42.24%; width: 6.98%; height: 6.39%; background: #afc1ed; animation-duration: 4.4s; animation-delay: 2.1s"></span>
+</span>
+</span>
+</span>
+</span></span>
+</button>
+</div>
+
+<div class="walkK" style="position: absolute; left: 136px; top: 534px; width: 109px; height: 166px; z-index: 8">
+<button class="badge" aria-label="ราคาตลาดวันนี้" onClick="{{openMarket}}" style="position: absolute; left: 50%; top: -46px; width: 44px; height: 44px; margin: 0 0 0 -22px; padding: 0; border: 0; background: transparent; cursor: pointer; z-index: 2"><span class="bob mali" style="display: flex; align-items: center; justify-content: center; box-sizing: border-box; width: 36px; height: 36px; margin: 4px; border-radius: 50%; background: #FFF4D6; border: 2px solid #E7C985; box-shadow: 0 3px 0 rgba(60,40,25,.3); font-weight: 700; font-size: 17px; color: #8A5A12">฿</span></button>
+<button class="mascot" aria-label="คาปิบาระ — ดูราคาตลาดวันนี้" onClick="{{openMarket}}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 0; margin: 0; border: 0; background: transparent; cursor: pointer; animation-delay: .35s">
+<span class="walkKFlip" style="position: absolute; inset: 0; display: block"><span class="step" style="position: absolute; inset: 0; display: block">
+<span style="position: absolute; left: 12%; right: 12%; bottom: -5px; height: 12px; border-radius: 50%; background: rgba(40,25,15,.3); filter: blur(2px); display: block"></span>
+<span class="swayK" style="position: absolute; inset: 0; display: block">
+<span class="breathe" style="position: absolute; inset: 0; display: block; animation-duration: 3.4s">
+<img src="/_blob/027b19d7519c0fdd8dfae330a9178d92" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block">
+</span>
+</span>
+</span></span>
+</button>
+</div>
+
+<svg class="spark" style="left: 205px; top: 300px; animation-delay: .3s" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.8 5.6 4.9 9.7 10.5 10.5-5.6.8-9.7 4.9-10.5 10.5C11.2 16.9 7.1 12.8 1.5 12 7.1 11.2 11.2 7.1 12 1.5z" fill="#FFFFFF"></path></svg>
+<svg class="spark" style="left: 262px; top: 196px; animation-delay: 1.2s" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.8 5.6 4.9 9.7 10.5 10.5-5.6.8-9.7 4.9-10.5 10.5C11.2 16.9 7.1 12.8 1.5 12 7.1 11.2 11.2 7.1 12 1.5z" fill="#FFFFFF"></path></svg>
+<svg class="spark" style="left: 176px; top: 452px; animation-delay: 2s" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.8 5.6 4.9 9.7 10.5 10.5-5.6.8-9.7 4.9-10.5 10.5C11.2 16.9 7.1 12.8 1.5 12 7.1 11.2 11.2 7.1 12 1.5z" fill="#FFFFFF"></path></svg>
+<svg class="spark" style="left: 358px; top: 470px; animation-delay: .8s" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.8 5.6 4.9 9.7 10.5 10.5-5.6.8-9.7 4.9-10.5 10.5C11.2 16.9 7.1 12.8 1.5 12 7.1 11.2 11.2 7.1 12 1.5z" fill="#FFFFFF"></path></svg>
+<svg class="spark" style="left: 118px; top: 652px; animation-delay: 1.6s" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.8 5.6 4.9 9.7 10.5 10.5-5.6.8-9.7 4.9-10.5 10.5C11.2 16.9 7.1 12.8 1.5 12 7.1 11.2 11.2 7.1 12 1.5z" fill="#FFFFFF"></path></svg>
+<svg class="spark" style="left: 306px; top: 636px; animation-delay: 2.4s" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.5c.8 5.6 4.9 9.7 10.5 10.5-5.6.8-9.7 4.9-10.5 10.5C11.2 16.9 7.1 12.8 1.5 12 7.1 11.2 11.2 7.1 12 1.5z" fill="#FFFFFF"></path></svg>
+
+<div class="bubble {{popClass}}" style="position: absolute; left: 12px; top: 196px; width: 232px; box-sizing: border-box; padding: 12px 14px 14px; background: #FFFFFF; border: 2px solid #F0DFC4; border-radius: 24px; box-shadow: 0 4px 0 rgba(122,92,72,.18), 0 12px 24px rgba(74,52,40,.14); z-index: 15">
+<div style="display: flex; align-items: center; gap: 6px">
+<span class="mali" style="display: inline-flex; align-items: center; padding: 2px 10px; border-radius: 999px; background: #5B6BD6; color: #FFFFFF; font-weight: 700; font-size: 12px">เชฟช้าง</span>
+<span style="font-size: 12px; color: #7A5C48">เมนูแนะนำวันนี้</span>
+</div>
+<p class="mali" style="margin: 6px 0 0; font-weight: 700; font-size: 16px; line-height: 1.45; color: #4A3428">วันนี้ทำ <span style="color: #C2512E">{{dish.name}}</span> กันไหม?</p>
+<div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; font-size: 12px; font-weight: 500; color: #7A5C48">
+<span style="display: inline-flex; align-items: center; gap: 3px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A5C48" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"></circle><path d="M12 7v5l3.5 2"></path></svg>{{dish.time}}</span>
+<span style="display: inline-flex; align-items: center; gap: 3px"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" fill="#F7A35C" stroke="#D9622F" stroke-width="1.6" stroke-linejoin="round"></path></svg>{{dish.kcal}}</span>
+<span style="display: inline-flex; align-items: center; gap: 3px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A5C48" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"></path><circle cx="7.5" cy="7.5" r="1.2" fill="#7A5C48"></circle></svg>{{dish.price}}</span>
+</div>
+<div style="display: flex; gap: 8px; margin-top: 10px">
+<button class="btn3d mali" onClick="{{openCook}}" style="flex: 1 1 0; height: 44px; border: 0; border-radius: 16px; background: #C2512E; color: #FFFFFF; font-weight: 700; font-size: 15px; box-shadow: 0 4px 0 #8F3A20; cursor: pointer">ทำเลย!</button>
+<button class="btn3d mali" onClick="{{nextDish}}" style="flex: 1 1 0; height: 44px; box-sizing: border-box; border: 2px solid #EAD6B8; border-radius: 16px; background: #FFF6E6; color: #4A3428; font-weight: 700; font-size: 15px; box-shadow: 0 4px 0 #E2C9A6; cursor: pointer">เมนูอื่น</button>
+</div>
+<svg width="26" height="16" viewBox="0 0 26 16" aria-hidden="true" style="position: absolute; left: 56px; bottom: -14px; display: block"><path d="M1 0 L25 0 L11.5 13.5 Q9.6 15.6 8.9 13 Z" fill="#FFFFFF"></path><path d="M2.5 1.5 L9.2 12.8 Q9.9 15.2 11.6 13.3 L23.5 1.5" fill="none" stroke="#F0DFC4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+
+<div class="hud" style="position: absolute; top: 50px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; z-index: 20">
+<div style="display: flex; align-items: center; gap: 8px; padding: 4px 14px 4px 4px; background: #FFFDF8; border: 2px solid #F0DFC4; border-radius: 999px; box-shadow: 0 3px 0 rgba(122,92,72,.22)">
+<svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#FFE9A8"></circle><circle cx="20" cy="20" r="17" fill="none" stroke="#F1E4D0" stroke-width="4"></circle><circle cx="20" cy="20" r="17" fill="none" stroke="#F2994A" stroke-width="4" stroke-linecap="round" stroke-dasharray="106.8" stroke-dashoffset="37.4" transform="rotate(-90 20 20)"></circle><path d="M14 22.5h12v3.2a1 1 0 0 1-1 1H15a1 1 0 0 1-1-1z" fill="#FFFFFF" stroke="#4A3428" stroke-width="1.4" stroke-linejoin="round"></path><path d="M14.3 22.5c-2.2-.6-3.3-2.4-3-4.3.4-2.2 2.6-3.6 4.7-3 .6-2 2.2-3.3 4-3.3s3.4 1.3 4 3.3c2.1-.6 4.3.8 4.7 3 .3 1.9-.8 3.7-3 4.3" fill="#FFFFFF" stroke="#4A3428" stroke-width="1.4" stroke-linejoin="round"></path></svg>
+<div style="display: flex; flex-direction: column; line-height: 1.2">
+<span class="mali" style="font-weight: 700; font-size: 15px">เลเวล 3</span>
+<span style="font-size: 12px; color: #7A5C48">เชฟฝึกหัด</span>
+</div>
+</div>
+<div style="display: flex; gap: 8px">
+<div style="display: flex; align-items: center; gap: 4px; height: 40px; box-sizing: border-box; padding: 0 12px 0 9px; background: #FFFDF8; border: 2px solid #F0DFC4; border-radius: 999px; box-shadow: 0 3px 0 rgba(122,92,72,.22)">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" fill="#F7A35C" stroke="#D9622F" stroke-width="1.6" stroke-linejoin="round"></path></svg>
+<span class="mali" style="font-weight: 700; font-size: 16px">7</span>
+<span style="font-size: 12px; color: #7A5C48">วัน</span>
+</div>
+<div style="display: flex; align-items: center; gap: 4px; height: 40px; box-sizing: border-box; padding: 0 12px 0 9px; background: #FFFDF8; border: 2px solid #F0DFC4; border-radius: 999px; box-shadow: 0 3px 0 rgba(122,92,72,.22)">
+<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.5l-5.2 2.7 1-5.8L3.6 9.3l5.8-.8z" fill="#FFC94D" stroke="#B9822A" stroke-width="1.4" stroke-linejoin="round"></path></svg>
+<span class="mali" style="font-weight: 700; font-size: 16px">1,240</span>
+</div>
+</div>
+</div>
+
+<nav class="dock" aria-label="เมนูหลัก" style="position: absolute; left: 12px; right: 12px; bottom: 14px; height: 76px; box-sizing: border-box; padding: 0 8px; display: flex; align-items: center; justify-content: space-between; background: #FFFDF8; border: 2px solid #F0DFC4; border-radius: 30px; box-shadow: 0 4px 0 rgba(122,92,72,.2), 0 12px 28px rgba(74,52,40,.18); z-index: 30">
+<button class="dockItem" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 64px; height: 64px; padding: 0; border: 0; background: transparent; cursor: pointer">
+<span style="display: flex; align-items: center; justify-content: center; width: 46px; height: 32px; border-radius: 14px; background: #FFE9A8"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10.6 12 3.6l8.5 7V19.5a1.5 1.5 0 0 1-1.5 1.5h-4.2v-5.6H9.2V21H5a1.5 1.5 0 0 1-1.5-1.5z" fill="#FFD25E" stroke="#4A3428" stroke-width="1.8" stroke-linejoin="round"></path></svg></span>
+<span style="font-size: 12px; font-weight: 700; color: #4A3428">บ้าน</span>
+</button>
+<button class="dockItem" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 64px; height: 64px; padding: 0; border: 0; background: transparent; cursor: pointer">
+<span style="display: flex; align-items: center; justify-content: center; width: 46px; height: 32px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 5.5A1.5 1.5 0 0 1 5 4h5.2A1.8 1.8 0 0 1 12 5.8V20a2 2 0 0 0-2-1.6H5a1.5 1.5 0 0 1-1.5-1.5z" fill="#BFE8C8" stroke="#4A3428" stroke-width="1.8" stroke-linejoin="round"></path><path d="M20.5 5.5A1.5 1.5 0 0 0 19 4h-5.2A1.8 1.8 0 0 0 12 5.8V20a2 2 0 0 1 2-1.6h5a1.5 1.5 0 0 0 1.5-1.5z" fill="#BFE8C8" stroke="#4A3428" stroke-width="1.8" stroke-linejoin="round"></path></svg></span>
+<span style="font-size: 12px; font-weight: 600; color: #7A5C48">สูตรอาหาร</span>
+</button>
+<div style="width: 72px; height: 100%; box-sizing: border-box; padding-bottom: 9px; display: flex; align-items: flex-end; justify-content: center">
+<span style="font-size: 12px; font-weight: 700; color: #C2512E">ทำอาหาร</span>
+</div>
+<button class="dockItem" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 64px; height: 64px; padding: 0; border: 0; background: transparent; cursor: pointer">
+<span style="display: flex; align-items: center; justify-content: center; width: 46px; height: 32px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" fill="#FFC2CE" stroke="#4A3428" stroke-width="1.8" stroke-linejoin="round"></path></svg></span>
+<span style="font-size: 12px; font-weight: 600; color: #7A5C48">ชุมชน</span>
+</button>
+<button class="dockItem" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: 64px; height: 64px; padding: 0; border: 0; background: transparent; cursor: pointer">
+<span style="display: flex; align-items: center; justify-content: center; width: 46px; height: 32px"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.6" r="4" fill="#D6DCFF" stroke="#4A3428" stroke-width="1.8"></circle><path d="M4.5 20.5a7.5 7.5 0 0 1 15 0z" fill="#D6DCFF" stroke="#4A3428" stroke-width="1.8" stroke-linejoin="round"></path></svg></span>
+<span style="font-size: 12px; font-weight: 600; color: #7A5C48">ฉัน</span>
+</button>
+</nav>
+
+<button class="cookBtn" aria-label="ทำอาหาร" onClick="{{openCook}}" style="position: absolute; left: 159px; top: 716px; width: 72px; height: 72px; box-sizing: border-box; border-radius: 50%; border: 4px solid #FFFDF8; background: #C2512E; box-shadow: 0 5px 0 #8F3A20, 0 12px 24px rgba(74,52,40,.25); display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; z-index: 31">
+<span class="pulse"></span>
+<svg class="potIcon" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"></path><path d="M19.5 12v6.5a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2V12"></path><path d="M9.5 9.5V8.6a2.5 2.5 0 0 1 5 0v.9"></path><path d="M8 5.5c0-1 .8-1.2.8-2.2M12 5.5c0-1 .8-1.2.8-2.2M16 5.5c0-1 .8-1.2.8-2.2"></path></svg>
+</button>
+
+<sc-if value="{{anySheet}}" hint-placeholder-val="{{ false }}">
+<button class="scrim" aria-label="ปิดหน้าต่าง" onClick="{{closeSheet}}" style="position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; margin: 0; border: 0; background: rgba(60,35,20,.35); cursor: pointer; z-index: 39"></button>
+</sc-if>
+
+<sc-if value="{{isMarket}}" hint-placeholder-val="{{ false }}">
+<section class="sheet" aria-label="ราคาตลาดวันนี้" style="position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; padding: 12px 20px 28px; display: flex; flex-direction: column; gap: 12px; background: #FFF8EC; border-top: 2px solid #F0DFC4; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 30px rgba(74,52,40,.18); z-index: 40">
+<div style="width: 44px; height: 5px; border-radius: 3px; background: #E6D2B5; align-self: center"></div>
+<div style="display: flex; align-items: center; gap: 12px">
+<img src="/_blob/027b19d7519c0fdd8dfae330a9178d92" alt="" style="height: 64px; width: auto; display: block">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px">
+<h2 class="mali" style="margin: 0; font-weight: 700; font-size: 20px; color: #4A3428">ราคาตลาดวันนี้</h2>
+<p style="margin: 0; font-size: 13px; color: #7A5C48">คาปิบาระไปเดินตลาดมาให้แล้ว</p>
+</div>
+<button aria-label="ปิด" onClick="{{closeSheet}}" style="flex: 0 0 auto; width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%; border: 2px solid #EAD6B8; background: #FFFFFF; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A3428" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{marketRows}}" as="row" hint-placeholder-count="4">
+<div class="row" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #FFFFFF; border: 2px solid #F3E6D2; border-radius: 16px; animation-delay: {{row.delay}}">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column">
+<span style="font-weight: 600; font-size: 15px; color: #4A3428">{{row.name}}</span>
+<span style="font-size: 12px; color: #7A5C48">{{row.unit}}</span>
+</div>
+<span class="mali" style="font-weight: 700; font-size: 18px; color: #4A3428">{{row.price}}</span>
+<span style="padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: {{row.bg}}; color: {{row.fg}}">{{row.change}}</span>
+</div>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 12px; color: #7A5C48">ข้อมูลตัวอย่าง · แอปจริงจะอัปเดตจากแหล่งราคาทางการทุกวัน</p>
+</section>
+</sc-if>
+
+<sc-if value="{{isCalorie}}" hint-placeholder-val="{{ false }}">
+<section class="sheet" aria-label="แคลอรี่วันนี้" style="position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; padding: 12px 20px 28px; display: flex; flex-direction: column; gap: 14px; background: #FFF8EC; border-top: 2px solid #F0DFC4; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 30px rgba(74,52,40,.18); z-index: 40">
+<div style="width: 44px; height: 5px; border-radius: 3px; background: #E6D2B5; align-self: center"></div>
+<div style="display: flex; align-items: center; gap: 12px">
+<img src="/_blob/8d835b9032e8a7c484da38d3abc87496" alt="" style="height: 60px; width: auto; display: block">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px">
+<h2 class="mali" style="margin: 0; font-weight: 700; font-size: 20px; color: #4A3428">แคลอรี่วันนี้</h2>
+<p style="margin: 0; font-size: 13px; color: #7A5C48">โค้ชกบช่วยนับให้ทุกมื้อ</p>
+</div>
+<button aria-label="ปิด" onClick="{{closeSheet}}" style="flex: 0 0 auto; width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%; border: 2px solid #EAD6B8; background: #FFFFFF; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A3428" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div style="display: flex; align-items: center; gap: 16px">
+<div style="position: relative; width: 108px; height: 108px; flex: 0 0 auto">
+<svg width="108" height="108" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="#F1E4D0" stroke-width="10"></circle><circle class="ring" cx="50" cy="50" r="40" fill="none" stroke="#7CC48A" stroke-width="10" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="122.5" transform="rotate(-90 50 50)"></circle></svg>
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center">
+<span class="mali" style="font-weight: 700; font-size: 24px; line-height: 1.1">820</span>
+<span style="font-size: 12px; color: #7A5C48">/ 1,600 แคล</span>
+</div>
+</div>
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{macros}}" as="m" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<div style="display: flex; justify-content: space-between; gap: 8px; font-size: 13px"><span style="font-weight: 600">{{m.name}}</span><span style="color: #7A5C48">{{m.text}}</span></div>
+<div style="height: 10px; border-radius: 6px; background: #F1E4D0; overflow: hidden"><div class="bar" style="height: 100%; border-radius: 6px; width: {{m.pct}}; background: {{m.color}}"></div></div>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #E9F6EC; border-radius: 16px">
+<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19c0-8 5-13 15-14-.5 9.5-6 15-14 14z" fill="#8FD19E" stroke="#2F6B3A" stroke-width="1.8" stroke-linejoin="round"></path><path d="M6 18c3-4 6-6.5 9.5-8.5" fill="none" stroke="#2F6B3A" stroke-width="1.6" stroke-linecap="round"></path></svg>
+<p style="margin: 0; font-size: 13px; color: #2F5E37">เหลืออีก 780 แคล พอสำหรับมื้อเย็นสบายๆ เลย!</p>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{isRanking}}" hint-placeholder-val="{{ false }}">
+<section class="sheet" aria-label="เมนูยอดฮิตสัปดาห์นี้" style="position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; padding: 12px 20px 28px; display: flex; flex-direction: column; gap: 12px; background: #FFF8EC; border-top: 2px solid #F0DFC4; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 30px rgba(74,52,40,.18); z-index: 40">
+<div style="width: 44px; height: 5px; border-radius: 3px; background: #E6D2B5; align-self: center"></div>
+<div style="display: flex; align-items: center; gap: 12px">
+<img src="/_blob/badc31b72ebea76e0ca6502ebeca1bc8" alt="" style="height: 66px; width: auto; display: block">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px">
+<h2 class="mali" style="margin: 0; font-weight: 700; font-size: 20px; color: #4A3428">เมนูยอดฮิตสัปดาห์นี้</h2>
+<p style="margin: 0; font-size: 13px; color: #7A5C48">นักชิมแมวชิมมาแล้ว อร่อยจริง!</p>
+</div>
+<button aria-label="ปิด" onClick="{{closeSheet}}" style="flex: 0 0 auto; width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%; border: 2px solid #EAD6B8; background: #FFFFFF; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A3428" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{rankRows}}" as="r" hint-placeholder-count="3">
+<div class="row" style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: #FFFFFF; border: 2px solid #F3E6D2; border-radius: 16px; animation-delay: {{r.delay}}">
+<span class="mali" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; font-weight: 700; font-size: 16px; background: {{r.medal}}; color: {{r.medalFg}}">{{r.rank}}</span>
+<div style="flex: 1 1 auto; display: flex; flex-direction: column">
+<span style="font-weight: 600; font-size: 15px; color: #4A3428">{{r.name}}</span>
+<span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #7A5C48"><svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.2l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.5l-5.2 2.7 1-5.8L3.6 9.3l5.8-.8z" fill="#FFC94D" stroke="#B9822A" stroke-width="1.4" stroke-linejoin="round"></path></svg>{{r.meta}}</span>
+</div>
+</div>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 12px; color: #7A5C48">ข้อมูลตัวอย่าง · อันดับจริงคิดจากคะแนนและจำนวนคนที่ทำตาม</p>
+</section>
+</sc-if>
+
+<sc-if value="{{isCook}}" hint-placeholder-val="{{ false }}">
+<section class="sheet" aria-label="เตรียมทำอาหาร" style="position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; padding: 12px 20px 28px; display: flex; flex-direction: column; gap: 12px; background: #FFF8EC; border-top: 2px solid #F0DFC4; border-radius: 28px 28px 0 0; box-shadow: 0 -10px 30px rgba(74,52,40,.18); z-index: 40">
+<div style="width: 44px; height: 5px; border-radius: 3px; background: #E6D2B5; align-self: center"></div>
+<div style="display: flex; align-items: center; gap: 12px">
+<img src="/_blob/52e94df06ddfa72fcbb235826c4ef0f2" alt="" style="height: 66px; width: auto; display: block">
+<div style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 2px">
+<h2 class="mali" style="margin: 0; font-weight: 700; font-size: 20px; color: #4A3428">{{dish.name}}</h2>
+<p style="margin: 0; font-size: 13px; color: #7A5C48">เชฟช้างพาทำทีละขั้น · สำหรับ 2 ที่</p>
+</div>
+<button aria-label="ปิด" onClick="{{closeSheet}}" style="flex: 0 0 auto; width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%; border: 2px solid #EAD6B8; background: #FFFFFF; display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4A3428" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<span style="padding: 6px 12px; border-radius: 999px; background: #FFEFD2; font-size: 13px; font-weight: 600; color: #4A3428">{{dish.time}}</span>
+<span style="padding: 6px 12px; border-radius: 999px; background: #FFE3D6; font-size: 13px; font-weight: 600; color: #4A3428">{{dish.kcal}} ต่อที่</span>
+<span style="padding: 6px 12px; border-radius: 999px; background: #E3F2E1; font-size: 13px; font-weight: 600; color: #4A3428">ค่าวัตถุดิบ {{dish.price}}</span>
+</div>
+<h3 class="mali" style="margin: 2px 0 0; font-weight: 700; font-size: 16px; color: #4A3428">วัตถุดิบ</h3>
+<div style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{dish.ingredients}}" as="ing" hint-placeholder-count="6">
+<span class="row" style="padding: 6px 12px; border-radius: 999px; background: #FFFFFF; border: 2px solid #F3E6D2; font-size: 13px; color: #4A3428; animation-delay: {{ing.delay}}">{{ing.label}}</span>
+</sc-for>
+</div>
+<button class="btn3d mali" style="height: 52px; margin-top: 4px; border: 0; border-radius: 18px; background: #C2512E; color: #FFFFFF; font-weight: 700; font-size: 17px; box-shadow: 0 5px 0 #8F3A20; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer">เริ่มทำทีละขั้น<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+</section>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"motion":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { sheet: null, dish: 0, pop: 0, tap: 0 };
+  }
+  renderVals() {
+    const s = this.state;
+    const delay = (i) => (0.12 + i * 0.07).toFixed(2) + 's';
+    const withDelay = (list) => list.map((x, i) => Object.assign({}, x, { delay: delay(i) }));
+    const dishes = [
+      { name: 'แกงเขียวหวานไก่', time: '35 นาที', kcal: '420 แคล', price: '฿85',
+        ingredients: withDelay([{ label: 'อกไก่ 300 ก.' }, { label: 'พริกแกงเขียวหวาน 2 ช้อนโต๊ะ' }, { label: 'กะทิ 400 มล.' }, { label: 'มะเขือเปราะ 4 ลูก' }, { label: 'ใบโหระพา 1 กำ' }, { label: 'น้ำปลา 1 ช้อนโต๊ะ' }]) },
+      { name: 'กะเพราหมูสับไข่ดาว', time: '15 นาที', kcal: '580 แคล', price: '฿55',
+        ingredients: withDelay([{ label: 'หมูสับ 200 ก.' }, { label: 'ใบกะเพรา 1 กำ' }, { label: 'กระเทียม 5 กลีบ' }, { label: 'พริกขี้หนู 5 เม็ด' }, { label: 'ไข่ไก่ 2 ฟอง' }, { label: 'ซีอิ๊วขาว 1 ช้อนโต๊ะ' }]) },
+      { name: 'ต้มยำกุ้งน้ำใส', time: '25 นาที', kcal: '190 แคล', price: '฿120',
+        ingredients: withDelay([{ label: 'กุ้ง 300 ก.' }, { label: 'ข่า 5 แว่น' }, { label: 'ตะไคร้ 2 ต้น' }, { label: 'ใบมะกรูด 5 ใบ' }, { label: 'เห็ดฟาง 150 ก.' }, { label: 'มะนาว 2 ลูก' }]) },
+    ];
+    const open = (k) => () => this.setState({ sheet: k });
+    const motion = this.props.motion ?? true;
+    return {
+      dish: dishes[s.dish % dishes.length],
+      popClass: s.pop === 0 ? 'pop0' : (s.pop % 2 ? 'pop1' : 'pop2'),
+      tapClass: s.tap === 0 ? '' : (s.tap % 2 ? 'tapA' : 'tapB'),
+      motionClass: motion ? '' : 'still',
+      anySheet: !!s.sheet,
+      isMarket: s.sheet === 'market',
+      isCalorie: s.sheet === 'calorie',
+      isRanking: s.sheet === 'ranking',
+      isCook: s.sheet === 'cook',
+      openMarket: open('market'),
+      openCalorie: open('calorie'),
+      openRanking: open('ranking'),
+      openCook: open('cook'),
+      closeSheet: () => this.setState({ sheet: null }),
+      nextDish: () => this.setState({ dish: s.dish + 1, pop: s.pop + 1 }),
+      tapElephant: () => this.setState({ tap: s.tap + 1, pop: s.pop + 1 }),
+      marketRows: withDelay([
+        { name: 'ไข่ไก่', unit: 'แผง 30 ฟอง', price: '฿135', change: 'ถูกลง ฿3', bg: '#DDF3E3', fg: '#2F6B3A' },
+        { name: 'ผักบุ้ง', unit: 'ต่อกำ', price: '฿15', change: 'ถูกลง ฿2', bg: '#DDF3E3', fg: '#2F6B3A' },
+        { name: 'อกไก่', unit: 'ต่อกิโลกรัม', price: '฿89', change: 'แพงขึ้น ฿4', bg: '#FDE3DA', fg: '#A3401F' },
+        { name: 'พริกขี้หนู', unit: 'ต่อ 100 กรัม', price: '฿12', change: 'เท่าเดิม', bg: '#F1E9DC', fg: '#6E5747' },
+      ]),
+      rankRows: withDelay([
+        { rank: '1', name: 'กะเพราหมูสับไข่ดาว', meta: '4.9 · ทำตาม 2.1k ครั้ง', medal: '#FFD45C', medalFg: '#6B4A00' },
+        { rank: '2', name: 'ต้มยำกุ้งน้ำข้น', meta: '4.8 · ทำตาม 1.6k ครั้ง', medal: '#DCE2EC', medalFg: '#3E4A5C' },
+        { rank: '3', name: 'ไข่เจียวหมูสับ', meta: '4.8 · ทำตาม 1.4k ครั้ง', medal: '#F3C09A', medalFg: '#6A3A16' },
+      ]),
+      macros: [
+        { name: 'โปรตีน', text: '48 / 90 ก.', pct: '53%', color: '#7CC48A' },
+        { name: 'คาร์โบไฮเดรต', text: '110 / 200 ก.', pct: '55%', color: '#F2B45A' },
+        { name: 'ไขมัน', text: '26 / 55 ก.', pct: '47%', color: '#EE8C7C' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

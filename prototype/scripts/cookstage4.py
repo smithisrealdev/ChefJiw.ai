@@ -1,0 +1,160 @@
+# One continuous kitchen: the camera zooms into the same scene and the user taps the real objects in it.
+import re
+import cookstage2 as c2
+from kitchen import BASE,OV,svgwrap,bottle,fl,INK
+from chefrig import chef as chefsvg, POSE_CSS
+from bots import svg as botsvg
+# take the loose props out of the static base so they can be picked up
+B=BASE
+for cut in [bottle(114,'#8A5540','#E8505B'),bottle(134,'#4A3530','#6DCB7A'),bottle(154,'#C98B5A','#F07B5E'),
+  '<path d="M174 166 H196 C196 174 192 178 185 178 C178 178 174 174 174 166 Z" fill="#FF9DBD"></path><path d="M176 166 C178 158 192 158 194 166 Z" fill="#FFFFFF"></path>',
+  '<rect x="216" y="136" width="8" height="16" rx="4" fill="#8A5540"></rect><rect x="211" y="158" width="18" height="28" rx="3" fill="#F3F1FA"></rect>',
+  '<rect x="242" y="136" width="8" height="16" rx="4" fill="#8A5540"></rect><path d="M240 158 H252 V190 C246 184 241 172 240 158 Z" fill="#F3F1FA"></path>',
+  '<rect x="266" y="140" width="7" height="12" rx="3.500" fill="#8A5540"></rect><path d="M265 158 H274 V176 C269 172 266 166 265 158 Z" fill="#F3F1FA"></path>']:
+    assert cut in B, cut[:40]; B=B.replace(cut,'')
+O=dict(OV)
+O.update({
+ 'fridge': '<rect x="0" y="170" width="12" height="146" rx="5" fill="#6CC7A8"></rect><rect x="12" y="172" width="84" height="142" rx="8" fill="#FFFDF2"></rect><rect x="12" y="172" width="84" height="6" rx="3" fill="#FFF3B8"></rect><rect x="12" y="208" width="84" height="4" fill="#CFEDE2"></rect><rect x="12" y="254" width="84" height="4" fill="#CFEDE2"></rect>'
+   '<rect x="20" y="276" width="12" height="34" rx="5" fill="#7CCBFF"></rect><rect x="36" y="284" width="12" height="26" rx="5" fill="#FFD84D"></rect><ellipse cx="74" cy="304" rx="14" ry="7" fill="#FF9DBD"></ellipse>',
+ 'rkCleaver': '<rect x="216" y="136" width="8" height="16" rx="4" fill="#8A5540"></rect><rect x="211" y="158" width="18" height="28" rx="3" fill="#F3F1FA"></rect>',
+ 'rkChef': '<rect x="242" y="136" width="8" height="16" rx="4" fill="#8A5540"></rect><path d="M240 158 H252 V190 C246 184 241 172 240 158 Z" fill="#F3F1FA"></path>',
+ 'rkParing': '<rect x="266" y="140" width="7" height="12" rx="3.500" fill="#8A5540"></rect><path d="M265 158 H274 V176 C269 172 266 166 265 158 Z" fill="#F3F1FA"></path>',
+ 'bOyster': bottle(108,'#8A5540','#E8505B'), 'bSoy': bottle(126.5,'#4A3530','#6DCB7A'), 'bFish': bottle(145,'#C98B5A','#F07B5E'), 'bOil': bottle(163.5,'#FFD95A','#6DCB7A'),
+ 'bSugar': '<path d="M182 166 H200 C200 174 197 178 191 178 C185 178 182 174 182 166 Z" fill="#FF9DBD"></path><path d="M184 166 C185 159 197 159 198 166 Z" fill="#FFFFFF"></path>',
+ 'boardLean': '<rect x="262" y="198" width="10" height="36" rx="5" fill="#F6CF9C" transform="rotate(8 267 216)"></rect><rect x="264" y="200" width="4" height="32" rx="2" fill="#FBDDB4" transform="rotate(8 267 216)"></rect>',
+ 'colander': '<path d="M138 222 H170 C170 232 164 237 154 237 C144 237 138 232 138 222 Z" fill="#FFFFFF"></path><ellipse cx="148" cy="220" rx="6" ry="4" fill="#4CA35C" transform="rotate(-20 148 220)"></ellipse><ellipse cx="158" cy="219" rx="6" ry="4" fill="#62BD6E" transform="rotate(15 158 219)"></ellipse><ellipse cx="153" cy="216" rx="5" ry="3.500" fill="#4CA35C"></ellipse>',
+ 'water': '<rect class="flow" x="149.500" y="202" width="5" height="18" rx="2.500" fill="#7CCBFF"></rect>',
+ 'h0': '<rect x="339" y="253" width="2.500" height="7" rx="1.200" fill="#FFFFFF"></rect>',
+ 'h1': '<rect x="339" y="253" width="2.500" height="7" rx="1.200" fill="#FFD84D" transform="rotate(60 340 260)"></rect>',
+ 'h2': '<rect x="339" y="253" width="2.500" height="7" rx="1.200" fill="#FF8A4C" transform="rotate(130 340 260)"></rect>',
+ 'pm': '<rect x="310" y="259" width="8" height="2.400" rx="1.200" fill="#FFFFFF"></rect><rect x="362" y="259" width="8" height="2.400" rx="1.200" fill="#FFFFFF"></rect><rect x="364.800" y="256.200" width="2.400" height="8" rx="1.200" fill="#FFFFFF"></rect>',
+ 'wOil': '<path d="M312 199 Q339 205 366 199 Q339 212 312 199 Z" fill="#FFE58A"></path>',
+ 'wEgg': '<ellipse cx="339" cy="196" rx="22" ry="6" fill="#FFFFFF"></ellipse><circle cx="339" cy="193" r="6" fill="#FFC93D"></circle>',
+ 'wAroma': '<rect x="318" y="196" width="5" height="3" rx="1.500" fill="#FFFDF4"></rect><rect x="330" y="195" width="6" height="2.500" rx="1.200" fill="#F0584A"></rect><rect x="346" y="196" width="5" height="3" rx="1.500" fill="#FFFDF4"></rect><rect x="356" y="195" width="6" height="2.500" rx="1.200" fill="#F0584A"></rect>',
+ 'wPork': '<path d="M312 198 Q339 182 366 198 Z" fill="{{porkColor}}"></path>',
+ 'bowl': '<path d="M228 208 H262 C262 219 256 225 245 225 C234 225 228 219 228 208 Z" fill="#FFFFFF"></path><rect x="226" y="206" width="38" height="3.500" rx="1.750" fill="#E4E0F2"></rect>',
+ 'bowlMix': '<ellipse cx="245" cy="209.500" rx="15" ry="3" fill="{{mixColor}}"></ellipse>',
+ 'wOm': '<ellipse cx="339" cy="195.500" rx="24" ry="6.500" fill="{{omColor}}"></ellipse><ellipse cx="330" cy="194" rx="3" ry="1.500" fill="#E9A07A"></ellipse><ellipse cx="348" cy="196.500" rx="3" ry="1.500" fill="#E9A07A"></ellipse>',
+ 'omRest': '<ellipse cx="266" cy="231" rx="16" ry="4" fill="#E4E0F2"></ellipse><ellipse cx="266" cy="227.500" rx="12" ry="4.500" fill="#F2B84B"></ellipse>',
+ 'wBasil': '<ellipse cx="326" cy="192" rx="6" ry="3" fill="#4CA35C" transform="rotate(-15 326 192)"></ellipse><ellipse cx="340" cy="188" rx="6" ry="3" fill="#62BD6E"></ellipse><ellipse cx="353" cy="192" rx="6" ry="3" fill="#4CA35C" transform="rotate(15 353 192)"></ellipse>',
+})
+def ov(k,pop=False): return '<sc-if value="{{sc.%s}}" hint-placeholder-val="{{false}}">%s</sc-if>'%(k,svgwrap(O[k],' class="pop"' if pop else ''))
+ORDER=['fridge','rkCleaver','rkChef','rkParing','bOyster','bSoy','bFish','bOil','bSugar','boardLean','board','knife','bits','colander','water','low','high','pm','h0','h1','h2','bowl','bowlMix','wOil','wAroma','wPork','wBasil','wEgg','wOm','eggplate','omRest']
+POP={'fridge','board','knife','eggplate','colander','bowl','omRest'}
+CSS5='''.world{position:absolute;left:0;top:0;width:390px;height:470px;transform-origin:0 0;transition:transform .42s cubic-bezier(.3,.7,.2,1)}
+.hot{position:absolute;display:block;padding:0;border:0;background:transparent;border-radius:6px;cursor:pointer;z-index:6}
+.hot img{display:block;width:100%;height:100%}
+@keyframes bobA{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+.bobs{animation:bobA 1.1s ease-in-out infinite}
+@keyframes spatA{0%,100%{transform:rotate(0)}35%{transform:rotate(-28deg)}70%{transform:rotate(18deg)}}
+@keyframes spatB{0%,100%{transform:rotate(0)}35%{transform:rotate(-28deg)}70%{transform:rotate(18deg)}}
+.spat0{animation:spatA .36s ease-in-out}
+@keyframes nopeA{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+@keyframes nopeB{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+.nope0{animation:nopeA .22s ease-in-out 2}.nope1{animation:nopeB .22s ease-in-out 2}.spat1{animation:spatB .36s ease-in-out}
+.cup{position:absolute;left:146px;top:220px;width:12px;height:14px;border-radius:2px 2px 4px 4px;background:#FFFFFF}
+'''
+WORLD='''<div style="position: absolute; left: 0; top: 116px; width: 390px; height: 470px; overflow: hidden; background: #CFCBFF">
+<div class="world" style="transform: {{cam}}">
+@@BASE@@
+@@OVS@@
+<sc-if value="{{sc.cup}}" hint-placeholder-val="{{false}}"><span class="cup" style="box-shadow: inset 0 -{{cupFill}}px 0 #7CCBFF"></span></sc-if>
+<sc-for list="{{bits}}" as="b" hint-placeholder-count="0"><span class="pop" style="position: absolute; left: {{b.x}}px; top: {{b.y}}px; width: {{b.w}}px; height: {{b.h}}px; border-radius: 999px; background: {{b.c}}"></span></sc-for>
+<sc-if value="{{sc.dish}}" hint-placeholder-val="{{false}}"><img class="pop" src="{{dishImg}}" alt="{{dishAlt}}" width="52" height="52" style="position: absolute; left: 236px; top: 186px; display: block"></sc-if>
+<sc-if value="{{sc.spat}}" hint-placeholder-val="{{false}}"><div class="{{spatCls}}" style="position: absolute; left: 344px; top: 160px; width: 14px; height: 40px; transform-origin: 50% 90%"><svg width="14" height="40" viewBox="0 0 14 40" aria-hidden="true" style="display: block"><rect x="5.500" y="14" width="3" height="24" rx="1.500" fill="#C98B5A" transform="rotate(180 7 26)"></rect><rect x="2" y="26" width="10" height="13" rx="3" fill="#8A8698"></rect></svg></div></sc-if>
+<sc-if value="{{sc.fume}}" hint-placeholder-val="{{false}}"><span class="fume" style="left: 326px; top: 168px; width: 6px; height: 9px"></span><span class="fume" style="left: 340px; top: 162px; width: 6px; height: 9px; animation-delay: .6s"></span><span class="fume" style="left: 352px; top: 168px; width: 6px; height: 9px; animation-delay: 1.1s"></span></sc-if>
+<sc-for list="{{spots}}" as="sp" hint-placeholder-count="6"><button class="{{sp.cls}}" onClick="{{sp.tap}}" disabled="{{sp.off}}" aria-label="{{sp.aria}}" style="left: {{sp.x}}px; top: {{sp.y}}px; width: {{sp.w}}px; height: {{sp.h}}px; box-shadow: {{sp.ring}}"><sc-if value="{{sp.target}}" hint-placeholder-val="{{false}}"><span class="tag">แตะที่นี่</span></sc-if></button></sc-for>
+<div class="{{chefCls}}" style="position: absolute; left: 0; top: 292px; width: 96px; height: 139px; transform: translate({{chefX}}px, {{chefY}}px); transition: transform .7s ease-in-out; z-index: 5; pointer-events: none"><span class="shadow"></span><span class="rig" style="display: block; transform: scaleX({{chefFace}})"><span class="hopper" style="display: block">@@CHEF@@</span></span></div>
+<sc-for list="{{hots}}" as="o" hint-placeholder-count="0"><button class="{{o.cls}}" onClick="{{o.tap}}" disabled="{{o.disabled}}" aria-label="{{o.aria}}" style="left: {{o.x}}px; top: {{o.y}}px; width: {{o.w}}px; height: {{o.h}}px; box-shadow: {{o.ring}}; opacity: {{o.op}}"><sc-if value="{{o.hasImg}}" hint-placeholder-val="{{false}}"><img src="{{o.img}}" alt=""></sc-if></button></sc-for>
+</div>
+<sc-if value="{{timing}}" hint-placeholder-val="{{false}}"><span class="mali num" style="position: absolute; right: 12px; top: 12px; padding: 4px 12px; border-radius: 999px; background: {{timerBg}}; color: #FFFFFF; font-size: 15px; font-weight: 700">{{timeText}}</span></sc-if>
+<sc-if value="{{showHeat}}" hint-placeholder-val="{{false}}"><span class="mali" style="position: absolute; left: 12px; top: 12px; padding: 4px 12px; border-radius: 999px; background: #FFF8EC; font-size: 15px; font-weight: 700">{{heatText}}</span></sc-if>
+</div>
+'''
+PANELROW='''<sc-if value="{{showWalk}}" hint-placeholder-val="{{true}}">
+<button class="press" onClick="{{walk.tap}}" disabled="{{walk.disabled}}" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; gap: 12px; height: 92px; padding: 0 16px; border: 0; border-radius: 22px; background: #FFFFFF; box-shadow: 0 0 0 3px #3B2A22; color: #3B2A22; cursor: pointer">
+<img src="{{walk.img}}" alt="" width="52" height="52" style="display: block">
+<span style="display: flex; flex-direction: column; align-items: flex-start"><span class="mali" style="font-size: 18px; font-weight: 700">{{walk.label}}</span><span style="font-size: 14px; font-weight: 600; color: #4F4A5C">หรือแตะจุดที่กะพริบในครัว</span></span>
+</button>
+</sc-if>
+<sc-if value="{{showSee}}" hint-placeholder-val="{{false}}">
+<p style="flex: 0 0 auto; margin: 0; display: flex; align-items: flex-start; gap: 8px; padding: 6px 10px; border-radius: 14px; background: #FFF3B0; font-size: 14px; font-weight: 600; line-height: 1.4"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#24212B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: 0 0 auto; margin-top: 1px"><path d="M2 12s3.600-6.500 10-6.500S22 12 22 12s-3.600 6.500-10 6.500S2 12 2 12z"></path><circle cx="12" cy="12" r="2.800"></circle></svg><span><span style="font-weight: 700">สังเกต</span> {{see}}</span></p>
+</sc-if>
+<sc-if value="{{showStir}}" hint-placeholder-val="{{false}}">
+<div style="flex: 0 0 auto; display: flex; gap: 6px">
+<div class="mali num" style="flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 62px; box-sizing: border-box; padding: 0 8px; border-radius: 16px; background: #FFE66D; font-size: 15px; font-weight: 700; line-height: 1.3; text-align: center">{{stirText}}</div>
+<button class="press mali" onClick="{{stirDone}}" style="flex: 1 1 0; min-height: 62px; padding: 0 8px; border: 0; border-radius: 16px; background: #24212B; color: #FFFFFF; font-size: 16px; font-weight: 700; cursor: pointer">ได้ที่แล้ว ไปต่อ</button>
+</div>
+</sc-if>
+<sc-if value="{{showTodo}}" hint-placeholder-val="{{false}}">
+<div style="flex: 0 0 auto; display: flex; gap: 6px">
+<sc-for list="{{todo}}" as="a" hint-placeholder-count="3"><div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 62px; padding: 5px 2px; box-sizing: border-box; border-radius: 16px; background: {{a.bg}}; opacity: {{a.op}}"><img src="{{a.img}}" alt="" width="30" height="30" style="display: block"><span class="num" style="font-size: 13px; font-weight: 700; line-height: 1.2; text-align: center; white-space: nowrap">{{a.text}}</span></div></sc-for>
+</div>
+</sc-if>
+'''
+SKIPBTN='<button class="press mali" onClick="{{skip}}" style="min-width: 60px; height: 44px; padding: 0 14px; border: 0; border-radius: 999px; background: #FFF8EC; color: #3B2A22; font-size: 15px; font-weight: 700; cursor: pointer">ข้าม</button>'
+FOOT='''<sc-if value="{{showFoot}}" hint-placeholder-val="{{true}}">
+<div style="flex: 0 0 auto; display: flex; justify-content: space-between; gap: 8px">
+<button class="press" onClick="{{back}}" disabled="{{noBack}}" style="height: 44px; padding: 0 10px; border: 0; background: transparent; color: #4F4A5C; font-size: 14px; font-weight: 700; text-decoration: underline; opacity: {{backOp}}; cursor: pointer">ย้อนงานก่อนหน้า</button>
+<button class="press" onClick="{{skip}}" style="height: 44px; padding: 0 10px; border: 0; background: transparent; color: #4F4A5C; font-size: 14px; font-weight: 700; text-decoration: underline; cursor: pointer">ข้ามงานนี้</button>
+</div>
+</sc-if>
+'''
+ASK='''<sc-if value="{{asking}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; inset: 0; z-index: 950; display: flex; align-items: flex-end; background: rgba(36,33,43,.55)">
+<div class="screen" role="dialog" aria-modal="true" aria-label="ออกจากครัว" style="width: 100%; box-sizing: border-box; padding: 22px 16px 24px; display: flex; flex-direction: column; gap: 12px; background: #FFF8EC; border-radius: 28px 28px 0 0">
+<h2 class="mali" style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.3">ออกจากครัวก่อนไหม?</h2>
+<p style="margin: 0 0 4px; font-size: 16px; line-height: 1.5">เชฟช้างจะจำไว้ว่าทำถึงไหน กลับมาทำต่อได้</p>
+<button class="press mali" onClick="{{stay}}" style="height: 56px; padding: 0; border: 0; border-radius: 20px; background: #C2512E; color: #FFFFFF; font-size: 18px; font-weight: 700; cursor: pointer">ทำต่อเลย</button>
+<button class="press mali" onClick="{{leave}}" style="height: 56px; padding: 0; border: 0; border-radius: 20px; background: #FFFFFF; color: #3B2A22; font-size: 17px; font-weight: 700; cursor: pointer">ออกไปหน้าวัตถุดิบ</button>
+</div>
+</div>
+</sc-if>
+'''
+LESSON=open('./lesson_markup.txt',encoding='utf-8').read()
+ASKBTN='<button class="press mali" onClick="{{openAsk}}" aria-label="ถามเชฟช้าง" style="display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 12px; border: 0; border-radius: 999px; background: #FFF8EC; color: #3B2A22; font-size: 15px; font-weight: 700; cursor: pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B2A22" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.500h16v10.500H10l-4.500 3.500V16H4z"></path></svg>ถามเชฟ</button>'
+ASK2='''<sc-if value="{{askOpen}}" hint-placeholder-val="{{false}}">
+<div style="position: absolute; inset: 0; z-index: 940; display: flex; align-items: flex-end; background: rgba(36,33,43,.35)">
+<div class="screen" role="dialog" aria-modal="true" aria-label="ถามเชฟช้าง" style="width: 100%; max-height: 640px; overflow-y: auto; box-sizing: border-box; padding: 18px 16px 20px; display: flex; flex-direction: column; gap: 10px; background: #FFF8EC; border-radius: 28px 28px 0 0">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 10px">
+<div style="display: flex; flex-direction: column"><h2 class="mali" style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.3">ถามเชฟช้าง</h2><span class="num" style="font-size: 14px; line-height: 1.4; color: #4F4A5C">{{quotaText}}</span></div>
+<button class="press mali" onClick="{{closeAsk}}" style="flex: 0 0 auto; height: 44px; padding: 0 16px; border: 0; border-radius: 999px; background: #F5F3FC; color: #24212B; font-size: 15px; font-weight: 700; cursor: pointer">กลับไปทำต่อ</button>
+</div>
+<span style="font-size: 14px; font-weight: 700; color: #4F4A5C">คำถามที่คนมักถามตอนทำขั้นนี้</span>
+<sc-for list="{{askQs}}" as="o" hint-placeholder-count="3"><button class="press" onClick="{{o.pick}}" aria-pressed="{{o.on}}" style="min-height: 48px; padding: 8px 14px; border: 0; border-radius: 16px; background: {{o.bg}}; color: {{o.fg}}; font-family: inherit; font-size: 16px; font-weight: 600; line-height: 1.4; text-align: left; cursor: pointer">{{o.q}}</button></sc-for>
+<sc-if value="{{hasAnswer}}" hint-placeholder-val="{{false}}"><div class="screen" aria-live="polite" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; border-radius: 18px; background: #FFF3B0"><span class="mali" style="font-size: 14px; font-weight: 700">เชฟช้างตอบ</span><p style="margin: 0; font-size: 16px; line-height: 1.55">{{answer}}</p></div></sc-if>
+<sc-if value="{{noQuota}}" hint-placeholder-val="{{false}}"><div class="screen" aria-live="polite" style="padding: 12px 14px; display: flex; flex-direction: column; gap: 2px; border-radius: 18px; background: #F5F3FC"><span class="mali" style="font-size: 15px; font-weight: 700">คำถามฟรีของวันนี้หมดแล้ว</span><p style="margin: 0; font-size: 15px; line-height: 1.5">พรุ่งนี้ถามฟรีได้ใหม่ 3 คำถาม สมาชิกถามได้ไม่จำกัด [ราคาสมาชิก]</p></div></sc-if>
+<div style="display: flex; align-items: center; gap: 10px; min-height: 52px; box-sizing: border-box; padding: 6px 8px 6px 14px; border-radius: 18px; background: #F5F3FC">
+<span style="flex: 1 1 auto; font-size: 15px; line-height: 1.4; color: #4F4A5C">พูดหรือพิมพ์ถามเอง จะมีในแอปจริง ต้นแบบนี้ตอบได้เฉพาะคำถามด้านบน</span>
+<span aria-hidden="true" style="flex: 0 0 auto; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; background: #E4E0F2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6B6777" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3.500" width="6" height="11" rx="3"></rect><path d="M5.500 11.500a6.500 6.500 0 0 0 13 0M12 18v3"></path></svg></span>
+</div>
+</div>
+</div>
+</sc-if>
+'''
+def build_block():
+    b=c2.BLOCK
+    a=b.index('<div style="position: absolute; left: 0; top: 116px; width: 390px; height: 470px; overflow: hidden">'); e=b.index('<div style="position: absolute; left: 12px; right: 12px; top: 594px')
+    b=b[:a]+WORLD+b[e:]
+    a=b.index('<div style="flex: 0 0 auto; display: flex; gap: 6px">\n<sc-for list="{{btns}}"'); e=b.index('</sc-for>\n</div>',a)+len('</sc-for>\n</div>')
+    b=b[:a]+PANELROW+FOOT+b[e:]
+    for x,y in [(SKIPBTN,ASKBTN),('top: 594px; height: 234px; box-sizing: border-box; padding: 12px 12px 12px; display: flex; flex-direction: column; gap: 8px;','top: 568px; height: 268px; box-sizing: border-box; padding: 10px 12px 6px; display: flex; flex-direction: column; gap: 6px;'),('aria-label="ออกจากครัว กลับไปดูวัตถุดิบ"','aria-label="ออกจากครัว"')]:
+        assert b.count(x)==1,x[:40]; b=b.replace(x,y)
+    t0='<div style="flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 0 6px">'
+    a=b.index(t0); e=b.index('</div>',a)+len('</div>')
+    b=b[:a]+'<sc-if value="{{showTask}}" hint-placeholder-val="{{true}}">\n'+b[a:e]+'\n</sc-if>\n'+LESSON+b[e:]
+    e=b.rindex('</div>\n</sc-if>')
+    return b[:e]+ASK+ASK2+b[e:]
+JS=open('./cookstage5.js',encoding='utf-8').read()
+def splice(html,mascot,CLOSEIC):
+    img=re.search(r"const IMG = (\{[^}]*\});",html).group(1)
+    a=html.index('<sc-if value="{{isCook}}"'); b=html.index('<sc-if value="{{isDone}}"')
+    blk=c2.ENTER+build_block()
+    ovs='\n'.join(ov(k,k in POP) for k in ORDER)
+    for k,v in {'@@CLOSE@@':CLOSEIC,'@@BASE@@':svgwrap(B),'@@OVS@@':ovs,'@@CHEF@@':chefsvg(),'@@FROG@@':botsvg('frog'),'@@CAT@@':botsvg('cat'),'@@CAPY@@':botsvg('capybara')}.items(): blk=blk.replace(k,v)
+    assert '@@' not in blk
+    html=html[:a]+blk+html[b:]
+    a=html.index('class Component extends DCLogic'); b=html.index('</script>',a)
+    html=html[:a]+JS.replace('__IMG__',img).replace('__X__',c2.XJS)+html[b:]
+    walk='.bot.back.walking .armL{animation:swingA .56s ease-in-out infinite}.bot.back.walking .armR{animation:swingB .56s ease-in-out infinite}\n'
+    return html.replace('.screen{animation',c2.CSS3+POSE_CSS+walk+CSS5+'.screen{animation',1)

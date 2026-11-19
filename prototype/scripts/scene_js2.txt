@@ -1,0 +1,25 @@
+    const out = {{}};
+    const B = '/_blob/', beat = s.beat;
+    // every mascot stays at its own station and loops through a small piece of work
+    const post = {{
+      elephant: {{ x: 276, y: 138, s: 1, z: 40, face: -1, work: 'w-stir', off: 0, moods: ['calm', 'sing', 'calm', 'calm'] }},
+      frog: {{ x: 24, y: 336, s: 0.92, z: 577, face: 1, work: 'w-point', off: 1, moods: ['wow', 'calm', 'calm', 'calm'] }},
+      cat: {{ x: 268, y: 352, s: 1.1, z: 588, face: -1, work: 'w-taste', off: 2, moods: ['calm', 'wow', 'love', 'calm'] }},
+      capybara: {{ x: 104, y: 478, s: 1.2, z: 717, face: 1, work: 'w-place', off: 3, moods: ['calm', 'calm', 'sing', 'calm'] }},
+    }};
+    Object.keys(post).forEach((k) => {{
+      const p = post[k], ph = (beat + p.off) % 4;
+      const mood = s.cheer[k] === beat ? 'happy' : p.moods[ph];
+      const pose = k === 'cat' ? (ph === 1 ? ' p-eat' : ph === 2 ? ' p-rest' : '') : '';
+      out[k] = {{
+        x: p.x, y: p.y, dur: 0, z: p.z, s: p.s, face: p.face,
+        cls: 'bot ' + p.work + pose + ' mood-' + mood,
+        tap: () => this.setState({{ who: k, line: s.who === k ? s.line + 1 : 0, n: s.n + 1, cheer: Object.assign({{}}, s.cheer, {{ [k]: beat }}) }}),
+      }};
+    }});
+    const weigh = [['c6263c9b14efb6319b8350ce20511359', 'ไข่ 1 ฟอง · ราว 80 แคล'], ['86fdb695be776bfd7914cdfa1c29ed25', 'หมูสับ 120 ก. · ราว 300 แคล'], ['5658e513ce137923d2aca173599a06ac', 'ข้าว 1 จาน · ราว 260 แคล']][Math.floor((beat + 1) / 4) % 3];
+    out.frog.img = B + weigh[0]; out.frog.read = weigh[1];
+    const taste = [['6c2552b0403b97e680de31c0a2deaa28', '4.8'], ['841f9e64f4da943f588bffe8f5e331c1', '4.6'], ['57d72c67af1ee4e1b933a4afefac4e80', '4.7']][Math.floor((beat + 2) / 4) % 3];
+    out.cat.dish = B + taste[0]; out.cat.score = taste[1]; out.cat.scored = (beat + 2) % 4 >= 2;
+    const stock = [['78d54072a7ea0047ddab68f6e27714f4', 'ผักบุ้ง กำละ ฿15'], ['88051bbf2bf5bf095b12be008a28cda8', 'พริกขี้หนู ขีดละ ฿12'], ['c6263c9b14efb6319b8350ce20511359', 'ไข่ไก่ แผงละ ฿135']][Math.floor(beat / 4) % 3];
+    out.capybara.img = B + stock[0]; out.capybara.tag = stock[1];

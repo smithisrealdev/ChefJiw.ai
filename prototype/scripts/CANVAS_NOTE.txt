@@ -1,0 +1,2 @@
+canvas.json here is STALE: the user removed the TasterOptions board on the canvas. Re-read the live index before changing it.
+The user also removed from the canvas: App, CatChef, ChefDuo, ElephantChef, Ingredients, Main, Mascot, MascotOptions, SceneDone (and TasterOptions earlier). Do not republish them unasked. build.sh still writes App.dc.html locally; leave it out of publishes unless the user wants the full-app board back.

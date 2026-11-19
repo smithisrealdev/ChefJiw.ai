@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<title>แอปทำอาหาร เล่นต่อเนื่องทุกหน้า</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@500;600;700&amp;family=IBM+Plex+Sans+Thai+Looped:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #FFFFFF; font-family: 'IBM Plex Sans Thai Looped', sans-serif; color: #24212B">
+<sc-if value="{{seen.Restaurant}}" hint-placeholder-val="{{true}}"><div style="position: absolute; inset: 0; display: {{show.Restaurant}}"><dc-import name="Restaurant" app="{{app}}" hint-size="390px,844px"></dc-import></div></sc-if>
+<sc-if value="{{seen.Recipes}}" hint-placeholder-val="{{false}}"><div style="position: absolute; inset: 0; display: {{show.Recipes}}"><dc-import name="Recipes" app="{{app}}" hint-size="390px,844px"></dc-import></div></sc-if>
+<sc-if value="{{seen.Cook}}" hint-placeholder-val="{{false}}"><div style="position: absolute; inset: 0; display: {{show.Cook}}"><dc-import name="Cook" app="{{app}}" hint-size="390px,844px"></dc-import></div></sc-if>
+<sc-if value="{{seen.Market}}" hint-placeholder-val="{{false}}"><div style="position: absolute; inset: 0; display: {{show.Market}}"><dc-import name="Market" app="{{app}}" hint-size="390px,844px"></dc-import></div></sc-if>
+<sc-if value="{{seen.Ranking}}" hint-placeholder-val="{{false}}"><div style="position: absolute; inset: 0; display: {{show.Ranking}}"><dc-import name="Ranking" app="{{app}}" hint-size="390px,844px"></dc-import></div></sc-if>
+<sc-if value="{{seen.Calories}}" hint-placeholder-val="{{false}}"><div style="position: absolute; inset: 0; display: {{show.Calories}}"><dc-import name="Calories" app="{{app}}" hint-size="390px,844px"></dc-import></div></sc-if>
+<sc-if value="{{seen.Me}}" hint-placeholder-val="{{false}}"><div style="position: absolute; inset: 0; display: {{show.Me}}"><dc-import name="Me" app="{{app}}" hint-size="390px,844px"></dc-import></div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    // one shared record for the whole app: points, dishes cooked in this session, and the recipe picked to cook next
+    this.state = { screen: 'Restaurant', seen: { Restaurant: true }, save: { xp: 520, runs: [], pick: 'kaprao', pickN: 0 } };
+  }
+  open(n, save) {
+    const s = this.state;
+    this.setState({ screen: n, seen: Object.assign({}, s.seen, { [n]: true }), save: save || s.save });
+  }
+  renderVals() {
+    const s = this.state, show = {};
+    ["Restaurant", "Recipes", "Cook", "Market", "Ranking", "Calories", "Me"].forEach((n) => { show[n] = s.screen === n ? 'block' : 'none'; });
+    const app = {
+      save: s.save,
+      go: (n) => this.open(n),
+      cook: (id) => this.open('Cook', Object.assign({}, s.save, { pick: id, pickN: s.save.pickN + 1 })),
+      record: (r) => { const d = this.state.save; this.setState({ save: Object.assign({}, d, { xp: d.xp + r.gain, runs: d.runs.concat([r]) }) }); },
+    };
+    return { app, show, seen: s.seen };
+  }
+}
+</script>
+</body>
+</html>
