@@ -6,15 +6,17 @@ import { Icon } from '@/components/icon';
 import { Button, Card, Chip, Screen, T, Thumb } from '@/components/ui';
 import { IMG } from '@/data/images';
 import { buildRecipe, DEFAULT_OPTS, MENU, type ImgKey } from '@/data/recipes';
-import { useSettings } from '@/lib/settings';
+import { cancelTimer, putProgress, useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
 
 export default function RecipeDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors, t, pick, price, set } = useSettings();
-  const [o1, setO1] = useState(DEFAULT_OPTS[id]?.[0] ?? 0);
-  const [o2, setO2] = useState(DEFAULT_OPTS[id]?.[1] ?? 0);
-  const [adapt, setAdapt] = useState<string[]>([]);
+  const { colors, t, pick, price, set, progress } = useSettings();
+  // จานที่ทำค้างไว้ เปิดหน้านี้ด้วยตัวเลือกเดิม และปุ่มหลักพาไปทำต่อ ไม่เริ่มใหม่
+  const cooking = progress.find((x) => x.recipe === id);
+  const [o1, setO1] = useState(cooking?.o1 ?? DEFAULT_OPTS[id]?.[0] ?? 0);
+  const [o2, setO2] = useState(cooking?.o2 ?? DEFAULT_OPTS[id]?.[1] ?? 0);
+  const [adapt, setAdapt] = useState<string[]>(cooking?.adapt ?? []);
   const [have, setHave] = useState<string[]>([]);
   const r = buildRecipe(id, o1, o2, adapt);
   if (!r) return <Screen tint={colors.header.cook} title={t('recipes.empty')} onBack={() => router.replace('/recipes')} backLabel={t('detail.back')}><T>{t('recipes.emptyHint')}</T></Screen>;
@@ -22,7 +24,8 @@ export default function RecipeDetail() {
   const total = r.ingredients.filter((g) => !have.includes(g.id)).reduce((sum, g) => sum + g.baht, 0);
   const toggle = (list: string[], x: string) => (list.includes(x) ? list.filter((y) => y !== x) : [...list, x]);
   const start = () => {
-    set({ progress: { recipe: r.id, o1, o2, adapt, step: 0, total: r.steps.length } });
+    cancelTimer(cooking);
+    set((prev) => ({ progress: putProgress(prev.progress, r.id, { recipe: r.id, o1, o2, adapt, step: 0, total: r.steps.length }) }));
     router.push(`/cook/${r.id}`);
   };
   const back = () => (router.canGoBack() ? router.back() : router.replace('/recipes'));
@@ -37,7 +40,10 @@ export default function RecipeDetail() {
             <T v="small" tone="pastelMuted">{t('detail.toBuy')}</T>
             <T v="heading" tone="pastel">{price(total)}</T>
           </View>
-          <Button kind="onPastel" label={t('detail.start')} size="cook" onPress={start} />
+          <View style={{ alignItems: 'center', gap: space.xs }}>
+            <Button kind="onPastel" label={cooking ? t('detail.resume', { n: cooking.step + 1 }) : t('detail.start')} size="cook" onPress={cooking ? () => router.push(`/cook/${r.id}`) : start} />
+            {cooking && <Pressable accessibilityRole="button" onPress={start} hitSlop={8}><T v="smallBold" tone="pastel" style={{ textDecorationLine: 'underline' }}>{t('detail.restart')}</T></Pressable>}
+          </View>
         </Card>
       }>
       {[{ g: r.g1, v: o1, setV: setO1 }, { g: r.g2, v: o2, setV: setO2 }].map(({ g, v, setV }) => (

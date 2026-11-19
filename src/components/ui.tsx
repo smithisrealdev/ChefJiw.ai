@@ -153,6 +153,8 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
   );
 }
 
+export const mmss = (s: number) => Math.floor(s / 60) + ':' + String(Math.max(0, s) % 60).padStart(2, '0');
+
 export function Thumb({ source, tint, size = 64 }: { source: number; tint?: string; size?: number }) {
   return (
     <View style={{ width: size, height: size, borderRadius: radius.sm, backgroundColor: tint, alignItems: 'center', justifyContent: 'center' }}>

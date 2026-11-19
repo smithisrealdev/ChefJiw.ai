@@ -1,15 +1,19 @@
 import { IBMPlexSansThaiLooped_400Regular, IBMPlexSansThaiLooped_600SemiBold, IBMPlexSansThaiLooped_700Bold } from '@expo-google-fonts/ibm-plex-sans-thai-looped';
 import { Mali_600SemiBold, Mali_700Bold } from '@expo-google-fonts/mali';
 import { useFonts } from 'expo-font';
+import * as Notifications from 'expo-notifications';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import Stack from 'expo-router/stack';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 
 import { SettingsProvider, useSettings } from '@/lib/settings';
 
 SplashScreen.preventAutoHideAsync();
+// ตัวจับเวลาของจานที่วางไว้ต้องเด้งเตือนแม้กำลังเปิดแอปทำจานอื่นอยู่ (แผนวันอาทิตย์ทำหลายจานสลับกัน)
+if (Platform.OS !== 'web') Notifications.setNotificationHandler({ handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }) });
 
 function Root() {
   const { ready, isDark, colors } = useSettings();

@@ -2,36 +2,38 @@ import * as Haptics from 'expo-haptics';
 import { useKeepAwake } from 'expo-keep-awake';
 import * as Notifications from 'expo-notifications';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, AppState, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/icon';
-import { ApiNotice, Button, Card, IconButton, Sheet, Skeleton, T } from '@/components/ui';
+import { ApiNotice, Button, Card, IconButton, mmss, Sheet, Skeleton, T } from '@/components/ui';
 import { MASCOT } from '@/data/images';
-import { buildRecipe, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
+import { buildRecipe, MENU, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY, freeLeft, localDay, spendOne } from '@/lib/quota';
-import { useSettings } from '@/lib/settings';
+import { cancelTimer, putProgress, useSettings, type Progress } from '@/lib/settings';
 import { Image } from 'expo-image';
 import { fonts, onPastel, radius, space, type } from '@/theme/tokens';
-
-const mmss = (s: number) => Math.floor(s / 60) + ':' + String(Math.max(0, s) % 60).padStart(2, '0');
 
 export default function Cook() {
   useKeepAwake(); // หน้าจอไม่ดับเองตลอดการทำอาหาร
   const { id } = useLocalSearchParams<{ id: string }>();
   const { progress, set, t, colors } = useSettings();
-  const p = progress?.recipe === id ? progress : { recipe: id, o1: 1, o2: 0, adapt: [], step: 0, total: 0 };
+  const p: Progress = progress.find((x) => x.recipe === id) ?? { recipe: id, o1: 1, o2: 0, adapt: [], step: 0, total: 0 };
   const r = buildRecipe(id, p.o1, p.o2, p.adapt);
   const [taste, setTaste] = useState(false);
   if (!r) return null;
-  return taste ? <Taste r={r} /> : <Steps r={r} start={Math.min(p.step, r.steps.length - 1)} onFinish={() => setTaste(true)}
-    onStep={(step) => set({ progress: { ...p, step, total: r.steps.length } })} t={t} colors={colors} />;
+  // อ่านค่าล่าสุดจาก state ทุกครั้ง เพราะเปลี่ยนขั้นกับเริ่มจับเวลาอาจเกิดติดกัน
+  const update = (patch: Partial<Progress>) =>
+    set((prev) => ({ progress: putProgress(prev.progress, id, { ...(prev.progress.find((x) => x.recipe === id) ?? p), ...patch }) }));
+  return taste ? <Taste key={id} r={r} /> : <Steps key={id} r={r} p={p} start={Math.min(p.step, r.steps.length - 1)} onFinish={() => setTaste(true)}
+    onStep={(step) => { cancelTimer(p); update({ step, total: r.steps.length, timer: undefined }); }}
+    onTimer={(timer) => update({ timer })} t={t} colors={colors} />;
 }
 
-function Steps({ r, start, onStep, onFinish, t, colors }: { r: Recipe; start: number; onStep: (i: number) => void; onFinish: () => void; t: ReturnType<typeof useSettings>['t']; colors: ReturnType<typeof useSettings>['colors'] }) {
+function Steps({ r, p, start, onStep, onTimer, onFinish, t, colors }: { r: Recipe; p: Progress; start: number; onStep: (i: number) => void; onTimer: (timer: Progress['timer']) => void; onFinish: () => void; t: ReturnType<typeof useSettings>['t']; colors: ReturnType<typeof useSettings>['colors'] }) {
   const { pick, isDark } = useSettings();
   const insets = useSafeAreaInsets();
   const [i, setI] = useState(start);
@@ -61,6 +63,7 @@ function Steps({ r, start, onStep, onFinish, t, colors }: { r: Recipe; start: nu
       <View style={s.bar} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         {Array.from({ length: r.phases }, (_, k) => <View key={k} style={[s.seg, { backgroundColor: k < step.phase ? ink : 'rgba(36,33,43,0.18)' }]} />)}
       </View>
+      <OtherTimers current={r.id} ink={ink} />
 
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
         <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: space.xl }}>
@@ -85,7 +88,8 @@ function Steps({ r, start, onStep, onFinish, t, colors }: { r: Recipe; start: nu
             <T v="smallBold" tone="pastelMuted">{t('cook.see')}</T>
             <T v="bodyBold" tone="pastel">{pick(step.see)}</T>
           </Card>
-          {step.timer && <Timer key={step.id} seconds={step.timer} t={t} />}
+          {step.timer && <Timer key={step.id} seconds={step.timer} name={pick(r.name)} endAt={p.timer?.step === step.id ? p.timer.endAt : null}
+            onStart={(endAt, note) => onTimer({ step: step.id, endAt, note })} t={t} />}
         </ScrollView>
         {/* ปุ่มหลักปุ่มเดียวต่อขั้น ครึ่งล่างของจอ ไม่มีการปัดเปลี่ยนขั้น */}
         <View style={[s.foot, { paddingBottom: Math.max(insets.bottom, space.md), borderTopColor: colors.line }]}>
@@ -115,11 +119,38 @@ function HeatBadge({ heat, t }: { heat: Heat; t: ReturnType<typeof useSettings>[
   );
 }
 
-/** จับเวลาจากเวลาจริงของเครื่อง จึงเดินต่อแม้สลับแอปหรือล็อกจอ และตั้งการแจ้งเตือนไว้ล่วงหน้า */
-function Timer({ seconds, t }: { seconds: number; t: ReturnType<typeof useSettings>['t'] }) {
-  const [endAt, setEndAt] = useState<number | null>(null);
-  const [now, setNow] = useState(0); // ตั้งค่าจริงตอนกดเริ่ม
-  const noteId = useRef<string | null>(null);
+/** ตัวจับเวลาของจานอื่นที่ยังเดินอยู่ เช่น พะโล้ที่เคี่ยวอยู่ระหว่างทำแกง แตะเพื่อสลับไปจานนั้น */
+function OtherTimers({ current, ink }: { current: string; ink: string }) {
+  const { progress, pick, t, colors, isDark } = useSettings();
+  const others = progress.filter((x) => x.recipe !== current && x.timer);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!others.length) return;
+    const tick = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(tick);
+  }, [others.length]);
+  if (!others.length) return null;
+  return (
+    <View style={s.others}>
+      {others.map((x) => {
+        const m = MENU.find((d) => d.id === x.recipe);
+        const left = Math.ceil((x.timer!.endAt - now) / 1000);
+        const label = `${m ? pick(m.name) : x.recipe} · ${left > 0 ? t('cook.timerLeft', { t: mmss(left) }) : t('cook.timerNotify')}`;
+        return (
+          <Pressable key={x.recipe} accessibilityRole="button" accessibilityLabel={label} onPress={() => router.replace(`/cook/${x.recipe}`)}
+            style={[s.pill, { backgroundColor: left > 0 ? (isDark ? colors.surface : '#FFFFFF') : colors.done }]}>
+            <Icon name="clock" color={left > 0 ? ink : onPastel.ink} size={18} />
+            <T v="smallBold" numberOfLines={1} style={{ color: left > 0 ? ink : onPastel.ink, flexShrink: 1 }}>{label}</T>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+/** จับเวลาจากเวลาจริงของเครื่อง เวลาจบเก็บไว้กับจาน จึงเดินต่อแม้ล็อกจอ ออกจากหน้านี้ หรือสลับไปทำจานอื่น และตั้งการแจ้งเตือนไว้ล่วงหน้า */
+function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: string; endAt: number | null; onStart: (endAt: number, note: string | null) => void; t: ReturnType<typeof useSettings>['t'] }) {
+  const [now, setNow] = useState(() => Date.now());
   const left = endAt ? Math.ceil((endAt - now) / 1000) : seconds;
   const done = endAt !== null && left <= 0;
 
@@ -130,17 +161,17 @@ function Timer({ seconds, t }: { seconds: number; t: ReturnType<typeof useSettin
     return () => { clearInterval(tick); sub.remove(); };
   }, [endAt, done]);
   useEffect(() => { if (done) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); }, [done]);
-  useEffect(() => () => { if (noteId.current) Notifications.cancelScheduledNotificationAsync(noteId.current).catch(() => {}); }, []);
 
   const startTimer = async () => {
-    setEndAt(Date.now() + seconds * 1000); setNow(Date.now());
+    const end = Date.now() + seconds * 1000;
+    setNow(Date.now()); onStart(end, null);
     if (Platform.OS === 'web') return;
     try {
       const perm = await Notifications.requestPermissionsAsync();
-      if (perm.granted) noteId.current = await Notifications.scheduleNotificationAsync({
-        content: { title: t('cook.timerNotify'), body: t('cook.timerDone'), sound: true },
+      if (perm.granted) onStart(end, await Notifications.scheduleNotificationAsync({
+        content: { title: `${t('cook.timerNotify')}: ${name}`, body: t('cook.timerDone'), sound: true },
         trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds },
-      });
+      }));
     } catch { /* ไม่มีสิทธิ์แจ้งเตือน ตัวจับเวลาในแอปยังทำงาน */ }
   };
 
@@ -241,7 +272,7 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
 }
 
 function Taste({ r }: { r: Recipe }) {
-  const { t, pick, colors, set, runs, progress, device } = useSettings();
+  const { t, pick, colors, set, progress, device } = useSettings();
   const insets = useSafeAreaInsets();
   const [ans, setAns] = useState<(number | null)[]>(r.senses.map(() => null));
   const [score, setScore] = useState<number | null>(null);
@@ -249,7 +280,8 @@ function Taste({ r }: { r: Recipe }) {
     const sc = tasteScore(ans as number[]);
     setScore(sc);
     const id = device || Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
-    set({ runs: [...runs, { recipe: r.id, score: sc, at: Date.now() }], progress: progress?.recipe === r.id ? null : progress, device: id });
+    cancelTimer(progress.find((x) => x.recipe === r.id));
+    set((prev) => ({ runs: [...prev.runs, { recipe: r.id, score: sc, at: Date.now() }], progress: putProgress(prev.progress, r.id, null), device: id }));
     void api.logRun(id, r.id, sc);
   };
   return (
@@ -301,6 +333,8 @@ const s = StyleSheet.create({
   ask: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill },
   bar: { flexDirection: 'row', gap: 6, paddingHorizontal: space.lg, paddingVertical: space.md },
   seg: { flex: 1, height: 8, borderRadius: radius.pill },
+  others: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.md },
+  pill: { flexDirection: 'row', alignItems: 'center', gap: space.xs, minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill, maxWidth: '100%' },
   sheet: { flex: 1, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, overflow: 'hidden' },
   foot: { paddingHorizontal: space.lg, paddingTop: space.md, gap: space.xs, borderTopWidth: StyleSheet.hairlineWidth },
   link: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },

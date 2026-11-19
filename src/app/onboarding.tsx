@@ -10,7 +10,7 @@ import { DEFAULT_OPTS, MENU } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
 import { FREE_PER_DAY } from '@/lib/quota';
-import { useSettings } from '@/lib/settings';
+import { putProgress, useSettings } from '@/lib/settings';
 import { onPastel, radius, space } from '@/theme/tokens';
 
 const BG = ['#FFE66D', '#FFD6DF', '#E9E6FF', '#8FE3CF'];
@@ -24,7 +24,7 @@ export default function Onboarding() {
 
   const finish = (to: string) => {
     const m = ready[dish];
-    if (to.startsWith('/cook')) set({ onboarded: true, progress: { recipe: m.id, o1: DEFAULT_OPTS[m.id][0], o2: DEFAULT_OPTS[m.id][1], adapt: [], step: 0, total: 0 } });
+    if (to.startsWith('/cook')) set((prev) => ({ onboarded: true, progress: putProgress(prev.progress, m.id, { recipe: m.id, o1: DEFAULT_OPTS[m.id][0], o2: DEFAULT_OPTS[m.id][1], adapt: [], step: 0, total: 0 }) }));
     else set({ onboarded: true });
     router.replace('/');
     if (to !== '/') router.push(to);
