@@ -1,0 +1,13 @@
+{
+  "id": "P014",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I already cook for my family every Sunday and know dishes like tom yum and pad see ew, and when I want something new, YouTube is free. I might try the free green curry, but paying 99 baht for recipes doesn't fit how I save money.",
+  "objection": "Will it really come out better than a free YouTube video? The free dishes are ones I already cook, so they don't prove the paid ones will come out right, and if one of my Sunday dishes fails I've wasted ingredients meant for several days.",
+  "would_change_my_mind": "Let me try one Sunday cook-ahead plan for free: if the three dishes really keep all week, my family eats them, and the shopping list costs less than what I spend now at my market, I'd pay the 99 baht.",
+  "price_too_cheap": 20,
+  "price_cheap": 40,
+  "price_expensive": 80,
+  "price_too_expensive": 150
+}

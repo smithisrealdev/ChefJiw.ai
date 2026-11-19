@@ -1,0 +1,13 @@
+{
+  "id": "P019",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Most days I just buy a 50-baht plate because it's quick and cheap, and when I do cook it's kra pao or a curry I already know, or something I saw in a free clip. No subscription is nice, but I still wouldn't pay for this.",
+  "objection": "I don't see what it gives me that the free cooking clips I already watch every night don't, so paying 99 feels like paying for something I already get for free.",
+  "would_change_my_mind": "If I could try one Sunday plan free and it really fed my family for clearly less than buying 50-baht plates, I'd pay the 99 for the rest.",
+  "price_too_cheap": 20,
+  "price_cheap": 49,
+  "price_expensive": 99,
+  "price_too_expensive": 150
+}
