@@ -61,9 +61,10 @@ changes). ★ marks the critical path: if it slips, launch day slips.
 - ★ Founder: recruit 8 cooks and book their two cooking slots. Deadline Sun 29 Nov.
 - Founder: set up PromptPay pre-order, the form and the refund promise. Sun 29 Nov.
 - Developer: add the green curry and the Sunday plan to the app (cost per meal
-  next to a 50-baht plate), free in beta. Deadline Fri 27 Nov.
+  next to a 50-baht plate), free in beta. Deadline Fri 27 Nov. **Done 19 Nov**
+  (recipes still untested).
 - Developer: log, per tester, which dish they finished and their taster score, so
-  the results don't depend on memory. Deadline Fri 27 Nov.
+  the results don't depend on memory. Deadline Fri 27 Nov. **Done 19 Nov**.
 - Developer: a test build the 8 cooks can install. Needs the founder's Expo
   account for an EAS build. Deadline Sun 29 Nov.
 - Founder or Developer: the one-page waitlist. Deadline Sun 29 Nov.

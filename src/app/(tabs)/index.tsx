@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { ResumeCard } from '@/components/resume-card';
 import { Button, Card, Screen, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT } from '@/data/images';
-import { MENU } from '@/data/recipes';
+import { MENU, planShopping } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import type { L } from '@/lib/i18n';
 import { useSettings } from '@/lib/settings';
@@ -17,6 +17,8 @@ const LINES: L[] = [
   { th: 'ใช้เวลา 15 นาที เดี๋ยวพาทำทีละขั้น', en: 'It takes 15 minutes. I will guide you step by step.' },
   { th: 'ดูสูตรก่อนก็ได้ ว่ามีวัตถุดิบครบไหม', en: 'Check the recipe first to see if you have everything.' },
 ];
+
+const PER_MEAL = planShopping().perMeal;
 
 export default function Home() {
   const { colors, t, pick, price, runs } = useSettings();
@@ -33,6 +35,13 @@ export default function Home() {
         </View>
       </Card>
       <ResumeCard />
+      <Card onPress={() => router.push('/plan')} label={t('plan.title')} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+        <Thumb source={IMG['dish-moo-palo']} size={64} />
+        <View style={{ flex: 1 }}>
+          <T v="subheading">{t('plan.title')}</T>
+          <T v="small" tone="muted">{t('plan.openSub', { p: price(PER_MEAL) })}</T>
+        </View>
+      </Card>
       {!BETA && (
         <Card onPress={() => router.push('/market')} label={t('market.open')} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
           <Thumb source={MASCOT.capybara} size={64} />

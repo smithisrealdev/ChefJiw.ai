@@ -20,6 +20,8 @@ export const IMG: Record<ImgKey, number> = {
   'dish-morning-glory': require('@/assets/images/food/dish-morning-glory.png'),
   'dish-tom-yum': require('@/assets/images/food/dish-tom-yum.png'),
   'dish-green-curry': require('@/assets/images/food/dish-green-curry.png'),
+  'dish-moo-palo': require('@/assets/images/food/dish-moo-palo.png'),
+  'dish-prik-khing': require('@/assets/images/food/dish-prik-khing.png'),
 };
 
 export const MASCOT = {

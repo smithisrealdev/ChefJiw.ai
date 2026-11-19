@@ -5,12 +5,13 @@ import type { L } from '../lib/i18n.ts';
 export type ImgKey =
   | 'pork' | 'egg' | 'garlic' | 'chili' | 'rice' | 'morning-glory' | 'chicken' | 'basil' | 'oil'
   | 'oyster-sauce' | 'soy-sauce' | 'sugar' | 'fish'
-  | 'dish-kaprao' | 'dish-omelet' | 'dish-fried-rice' | 'dish-morning-glory' | 'dish-tom-yum' | 'dish-green-curry';
+  | 'dish-kaprao' | 'dish-omelet' | 'dish-fried-rice' | 'dish-morning-glory' | 'dish-tom-yum' | 'dish-green-curry'
+  | 'dish-moo-palo' | 'dish-prik-khing';
 
 export type Heat = 0 | 1 | 2;
 export type Step = { id: string; phase: number; title: L; do: L; see: L; why: L; heat?: Heat; timer?: number; gather?: L[] };
 export type Option = { label: L; note: L };
-export type Ingredient = { id: string; name: L; q: number; unit: L; baht: number; why: L };
+export type Ingredient = { id: string; img?: ImgKey; name: L; q: number; unit: L; baht: number; why: L };
 export type Sense = { label: L; options: [L, L, L]; tips: [L, L]; good: L };
 export type QA = [L, L];
 export type Recipe = {
@@ -25,7 +26,7 @@ const fmt = (n: number) => (n === 0.5 ? l('ครึ่ง', 'half a') : l(Strin
 const U = {
   g: l('กรัม', 'g'), egg: l('ฟอง', 'eggs'), clove: l('กลีบ', 'cloves'), chili: l('เม็ด', 'chilies'),
   tbsp: l('ช้อนโต๊ะ', 'tbsp'), tsp: l('ช้อนชา', 'tsp'), plate: l('จาน', 'plate'), handful: l('กำมือ', 'handful'),
-  ml: l('มล.', 'ml'), piece: l('ลูก', 'pieces'), leaf: l('ใบ', 'leaves'), plates: l('จาน', 'plates'),
+  ml: l('มล.', 'ml'), piece: l('ลูก', 'pieces'), leaf: l('ใบ', 'leaves'), plates: l('จาน', 'plates'), root: l('ราก', 'roots'),
 };
 
 export const SAFETY: QA[] = [
@@ -91,6 +92,41 @@ const QA_BANK: Record<string, QA[]> = {
     [l('อุ่นซ้ำยังไงให้ไม่แตกมัน', 'How do I reheat it without splitting?'), l('อุ่นไฟกลางค่อนอ่อน คนเป็นระยะจนเดือดทั่วหม้อ หรือเข้าไมโครเวฟทีละกล่อง 2 ถึง 3 นาที คนครั้งหนึ่งระหว่างนั้น', 'Reheat on medium-low, stirring now and then, until it bubbles all through. Or microwave one box for 2 to 3 minutes, stirring once.')],
     [l('แช่แข็งได้ไหม', 'Can I freeze it?'), l('ได้ราว 1 เดือน มะเขือจะนิ่มลง ละลายในตู้เย็นข้ามคืนแล้วอุ่นให้เดือด', 'Yes, for about a month. The eggplant gets softer. Thaw overnight in the fridge and reheat until it boils.')],
   ],
+  'mp-fridge': [
+    [l('ไม่มีผงพะโล้ ใช้อะไรแทนได้', 'No five-spice powder. What instead?'), l('ใช้โป๊ยกั๊ก 2 ดอกกับอบเชย 1 แท่ง ใส่ตอนเติมน้ำ กลิ่นจะใกล้เคียงกัน', 'Use 2 star anise and 1 cinnamon stick, added with the water. The smell is close.')],
+    [l('ไม่มีน้ำตาลปี๊บ', 'No palm sugar'), l('ใช้น้ำตาลทรายแดงหรือน้ำตาลทรายเท่ากันได้ น้ำตาลทรายขาวเป็นคาราเมลเร็วกว่า ต้องดูให้ดี', 'Brown or white sugar works, same amount. White sugar caramelizes faster, so watch it.')],
+  ],
+  'mp-eggs': [[l('ปอกแล้วไข่ขาวขาดเป็นแผ่น', 'The whites tear when I peel'), l('ไข่ที่สดมากจะปอกยาก ใช้ไข่ที่ซื้อมาแล้ว 3 ถึง 4 วัน แช่น้ำเย็นให้นานพอ แล้วปอกใต้น้ำไหล', 'Very fresh eggs peel badly. Use eggs bought 3 to 4 days ago, cool them long enough and peel under running water.')]],
+  'mp-caramel': [
+    [l('น้ำตาลไหม้ดำแล้ว', 'The sugar burnt black'), l('ล้างหม้อแล้วเริ่มใหม่ เพราะความขมจะติดทั้งหม้อ ครั้งหน้าใช้ไฟกลางค่อนอ่อน และไปขั้นต่อไปทันทีที่เป็นสีทอง', 'Wash the pot and start again, or the bitterness spreads to everything. Next time use medium-low heat and move on as soon as it turns golden.')],
+    [l('น้ำตาลจับเป็นก้อน ไม่ละลาย', 'The sugar clumped and will not melt'), l('คนต่อไปเรื่อยๆ บนไฟกลาง ก้อนจะค่อยๆ ละลาย หรือเติมน้ำ 1 ช้อนโต๊ะช่วย', 'Keep stirring on medium heat and the lumps will melt. A tablespoon of water helps.')],
+  ],
+  'mp-braise': [
+    [l('น้ำงวดเร็วไป', 'The liquid is drying up'), l('เติมน้ำร้อนให้ท่วมเนื้อ หรี่ไฟให้อ่อนลงอีก แล้วปิดฝาให้สนิท', 'Top up with hot water to cover the meat, turn the heat lower and close the lid.')],
+    [l('ครบเวลาแล้วเนื้อยังเหนียว', 'The meat is still tough'), l('เคี่ยวต่อครั้งละ 10 นาทีจนส้อมจิ้มเข้าง่าย เนื้อแต่ละร้านนุ่มเร็วไม่เท่ากัน', 'Keep simmering 10 minutes at a time until a fork goes in easily. Meat from different shops softens at different speeds.')],
+  ],
+  'mp-store': [
+    [l('อุ่นซ้ำยังไง', 'How do I reheat it?'), l('อุ่นในหม้อจนเดือดทั่ว หรือเข้าไมโครเวฟทีละกล่องจนร้อนทั่ว ถ้าน้ำงวดเติมน้ำนิดหน่อย', 'Bring it to a boil in a pot, or microwave one box at a time until hot all through. Add a splash of water if it has reduced.')],
+    [l('แช่แข็งได้ไหม', 'Can I freeze it?'), l('เนื้อแช่แข็งได้ราว 1 เดือน แต่ไข่ต้มแช่แข็งแล้วจะเหนียวเป็นยาง กินไข่ให้หมดภายใน 4 วัน', 'The meat freezes for about a month, but boiled eggs turn rubbery in the freezer. Eat the eggs within 4 days.')],
+  ],
+  'pk-fridge': [
+    [l('ไม่มีพริกแกงเผ็ด ใช้อะไรแทนได้', 'No red curry paste. What instead?'), l('พริกแกงพริกขิงสำเร็จรูปดีที่สุด หรือใช้พริกแกงเขียวหวานก็ได้ รสจะต่างไปเล็กน้อย', 'Ready-made prik khing paste is best, or use green curry paste for a slightly different taste.')],
+    [l('ไม่มีถั่วฝักยาว', 'No long beans'), l('ใช้ถั่วแขกหรือถั่วลันเตาแทนได้ หั่นและผัดเวลาเท่ากัน', 'Green beans or snow peas work. Cut and cook them the same way.')],
+  ],
+  'pk-paste': [
+    [l('พริกแกงติดกระทะ', 'The paste is sticking'), l('หรี่ไฟ เติมน้ำ 1 ช้อนโต๊ะแล้วผัดต่อ อย่าปล่อยจนไหม้ เพราะจะขมทั้งจาน', 'Lower the heat, add a tablespoon of water and keep stirring. Do not let it burn or the whole dish turns bitter.')],
+    [l('ควันแสบตาแสบจมูก', 'The fumes sting my eyes'), l('เป็นปกติของพริกแกงที่โดนน้ำมันร้อน เปิดพัดลมดูดควันหรือหน้าต่าง', 'Normal for curry paste in hot oil. Turn on the hood or open a window.')],
+  ],
+  'pk-meat': [
+    [l('เนื้อออกน้ำ แฉะ', 'The meat went watery'), l('ไฟยังไม่แรงพอหรือใส่เนื้อเยอะไป เร่งไฟแล้วผัดต่อจนน้ำระเหย เครื่องแกงจะกลับมาเกาะ', 'The heat is too low or the wok too full. Turn it up and keep going until the liquid evaporates and the paste clings again.')],
+    [l('รู้ได้ยังไงว่าสุกแล้ว', 'How do I know it is cooked?'), l('ไม่เหลือสีชมพูทั้งชิ้น และน้ำที่ออกมาใส', 'No pink left anywhere and the juices run clear.')],
+  ],
+  'pk-beans': [[l('ถั่วยังแข็งอยู่', 'The beans are still hard'), l('เติมน้ำอีก 2 ช้อนโต๊ะ ปิดฝา 1 นาทีให้ไอน้ำช่วย', 'Add 2 more tbsp water and cover for a minute so the steam finishes them.')]],
+  'pk-season': [
+    [l('เค็มไปแล้ว แก้ยังไง', 'Too salty. How do I fix it?'), l('เติมน้ำตาลอีกนิดกับน้ำ 1 ถึง 2 ช้อนโต๊ะ หรือเพิ่มถั่วฝักยาว', 'Add a little more sugar and 1 to 2 tbsp water, or more beans.')],
+    [l('เผ็ดเกินไป', 'Too spicy'), l('เติมน้ำตาลอีกนิด กินกับไข่ต้มหรือไข่เจียว ครั้งหน้าลดพริกแกงลง 1 ช้อนโต๊ะ', 'Add a little sugar and eat it with a boiled egg or an omelet. Next time use 1 tbsp less paste.')],
+  ],
+  'pk-store': [[l('อุ่นซ้ำยังไง', 'How do I reheat it?'), l('ผัดในกระทะไฟกลางกับน้ำ 1 ช้อนโต๊ะจนร้อนทั่ว หรือเข้าไมโครเวฟทีละกล่อง', 'Toss in a pan over medium heat with a tablespoon of water until hot, or microwave one box at a time.')]],
   lift: [[l('ไข่อมน้ำมัน', 'The omelet is greasy'), l('ตักขึ้นพักบนกระดาษซับน้ำมันหรือตะแกรง ครั้งหน้าให้น้ำมันร้อนกว่านี้ก่อนเทไข่ ไข่จะอมน้ำมันน้อยลง', 'Rest it on paper towel or a rack. Next time heat the oil more before pouring and it soaks up less.')]],
 };
 const STOVE_QA: QA = [l('ใช้เตาไฟฟ้าหรือเตาแม่เหล็กไฟฟ้าได้ไหม', 'Can I use an electric or induction stove?'), l('ได้ ไฟกลางคือระดับกลางของเตา ไฟแรงคือระดับสูงสุดหรือรองลงมา เตาไฟฟ้าร้อนและเย็นช้ากว่าแก๊ส ให้ปรับล่วงหน้าราวครึ่งนาที', 'Yes. Medium heat is the middle setting, high heat is the top or one below. Electric stoves react slower than gas, so adjust about 30 seconds early.')];
@@ -363,13 +399,187 @@ function greenCurry(o1: number, o2: number, adapt: string[]): Recipe {
   };
 }
 
+// พะโล้เก็บได้ 4 วันและอร่อยขึ้นในวันรุ่งขึ้น เป็นจานแรกของแผนวันอาทิตย์เพราะเคี่ยวนานที่สุด
+function mooPalo(o1: number, o2: number, adapt: string[]): Recipe {
+  const MEAT = [
+    { label: l('หมูสามชั้น', 'Pork belly'), id: 'pork-belly', img: 'pork' as ImgKey, q: 500, baht: 110, simmer: 40, kcal: 620, note: l('มันแทรกเนื้อ เคี่ยวแล้วนุ่มละลายในปาก แบบพะโล้ร้านข้าวแกง', 'The fat between the layers turns meltingly soft, like the curry-shop version.') },
+    { label: l('หมูสันคอ', 'Pork collar'), id: 'pork-collar', img: 'pork' as ImgKey, q: 500, baht: 95, simmer: 40, kcal: 540, note: l('มันน้อยกว่าสามชั้น แต่เนื้อยังนุ่มชุ่ม และถูกกว่าเล็กน้อย', 'Leaner than belly but still juicy, and a little cheaper.') },
+    { label: l('น่องไก่', 'Chicken drumsticks'), id: 'drumstick', img: 'chicken' as ImgKey, q: 700, baht: 70, simmer: 25, kcal: 520, note: l('ไม่กินหมูก็ทำได้ ราว 6 น่อง เคี่ยวสั้นกว่า 15 นาที', 'No pork needed. About 6 drumsticks, and 15 minutes less simmering.') },
+  ];
+  const SWEET = [
+    { label: l('หวานนำ', 'Sweeter'), sugar: 3, note: l('น้ำตาลปี๊บ 3 ช้อนโต๊ะ หวานเค็มแบบพะโล้ร้านข้าวแกง', '3 tbsp palm sugar. Sweet and salty, like a curry shop.') },
+    { label: l('หวานน้อย', 'Less sweet'), sugar: 1.5, note: l('น้ำตาลปี๊บ 1 ช้อนโต๊ะครึ่ง เค็มนำ กลิ่นเครื่องพะโล้ชัดขึ้น', '1½ tbsp palm sugar. Saltier, and the five-spice comes through more.') },
+  ];
+  const m = MEAT[o1] ?? MEAT[1], sw = SWEET[o2] ?? SWEET[0], chicken = m.id === 'drumstick';
+  const lowSalt = adapt.includes('salt'), soy = lowSalt ? 1.5 : 3;
+  const ingredients: Ingredient[] = [
+    { id: m.id, img: m.img, name: m.label, q: m.q, unit: U.g, baht: m.baht, why: chicken ? l('ทั้งน่อง เคี่ยวแล้วเนื้อนุ่มหลุดกระดูก', 'Whole drumsticks simmer until the meat falls off the bone') : l('หั่นชิ้นใหญ่ราว 3 ซม. เคี่ยวนานแล้วไม่เปื่อยยุ่ย', 'Large 3 cm chunks hold together through the long simmer') },
+    { id: 'egg', name: l('ไข่ไก่', 'Eggs'), q: 6, unit: U.egg, baht: 30, why: l('ต้มก่อนแล้วเคี่ยวในน้ำพะโล้ ไข่จะดูดสีและรสจนเข้าเนื้อ', 'Boiled first, then simmered so they soak up the color and flavor') },
+    { id: 'garlic', name: l('กระเทียม', 'Garlic'), q: 6, unit: U.clove, baht: 3, why: l('ตำกับรากผักชีและพริกไทยเป็นสามเกลอ คือกลิ่นหลักของพะโล้', 'Pounded with coriander root and pepper, the classic base of the braise') },
+    { id: 'coriander-root', name: l('รากผักชี', 'Coriander root'), q: 2, unit: U.root, baht: 3, why: l('ให้กลิ่นหอมลึก ถ้าไม่มีใช้ก้านผักชีแทนได้', 'A deep aroma. Coriander stems work if you have no roots') },
+    { id: 'pepper', name: l('พริกไทยขาวเม็ด', 'White peppercorns'), q: 1, unit: U.tsp, baht: 2, why: l('เผ็ดร้อนอุ่นๆ ช่วยตัดความหวาน', 'A warm heat that balances the sweetness') },
+    { id: 'five-spice', name: l('ผงพะโล้', 'Five-spice powder'), q: 1, unit: U.tbsp, baht: 5, why: l('กลิ่นอบเชยกับโป๊ยกั๊กที่เป็นเอกลักษณ์ของพะโล้', 'The cinnamon and star anise smell that makes it palo') },
+    { id: 'sugar', name: l('น้ำตาลปี๊บ', 'Palm sugar'), q: sw.sugar, unit: U.tbsp, baht: 4, why: l('เคี่ยวเป็นคาราเมลก่อน ให้สีน้ำตาลสวยและหวานหอม', 'Caramelized first for the brown color and a toasty sweetness') },
+    { id: 'dark-soy', img: 'soy-sauce', name: l('ซีอิ๊วดำ', 'Dark soy sauce'), q: 1, unit: U.tbsp, baht: 3, why: l('ช่วยให้สีเข้มขึ้น ไม่ได้เค็มมาก', 'Deepens the color without much salt') },
+    { id: 'soy-sauce', name: l('ซีอิ๊วขาว', 'Light soy sauce'), q: soy, unit: U.tbsp, baht: 3, why: lowSalt ? l('ลดลงครึ่งหนึ่งตามที่ขอ ชิมก่อนแล้วค่อยเติม', 'Halved as you asked. Taste before adding more') : l('รสเค็มหลักของน้ำพะโล้', 'The main saltiness of the broth') },
+    { id: 'oil', name: l('น้ำมันพืช', 'Vegetable oil'), q: 1, unit: U.tbsp, baht: 1, why: l('แค่พอเคี่ยวน้ำตาลไม่ให้ติดหม้อ', 'Just enough to melt the sugar without sticking') },
+    { id: 'rice', name: l('ข้าวสวย', 'Cooked rice'), q: 4, unit: U.plates, baht: 28, why: l('พะโล้หม้อนี้พอดีกับข้าว 4 จาน', 'This pot is right for 4 plates of rice') },
+  ];
+  const meat = chicken ? l('น่องไก่', 'drumsticks') : l('หมู', 'pork');
+  const steps: Step[] = [
+    { id: 'mp-fridge', phase: 1, title: l('หยิบของออกมาให้ครบ', 'Get everything out'), do: l('หยิบของจริงออกมาวางให้ครบก่อนเปิดไฟ', 'Take everything out before you turn on the heat.'),
+      gather: [l(`${m.label.th} ${m.q} กรัม`, `${m.label.en}, ${m.q} g`), l('ไข่ 6 ฟอง', '6 eggs'), l('กระเทียม 6 กลีบ', '6 garlic cloves'), l('รากผักชี 2 ราก', '2 coriander roots'), l('พริกไทยขาวเม็ด 1 ช้อนชา', '1 tsp white peppercorns'), l('ผงพะโล้ 1 ช้อนโต๊ะ', '1 tbsp five-spice powder'), l(`น้ำตาลปี๊บ ${sw.sugar} ช้อนโต๊ะ`, `${sw.sugar} tbsp palm sugar`), l('ซีอิ๊วดำ ซีอิ๊วขาว น้ำเปล่า 1 ลิตร', 'Dark and light soy sauce, 1 litre water')],
+      see: l('เนื้อสด ไข่ไม่ร้าว', 'Fresh meat, no cracked eggs'),
+      why: l('พอน้ำตาลเป็นคาราเมลแล้ว ทุกอย่างต้องลงหม้อต่อกันเร็ว', 'Once the sugar caramelizes, everything goes in quickly.') },
+    { id: 'mp-eggs', phase: 1, heat: 2, timer: 480, title: l('ต้มไข่', 'Boil the eggs'), do: l('ต้มน้ำให้เดือด ค่อยๆ ใส่ไข่ ต้ม 8 นาที แล้วแช่น้ำเย็นและปอกเปลือก', 'Bring water to a boil, lower in the eggs, boil 8 minutes, then cool them in cold water and peel.'),
+      see: l('ไข่ขาวเรียบ ปอกง่าย', 'Smooth whites that peel easily'),
+      why: l('แช่น้ำเย็นทันทีทำให้ปอกง่าย และไข่แดงไม่เป็นวงสีเขียว', 'Cooling right away makes them peel easily and stops a green ring round the yolk.') },
+    { id: 'mp-cut', phase: 1, title: chicken ? l('เตรียมน่องไก่', 'Prep the drumsticks') : l('หั่นหมู', 'Cut the pork'),
+      do: chicken ? l('ล้างน่องไก่แล้วซับให้แห้ง ไม่ต้องหั่น แล้วล้างมือกับเขียง', 'Rinse the drumsticks and pat them dry; no cutting needed. Then wash your hands and the board.') : l('หั่นหมูเป็นชิ้นใหญ่ราว 3 ซม. แล้วล้างมือกับเขียง', 'Cut the pork into large pieces, about 3 cm, then wash your hands and the board.'),
+      see: l('ชิ้นขนาดใกล้เคียงกัน', 'Pieces about the same size'),
+      why: l('ชิ้นใหญ่ไม่เปื่อยยุ่ยตอนเคี่ยวนาน และสุกพร้อมกัน', 'Big, even pieces hold together through a long simmer and cook at the same pace.') },
+    { id: 'mp-pound', phase: 1, title: l('ตำสามเกลอ', 'Pound the garlic trio'), do: l('ตำกระเทียม รากผักชี และพริกไทยพอแหลกหยาบ', 'Pound the garlic, coriander root and pepper to a rough paste.'),
+      see: l('หยาบๆ ยังเห็นชิ้นกระเทียม', 'Rough, with bits of garlic still visible'),
+      why: l('สามเกลอคือกลิ่นหลักของพะโล้ ตำหยาบกลิ่นจะค่อยๆ ออกตลอดการเคี่ยว', 'This trio is the base aroma. A rough pound releases it slowly through the simmer.') },
+    { id: 'mp-caramel', phase: 2, heat: 1, timer: 120, title: l('เคี่ยวน้ำตาล ไฟกลาง', 'Medium heat, caramelize the sugar'),
+      do: l(`ตั้งหม้อไฟกลาง ใส่น้ำมัน 1 ช้อนโต๊ะกับน้ำตาลปี๊บ ${sw.sugar} ช้อนโต๊ะ คนจนละลายเป็นคาราเมลสีน้ำตาลทอง`, `Pot on medium heat. Add 1 tbsp oil and ${sw.sugar} tbsp palm sugar and stir until it melts into a golden-brown caramel.`),
+      see: l('สีน้ำตาลทอง หอมคาราเมล ไม่ดำ', 'Golden brown and smelling of caramel, not black'),
+      why: l('คาราเมลให้สีพะโล้ที่สวยและหวานหอม ถ้าไหม้ดำจะขมทั้งหม้อ', 'The caramel gives the braise its color and a toasty sweetness. Burnt black, it turns the whole pot bitter.') },
+    { id: 'mp-aroma', phase: 2, heat: 1, timer: 30, title: l('ผัดสามเกลอกับผงพะโล้', 'Fry the garlic trio and five-spice'), do: l('ใส่สามเกลอกับผงพะโล้ ผัดราว 30 วินาทีจนหอม', 'Add the pounded trio and five-spice and fry about 30 seconds until fragrant.'),
+      see: l('หอมกระเทียมและเครื่องพะโล้', 'Smells of garlic and five-spice'),
+      why: l('ผัดในคาราเมลให้กลิ่นออกก่อนเติมน้ำ', 'Frying in the caramel brings out the aroma before the liquid goes in.') },
+    { id: 'mp-sear', phase: 3, heat: 1, timer: 180, title: l(`ใส่${meat.th}`, `Add the ${meat.en}`), do: l(`ใส่${meat.th}ลงไปคลุกกับคาราเมลให้ทั่ว ผัดราว 3 นาทีจนผิวเป็นสีน้ำตาล`, `Add the ${meat.en} and toss it in the caramel. Cook about 3 minutes until browned.`),
+      see: l('เนื้อเคลือบสีน้ำตาลทั่วชิ้น', 'The meat coated brown all over'),
+      why: l('เคลือบก่อนเติมน้ำ สีและรสจะเข้าเนื้อ', 'Coating it before the water goes in locks the color and flavor into the meat.') },
+    { id: 'mp-braise', phase: 4, timer: m.simmer * 60, title: l('เติมน้ำ เคี่ยวไฟอ่อน', 'Add water, simmer low'),
+      do: l(`เติมน้ำ 1 ลิตร ซีอิ๊วดำ 1 ช้อนโต๊ะ ซีอิ๊วขาว ${soy} ช้อนโต๊ะ ใส่ไข่ พอเดือดหรี่ไฟอ่อนที่สุด ปิดฝา เคี่ยวราว ${m.simmer} นาที ช้อนฟองทิ้ง`, `Add 1 litre water, 1 tbsp dark soy sauce, ${soy} tbsp light soy sauce and the eggs. When it boils, turn the heat to the lowest, cover and simmer about ${m.simmer} minutes, skimming off the foam.`),
+      see: l('เดือดเบาๆ ใต้ฝา น้ำพะโล้สีน้ำตาลใส', 'A gentle bubble under the lid and a clear brown broth'),
+      why: l('ไฟอ่อนนานๆ ทำให้เนื้อนุ่ม ช้อนฟองทิ้งให้น้ำใสและไม่คาว', 'A long, gentle simmer makes the meat tender. Skimming keeps the broth clear and clean-tasting.') },
+    { id: 'mp-taste', phase: 4, title: l('ชิมแล้วปรับรส', 'Taste and adjust'), do: l('ชิมน้ำพะโล้ เค็มไปเติมน้ำ หวานไปเติมซีอิ๊วขาวทีละช้อนชา', 'Taste the broth. Too salty: add water. Too sweet: add light soy sauce a teaspoon at a time.'),
+      see: l('หวานเค็มกลมกล่อม เอาส้อมจิ้มเนื้อแล้วเข้าง่าย', 'Sweet and salty in balance, and a fork goes into the meat easily'),
+      why: lowSalt ? l('สูตรนี้ลดเค็มไว้ น้ำพะโล้จะเค็มขึ้นเมื่องวด ชิมก่อนแล้วค่อยเติม', 'This version is less salty. The broth gets saltier as it reduces, so taste before adding.') : l('น้ำพะโล้จะเค็มขึ้นเมื่อเก็บไว้และงวดลง ปรุงให้อ่อนกว่าที่ชอบนิดหน่อย', 'The broth gets saltier as it keeps and reduces, so season it a little lighter than you like.'),
+      gather: [l('ซีอิ๊วขาว', 'Light soy sauce'), l('น้ำเปล่า', 'Water')] },
+    { id: 'mp-store', phase: 5, title: l('ตักกิน แล้วเก็บส่วนที่เหลือ', 'Serve, then store the rest'), do: l('ตักกินกับข้าว ส่วนที่เหลือพักให้เย็นภายใน 1 ชั่วโมง แบ่งใส่กล่องปิดฝา แล้วเข้าตู้เย็น', 'Serve with rice. Cool the rest within an hour, portion it into lidded boxes and refrigerate.'),
+      see: l('แบ่งกล่องละ 1 มื้อ ใส่ไข่กล่องละลูก', 'One meal per box, an egg in each'),
+      why: l('เก็บได้ 4 วัน และอร่อยขึ้นในวันรุ่งขึ้น อุ่นให้เดือดทุกครั้งก่อนกิน', 'It keeps 4 days and tastes better the next day. Reheat until it boils every time.') },
+  ];
+  return {
+    id: 'moo-palo', name: chicken ? l('ไก่พะโล้ไข่ (4 จาน)', 'Five-spice chicken & eggs (serves 4)') : l('หมูพะโล้ไข่ (4 จาน)', 'Five-spice pork & eggs (serves 4)'), img: 'dish-moo-palo', mins: m.simmer + 25, phases: 5, kcal: m.kcal,
+    g1: { title: l('เนื้อสัตว์', 'Meat'), opts: MEAT }, g2: { title: l('รสชาติ', 'Flavor'), opts: SWEET },
+    adapts: [{ id: 'salt', label: l('ลดเค็ม', 'Less salty') }],
+    adaptNotes: lowSalt ? [l('ลดซีอิ๊วขาวเหลือ 1 ช้อนโต๊ะครึ่ง ชิมก่อนแล้วค่อยเติม', 'Light soy sauce cut to 1½ tbsp. Taste, then add more if needed.')] : [],
+    ingredients, steps, qa,
+    senses: [
+      { label: l('รสชาติ', 'Taste'), options: SALT, good: l('หวานเค็มกลมกล่อม หอมเครื่องพะโล้', 'Sweet and salty in balance, with five-spice'), tips: [l('ครั้งหน้าเติมซีอิ๊วขาวอีก 1 ช้อนโต๊ะ', 'Next time add 1 tbsp more light soy sauce'), l('ครั้งหน้าลดซีอิ๊วขาว หรือเติมน้ำตอนเคี่ยว', 'Next time use less light soy sauce, or add water while it simmers')] },
+      { label: l('กลิ่น', 'Aroma'), options: [l('ยังไม่หอมเครื่องพะโล้', 'No five-spice smell yet'), l('หอมเครื่องพะโล้', 'Smells of five-spice'), l('มีกลิ่นไหม้ขม', 'Smells burnt and bitter')], good: l('หอมพะโล้และกระเทียม', 'Five-spice and garlic'), tips: [l('ครั้งหน้าเพิ่มผงพะโล้อีกครึ่งช้อนโต๊ะ', 'Next time add half a tbsp more five-spice'), l('ครั้งหน้าเคี่ยวน้ำตาลไฟอ่อนลง และไปต่อทันทีที่เป็นสีทอง', 'Next time melt the sugar on lower heat and move on as soon as it turns golden')] },
+      { label: l('หน้าตา', 'Look'), options: [l('ซีด สีอ่อน', 'Pale'), l('น้ำตาลเข้มเงา ไข่สีน้ำตาลทั่วลูก', 'Glossy deep brown, eggs brown all over'), l('ดำ ขม', 'Black and bitter')], good: l('สีน้ำตาลเงา', 'A glossy brown'), tips: [l('ครั้งหน้าเคี่ยวคาราเมลให้เข้มขึ้น หรือเพิ่มซีอิ๊วดำ', 'Next time take the caramel darker or add more dark soy sauce'), l('ครั้งหน้าลดซีอิ๊วดำ และเคี่ยวคาราเมลแค่สีทอง', 'Next time use less dark soy sauce and stop the caramel at golden')] },
+    ],
+  };
+}
+
+// ผัดพริกขิงไม่มีน้ำแกง เก็บได้ 3 วัน เป็นจานสุดท้ายของแผนวันอาทิตย์เพราะเร็วที่สุด
+function prikKhing(o1: number, o2: number, adapt: string[]): Recipe {
+  const SP = [
+    { label: l('เผ็ดน้อย', 'Mild'), paste: 2, baht: 10, note: l('พริกแกงเผ็ด 2 ช้อนโต๊ะ หอมเครื่องแกง เผ็ดเบาๆ', '2 tbsp red curry paste. Aromatic with gentle heat.') },
+    { label: l('เผ็ดกลาง', 'Medium spicy'), paste: 3, baht: 15, note: l('พริกแกงเผ็ด 3 ช้อนโต๊ะ เผ็ดแบบร้านข้าวแกงทั่วไป', '3 tbsp red curry paste. As hot as a typical curry shop.') },
+    { label: l('เผ็ดจัด', 'Very spicy'), paste: 4, baht: 20, note: l('พริกแกงเผ็ด 4 ช้อนโต๊ะ เผ็ดเข้มทุกคำ', '4 tbsp red curry paste. Hot in every bite.') },
+  ];
+  const MEAT = [
+    { label: l('หมูสับ', 'Minced pork'), id: 'pork', img: 'pork' as ImgKey, baht: 60, kcal: 520, note: l('สุกเร็ว เครื่องแกงเกาะทั่วทุกเม็ด', 'Cooks fast and the paste clings to every bit.') },
+    { label: l('หมูสันนอก', 'Pork loin'), id: 'pork-loin', img: 'pork' as ImgKey, baht: 70, kcal: 480, note: l('หั่นเส้นบางๆ ได้ชิ้นหมูให้เคี้ยว', 'Sliced thin, for proper bites of pork.') },
+    { label: l('อกไก่', 'Chicken breast'), id: 'chicken-breast', img: 'chicken' as ImgKey, baht: 45, kcal: 430, note: l('ไม่กินหมูก็ทำได้ ไขมันน้อยกว่า ผัดแค่พอสุกจะไม่แข็ง', 'No pork needed, and leaner. Cook just until done so it stays tender.') },
+  ];
+  const sp = SP[o1] ?? SP[1], m = MEAT[o2] ?? MEAT[0], minced = m.id === 'pork', chicken = m.id === 'chicken-breast';
+  const lowSalt = adapt.includes('salt'), fish = fmt(lowSalt ? 0.5 : 1);
+  const ingredients: Ingredient[] = [
+    { id: m.id, img: m.img, name: m.label, q: 300, unit: U.g, baht: m.baht, why: l('ปริมาณนี้ผัดในกระทะใบเดียวได้ไม่แน่นเกินไป', 'This much fits one wok without crowding') },
+    { id: 'long-bean', name: l('ถั่วฝักยาว', 'Long beans'), q: 300, unit: U.g, baht: 25, why: l('ผัดแค่พอสุกยังกรอบ และเก็บได้หลายวันกว่าผักใบ', 'Cooked just tender-crisp, and it keeps longer than leafy greens') },
+    { id: 'red-paste', name: l('พริกแกงเผ็ด', 'Red curry paste'), q: sp.paste, unit: U.tbsp, baht: sp.baht, why: l('พริกขิงคือพริกแกงผัดน้ำมันจนหอมแห้ง ไม่ใส่กะทิ', 'Prik khing is curry paste fried in oil until dry and fragrant, no coconut milk') },
+    { id: 'lime-leaf', name: l('ใบมะกรูด', 'Kaffir lime leaves'), q: 6, unit: U.leaf, baht: 4, why: l('ซอยเป็นเส้นฝอย กลิ่นหอมสดคือเอกลักษณ์ของพริกขิง', 'Shredded fine, their fresh smell is the signature of prik khing') },
+    { id: 'oil', name: l('น้ำมันพืช', 'Vegetable oil'), q: 2, unit: U.tbsp, baht: 2, why: l('พอให้พริกแกงไม่ติดกระทะ', 'Enough to fry the paste without sticking') },
+    { id: 'fish', name: l('น้ำปลา', 'Fish sauce'), q: lowSalt ? 0.5 : 1, unit: U.tbsp, baht: 2, why: lowSalt ? l('ลดลงครึ่งหนึ่งตามที่ขอ ชิมก่อนแล้วค่อยเติม', 'Halved as you asked. Taste before adding more') : l('พริกแกงเค็มอยู่แล้ว ใส่น้อยก่อนแล้วชิม', 'The paste is already salty, so start small and taste') },
+    { id: 'sugar', name: l('น้ำตาลปี๊บหรือน้ำตาลทราย', 'Palm sugar or white sugar'), q: 1.5, unit: U.tbsp, baht: 2, why: l('พริกขิงต้องหวานนำนิดๆ ช่วยตัดความเผ็ด', 'Prik khing leans a little sweet to balance the heat') },
+    { id: 'rice', name: l('ข้าวสวย', 'Cooked rice'), q: 4, unit: U.plates, baht: 28, why: l('ผัดกระทะนี้พอดีกับข้าว 4 จาน', 'This wok is right for 4 plates of rice') },
+  ];
+  const steps: Step[] = [
+    { id: 'pk-fridge', phase: 1, title: l('หยิบของออกมาให้ครบ', 'Get everything out'), do: l('หยิบของจริงออกมาวางให้ครบก่อนเปิดไฟ', 'Take everything out before you turn on the heat.'),
+      gather: [l(`${m.label.th} 300 กรัม`, `${m.label.en}, 300 g`), l('ถั่วฝักยาว 300 กรัม', 'Long beans, 300 g'), l(`พริกแกงเผ็ด ${sp.paste} ช้อนโต๊ะ`, `Red curry paste, ${sp.paste} tbsp`), l('ใบมะกรูด 6 ใบ', '6 kaffir lime leaves'), l('น้ำมัน น้ำปลา น้ำตาล', 'Oil, fish sauce, sugar')],
+      see: l('ถั่วสีเขียวสด หักแล้วดังกรอบ', 'Bright green beans that snap'),
+      why: l('ผัดจานนี้ใช้เวลาราว 10 นาที เตรียมของครบก่อนพริกแกงจะได้ไม่ไหม้', 'The stir-fry takes about 10 minutes, so have everything ready or the paste burns.') },
+    { id: 'pk-cut', phase: 1, title: l('หั่นถั่วและใบมะกรูด', 'Cut the beans and lime leaves'),
+      do: l(`หั่นถั่วฝักยาวยาวราว 4 ซม.${minced ? '' : ' หั่นเนื้อเป็นเส้นบางๆ'} แล้วม้วนใบมะกรูดซอยเป็นเส้นฝอย`, `Cut the beans about 4 cm long.${minced ? '' : ' Slice the meat into thin strips.'} Roll up the lime leaves and shred them fine.`),
+      see: l('ใบมะกรูดฝอยเท่าเส้นด้าย', 'Lime leaves shredded thread-thin'),
+      why: l('ใบมะกรูดฝอยกระจายกลิ่นทั่วจาน และไม่แข็งเวลาเคี้ยว', 'Fine shreds spread the smell through the dish and are not tough to chew.') },
+    { id: 'pk-paste', phase: 2, heat: 1, timer: 60, title: l('ผัดพริกแกง ไฟกลาง', 'Medium heat, fry the paste'),
+      do: l(`เปิดไฟกลาง ใส่น้ำมัน 2 ช้อนโต๊ะ แล้วใส่พริกแกง ${sp.paste} ช้อนโต๊ะ ผัดราว 1 นาทีจนหอมและน้ำมันเป็นสีแดง`, `Medium heat, 2 tbsp oil, then ${sp.paste} tbsp paste. Fry about a minute until fragrant and the oil turns red.`),
+      see: l('น้ำมันสีแดงส้ม หอมฉุน', 'Red-orange oil and a strong smell'),
+      why: l('ผัดพริกแกงในน้ำมันให้สุกก่อน กลิ่นจะหอมและรสไม่ดิบ', 'Frying the paste first cooks out the raw taste and wakes the aroma.') },
+    { id: 'pk-meat', phase: 3, heat: 2, timer: chicken ? 150 : 180, title: l('เร่งไฟแรง ใส่เนื้อ', 'High heat, add the meat'),
+      do: l(`เร่งไฟแรง ใส่${m.label.th} ผัดคลุกกับพริกแกงจนสุกทั่ว ราว ${chicken ? '2 นาทีครึ่ง' : '3 นาที'}`, `Turn to high heat, add the ${m.label.en.toLowerCase()} and toss it in the paste until cooked through, about ${chicken ? '2½' : '3'} minutes.`),
+      see: l('ไม่เหลือสีชมพู เครื่องแกงเกาะเนื้อ', 'No pink left, the paste clinging to the meat'),
+      why: l('ไฟแรงทำให้เนื้อไม่ออกน้ำ เครื่องแกงจะเกาะแห้งหอม', 'High heat keeps the meat from going watery, so the paste clings dry and fragrant.') },
+    { id: 'pk-beans', phase: 3, heat: 2, timer: 240, title: l('ใส่ถั่วฝักยาว', 'Add the long beans'),
+      do: l('ใส่ถั่วฝักยาวกับน้ำ 3 ช้อนโต๊ะ ผัดราว 4 นาทีจนถั่วเขียวสดและยังกรอบ', 'Add the beans and 3 tbsp water and stir-fry about 4 minutes until bright green and still crisp.'),
+      see: l('ถั่วสีเขียวสด กัดแล้วยังกรอบนิดๆ', 'Bright green beans with a little bite left'),
+      why: l('น้ำเล็กน้อยช่วยให้ถั่วสุกโดยพริกแกงไม่ไหม้ อย่าผัดนานจนถั่วเหี่ยว เพราะจะอุ่นซ้ำอีก', 'A little water cooks the beans without burning the paste. Do not overcook them: they get reheated later.') },
+    { id: 'pk-season', phase: 4, heat: 2, timer: 30, title: l('ปรุงรส', 'Season'),
+      do: l(`ใส่น้ำปลา${fish.th} ช้อนโต๊ะ น้ำตาล 1 ช้อนโต๊ะครึ่ง ผัดให้เข้ากันแล้วชิม`, `Add ${fish.en} tbsp fish sauce and 1½ tbsp sugar, toss and taste.`),
+      see: l('หวานนำ เค็มตาม และเผ็ดหอม', 'Sweet first, then salty, with a fragrant heat'),
+      why: lowSalt ? l('สูตรนี้ลดเค็มไว้ พริกแกงเค็มอยู่แล้ว ชิมก่อนแล้วค่อยเติม', 'This version is less salty. The paste is salty already, so taste before adding more.') : l('พริกแกงเค็มอยู่แล้ว ปรุงตอนท้ายจะได้ไม่เค็มเกิน', 'The paste is already salty, so seasoning last keeps it from getting too salty.'),
+      gather: [l('น้ำปลา', 'Fish sauce'), l('น้ำตาล', 'Sugar')] },
+    { id: 'pk-leaves', phase: 5, heat: 0, timer: 10, title: l('ปิดไฟ ใส่ใบมะกรูด', 'Heat off, add the lime leaves'), do: l('ปิดไฟ ใส่ใบมะกรูดฝอย คลุกให้ทั่ว', 'Turn off the heat, add the shredded lime leaves and toss.'),
+      see: l('กลิ่นมะกรูดหอมขึ้นมาทันที', 'The lime leaf smell rises at once'),
+      why: l('ใส่ตอนท้ายกลิ่นจะสดที่สุด', 'Added last, the smell is at its freshest.') },
+    { id: 'pk-store', phase: 5, title: l('ตักกิน แล้วเก็บส่วนที่เหลือ', 'Serve, then store the rest'), do: l('ตักกินกับข้าว ส่วนที่เหลือพักให้เย็นภายใน 1 ชั่วโมง แบ่งใส่กล่องปิดฝา แล้วเข้าตู้เย็น', 'Serve with rice. Cool the rest within an hour, portion it into lidded boxes and refrigerate.'),
+      see: l('แบ่งกล่องละ 1 มื้อ', 'One meal per box'),
+      why: l('เก็บได้ 3 วัน ถั่วจะนิ่มลงเล็กน้อย อุ่นในกระทะหรือไมโครเวฟให้ร้อนทั่วก่อนกิน', 'It keeps 3 days; the beans soften a little. Reheat in a pan or microwave until hot all through.') },
+  ];
+  return {
+    id: 'prik-khing', name: chicken ? l('ผัดพริกขิงไก่ถั่วฝักยาว (4 จาน)', 'Prik khing chicken with long beans (serves 4)') : l('ผัดพริกขิงหมูถั่วฝักยาว (4 จาน)', 'Prik khing pork with long beans (serves 4)'), img: 'dish-prik-khing', mins: 25, phases: 5, kcal: m.kcal,
+    g1: { title: l('ความเผ็ด', 'Spiciness'), opts: SP }, g2: { title: l('เนื้อสัตว์', 'Meat'), opts: MEAT },
+    adapts: [{ id: 'salt', label: l('ลดเค็ม', 'Less salty') }],
+    adaptNotes: lowSalt ? [l('ลดน้ำปลาเหลือครึ่งช้อนโต๊ะ ชิมก่อนแล้วค่อยเติม', 'Fish sauce cut to half a tbsp. Taste, then add more if needed.')] : [],
+    ingredients, steps, qa,
+    senses: [
+      { label: l('รสชาติ', 'Taste'), options: SALT, good: l('หวานเค็ม เผ็ดหอม', 'Sweet, salty and fragrantly hot'), tips: [l('ครั้งหน้าเติมน้ำปลาอีกครึ่งช้อนโต๊ะตอนปรุง', 'Next time add half a tbsp more fish sauce when seasoning'), l('ครั้งหน้าลดน้ำปลา และเพิ่มน้ำตาลอีกนิด', 'Next time use less fish sauce and a little more sugar')] },
+      { label: l('กลิ่น', 'Aroma'), options: [l('ยังไม่หอมเครื่องแกง', 'No curry aroma yet'), l('หอมพริกแกงกับใบมะกรูด', 'Smells of curry paste and lime leaf'), l('มีกลิ่นไหม้', 'Smells burnt')], good: l('หอมพริกแกงผัดกับใบมะกรูด', 'Fried curry paste and lime leaf'), tips: [l('ครั้งหน้าผัดพริกแกงในน้ำมันนานขึ้นจนน้ำมันแดง', 'Next time fry the paste longer, until the oil turns red'), l('ครั้งหน้าหรี่ไฟตอนผัดพริกแกง และเติมน้ำทีละนิดถ้าเริ่มติด', 'Next time lower the heat for the paste and add a splash of water if it sticks')] },
+      { label: l('หน้าตา', 'Look'), options: [l('ถั่วเหี่ยวเละ', 'Limp, mushy beans'), l('ถั่วเขียวสด เคลือบพริกแกงแดง', 'Bright green beans coated in red paste'), l('ถั่วยังดิบแข็ง', 'Beans still raw and hard')], good: l('ถั่วเขียวสด เคลือบพริกแกงทั่ว', 'Bright beans coated all over'), tips: [l('ครั้งหน้าผัดถั่วสั้นลงราว 1 นาที', 'Next time cook the beans about a minute less'), l('ครั้งหน้าเติมน้ำอีก 2 ช้อนโต๊ะแล้วผัดต่ออีก 1 นาที', 'Next time add 2 more tbsp water and cook a minute longer')] },
+    ],
+  };
+}
+
+/** แผนทำอาหารวันอาทิตย์: ทำ 3 จานครั้งเดียว กินทั้งสัปดาห์ด้วยตู้เย็นและช่องแช่แข็ง เรียงตามลำดับที่ควรเริ่ม */
+export const SUNDAY_PLAN = {
+  meals: 12,
+  dishes: [
+    { id: 'moo-palo', o1: 1, o2: 0, when: l('เริ่มหมูพะโล้ก่อน เพราะเคี่ยวนานที่สุด ระหว่างเคี่ยวทำจานอื่นต่อได้', 'Start the braised pork first: it simmers longest, and you cook the rest meanwhile.') },
+    { id: 'green-curry', o1: 1, o2: 0, when: l('ระหว่างพะโล้เคี่ยว ทำแกงเขียวหวานบนอีกหัวเตา', 'While the pork simmers, make the green curry on the other burner.') },
+    { id: 'prik-khing', o1: 1, o2: 0, when: l('ผัดพริกขิงเป็นจานสุดท้าย เร็วที่สุด และถั่วจะยังกรอบ', 'Stir-fry the prik khing last: it is quickest and the beans stay crisp.') },
+  ],
+};
+
+/** รวมของที่ต้องซื้อของทั้งแผน ของเดียวกันหน่วยเดียวกันรวมเป็นแถวเดียว แล้วคิดต้นทุนต่อมื้อ */
+export function planShopping(plan = SUNDAY_PLAN) {
+  const items: Ingredient[] = [];
+  for (const d of plan.dishes) {
+    for (const g of buildRecipe(d.id, d.o1, d.o2)!.ingredients) {
+      const same = items.find((x) => x.id === g.id && x.unit.th === g.unit.th);
+      if (same) { same.q += g.q; same.baht += g.baht; } else items.push({ ...g });
+    }
+  }
+  const total = items.reduce((sum, g) => sum + g.baht, 0);
+  return { items, total, perMeal: Math.round(total / plan.meals) };
+}
+
 export function buildRecipe(id: string, o1 = 1, o2 = 0, adapt: string[] = []): Recipe | null {
   if (id === 'kaprao') return kaprao(o1, o2, adapt);
   if (id === 'omelet') return omelet(o1, o2, adapt);
   if (id === 'green-curry') return greenCurry(o1, o2, adapt);
+  if (id === 'moo-palo') return mooPalo(o1, o2, adapt);
+  if (id === 'prik-khing') return prikKhing(o1, o2, adapt);
   return null;
 }
-export const DEFAULT_OPTS: Record<string, [number, number]> = { kaprao: [1, 0], omelet: [0, 0], 'green-curry': [1, 0] };
+export const DEFAULT_OPTS: Record<string, [number, number]> = { kaprao: [1, 0], omelet: [0, 0], 'green-curry': [1, 0], 'moo-palo': [1, 0], 'prik-khing': [1, 0] };
 
 /** รายการเมนูในหน้าสูตร สองเมนูแรกทำตามได้ทุกขั้น ที่เหลือกำลังจะมา */
 export type MenuItem = { id: string; name: L; img: ImgKey; mins: number; easy: boolean; baht: number; kcal: number; ready: boolean; need: string[] };
@@ -380,6 +590,8 @@ export const MENU: MenuItem[] = [
   { id: 'morning-glory', name: l('ผัดผักบุ้งไฟแดง', 'Stir-fried morning glory'), img: 'dish-morning-glory', mins: 8, easy: true, baht: 25, kcal: 210, ready: false, need: ['morningGlory', 'garlic', 'chili'] },
   { id: 'tom-yum', name: l('ต้มยำกุ้ง', 'Tom yum goong'), img: 'dish-tom-yum', mins: 25, easy: false, baht: 120, kcal: 320, ready: false, need: ['shrimp', 'mushroom', 'chili'] },
   { id: 'green-curry', name: l('แกงเขียวหวานไก่ (4 จาน)', 'Green curry chicken (serves 4)'), img: 'dish-green-curry', mins: 35, easy: false, baht: 170, kcal: 610, ready: true, need: ['chicken', 'coconut', 'thaiBasil'] },
+  { id: 'moo-palo', name: l('หมูพะโล้ไข่ (4 จาน)', 'Five-spice pork & eggs (serves 4)'), img: 'dish-moo-palo', mins: 65, easy: false, baht: 177, kcal: 540, ready: true, need: ['pork', 'egg', 'garlic'] },
+  { id: 'prik-khing', name: l('ผัดพริกขิงหมูถั่วฝักยาว (4 จาน)', 'Prik khing pork with long beans (serves 4)'), img: 'dish-prik-khing', mins: 25, easy: true, baht: 138, kcal: 520, ready: true, need: ['pork', 'chili'] },
 ];
 
 export const PANTRY: { id: string; name: L }[] = [

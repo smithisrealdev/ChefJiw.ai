@@ -62,7 +62,7 @@ export default function RecipeDetail() {
             <View style={[s.box, { borderColor: colors.ink, backgroundColor: on ? colors.success : 'transparent' }]}>
               {on && <Icon name="check" color={colors.bg} size={18} />}
             </View>
-            {g.id in IMG ? <Thumb source={IMG[g.id as ImgKey]} size={48} /> : <View style={[s.noImg, { backgroundColor: colors.line }]} />}
+            {(g.img ?? g.id) in IMG ? <Thumb source={IMG[(g.img ?? g.id) as ImgKey]} size={48} /> : <View style={[s.noImg, { backgroundColor: colors.line }]} />}
             <View style={{ flex: 1 }}>
               <T v="bodyBold">{pick(g.name)}</T>
               <T v="smallBold" tone="muted">{g.q === 0.5 ? '½' : g.q} {pick(g.unit)}</T>
