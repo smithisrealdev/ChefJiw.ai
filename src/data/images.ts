@@ -30,6 +30,12 @@ export const DISH_TINT: Record<string, string> = {
   'green-curry': '#8FDB8A', 'moo-palo': '#A7B0FF', 'prik-khing': '#FFB35C',
 };
 
+// ฉากเต็มความกว้างใต้ชื่อหน้าจอ พื้นโปร่งใส วาดให้เข้ากับสีหัวจอของหน้านั้น
+export const SCENE = {
+  home: { source: require('@/assets/images/chef/scene-home.png'), ratio: 780 / 360 }, // ครัวของทีมเชฟ (หัวจอสีน้ำเงิน)
+  plan: { source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300 }, // แผงตลาดของป้างอบ (หัวจอสีส้ม)
+};
+
 // ทีมเชฟ ตัวละครสามตัว แต่ละตัวดูแลงานของตัวเอง ใช้เฉพาะจังหวะที่ท่านั้นมีความหมาย ไม่แปะทุกหน้า
 export const MASCOT = {
   // เชฟจิ๋ว: พาทำอาหาร

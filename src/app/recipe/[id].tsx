@@ -38,7 +38,7 @@ export default function RecipeDetail() {
         <Card tone="accent" style={s.buy}>
           <View style={{ flex: 1 }}>
             <T v="small" tone="pastelMuted">{t('detail.toBuy')}</T>
-            <T v="heading" tone="pastel">{price(total)}</T>
+            <T v="price" tone="pastel">{price(total)}</T>
           </View>
           <View style={{ alignItems: 'center', gap: space.xs }}>
             <Button kind="onPastel" label={cooking ? t('detail.resume', { n: cooking.step + 1 }) : t('detail.start')} size="cook" onPress={cooking ? () => router.push(`/cook/${r.id}`) : start} />

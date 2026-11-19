@@ -45,8 +45,7 @@ export const type = { sm: 14, md: 16, lg: 18, xl: 20, xxl: 28, hero: 44 } as con
 export const touch = { min: 44, cook: 56 } as const;
 
 export const fonts = {
-  heading: 'Mali_700Bold',
-  headingSemi: 'Mali_600SemiBold',
+  heading: 'Mitr_500Medium', // วางวรรณยุกต์ไทยถูกตำแหน่ง ฟอนต์เดิม (Mali) วางไม้ตรีกับไม้จัตวาลอยสูง เช่นคำว่า จิ๋ว
   body: 'IBMPlexSansThaiLooped_400Regular',
   bodySemi: 'IBMPlexSansThaiLooped_600SemiBold',
   bodyBold: 'IBMPlexSansThaiLooped_700Bold',

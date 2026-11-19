@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { Icon } from '@/components/icon';
 import { ResumeCard } from '@/components/resume-card';
 import { Button, Card, Float, Pill, Screen, T, Thumb } from '@/components/ui';
-import { IMG, MASCOT } from '@/data/images';
+import { IMG, MASCOT, SCENE } from '@/data/images';
 import { MENU, planShopping } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import type { L } from '@/lib/i18n';
@@ -27,7 +27,7 @@ export default function Home() {
   const [line, setLine] = useState(0);
   const pickToday = MENU[0];
   return (
-    <Screen tint={colors.header.home} title={t('home.title')} mascot={MASCOT.hi}>
+    <Screen tint={colors.header.home} title={t('home.title')} scene={SCENE.home}>
       {/* จุดเด่นของจอ: จานแนะนำวันนี้ พร้อมบทพูดของเชฟและปุ่มเริ่มทำ */}
       <Card tone="coral" style={{ gap: space.md }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
@@ -54,10 +54,8 @@ export default function Home() {
       <Card tone="navy" onPress={() => router.push('/plan')} label={`${t('plan.title')}, ${t('plan.perMeal')} ${price(PER_MEAL)}`} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View style={{ flex: 1 }}>
           <T v="subheading" tone="onNavy">{t('plan.title')}</T>
-          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.sm }}>
-            <T v="bodyBold" tone="onNavy">{t('plan.perMeal')}</T>
-            <T v="hero" tone="yellow">{price(PER_MEAL)}</T>
-          </View>
+          <T v="smallBold" tone="onNavyMuted">{t('plan.perMeal')}</T>
+          <T v="hero" tone="yellow">{price(PER_MEAL)}</T>
           <T v="small" tone="onNavyMuted">{t('plan.sub')}</T>
         </View>
         <Image source={MASCOT.shop} style={{ width: 104, height: 104 }} contentFit="contain" accessible={false} />

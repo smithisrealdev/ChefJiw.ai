@@ -12,10 +12,12 @@ import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
 import { fonts, onPastel, onTint, radius, space, touch, type, vivid } from '@/theme/tokens';
 
-type TextVariant = 'hero' | 'title' | 'heading' | 'subheading' | 'body' | 'bodyBold' | 'small' | 'smallBold' | 'step';
+type TextVariant = 'hero' | 'price' | 'title' | 'heading' | 'subheading' | 'body' | 'bodyBold' | 'small' | 'smallBold' | 'step';
 const VARIANT: Record<TextVariant, TextStyle> = {
   // ตัวเลขเด่นของจอ (ราคาต่อมื้อ เวลาที่เหลือ จำนวนจานที่ทำแล้ว)
-  hero: { fontFamily: fonts.heading, fontSize: type.hero, lineHeight: type.hero * 1.2, fontVariant: ['tabular-nums'] },
+  // ตัวเลขใช้ฟอนต์เนื้อความตัวหนา เพราะเลขศูนย์ของฟอนต์หัวข้อ (Mitr) มีขีดทับ
+  hero: { fontFamily: fonts.bodyBold, fontSize: type.hero, lineHeight: type.hero * 1.2, fontVariant: ['tabular-nums'] },
+  price: { fontFamily: fonts.bodyBold, fontSize: type.xl, lineHeight: type.xl * 1.35, fontVariant: ['tabular-nums'] },
   title: { fontFamily: fonts.heading, fontSize: type.xxl, lineHeight: type.xxl * 1.3 },
   heading: { fontFamily: fonts.heading, fontSize: type.xl, lineHeight: type.xl * 1.35 },
   subheading: { fontFamily: fonts.heading, fontSize: type.lg, lineHeight: type.lg * 1.4 },
@@ -94,7 +96,7 @@ export function Float({ children }: { children: ReactNode }) {
 }
 
 /** หัวหน้าจอพร้อมมาสคอต พื้นสีสดประจำหน้า แล้วต่อด้วยแผ่นเนื้อหาสีพื้น */
-export function Screen({ tint, title, subtitle, mascot, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; mascot?: number; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
+export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; mascot?: number; scene?: { source: number; ratio: number }; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   const { colors, isDark } = useSettings();
   const insets = useSafeAreaInsets();
   return (
@@ -108,6 +110,7 @@ export function Screen({ tint, title, subtitle, mascot, onBack, backLabel, right
         {right}
         {mascot && <Float><Image source={mascot} style={s.mascot} contentFit="contain" accessible={false} /></Float>}
       </View>
+      {scene && <Image source={scene.source} style={{ width: '100%', aspectRatio: scene.ratio, marginTop: -space.sm }} contentFit="contain" accessible={false} />}
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
         <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: footer ? 120 : space.xxl }} keyboardShouldPersistTaps="handled">
           {children}

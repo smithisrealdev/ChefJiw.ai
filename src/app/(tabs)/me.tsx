@@ -44,7 +44,7 @@ export default function Me() {
           <Card key={r.at} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
             <Thumb source={IMG[m.img]} size={48} />
             <T v="bodyBold" style={{ flex: 1 }}>{pick(m.name)}</T>
-            <T v="subheading">{t('me.stars', { n: r.score.toFixed(1) })}</T>
+            <T v="price">{t('me.stars', { n: r.score.toFixed(1) })}</T>
           </Card>
         );
       })}

@@ -305,7 +305,7 @@ function Taste({ r }: { r: Recipe }) {
       </View>
       {score !== null && (
         <Card tone="accent" style={{ alignItems: 'center' }}>
-          <T v="title" tone="pastel" style={{ fontSize: 44, lineHeight: 56 }}>{score.toFixed(1)}</T>
+          <T v="hero" tone="pastel">{score.toFixed(1)}</T>
           <T v="bodyBold" tone="pastel">{t('taste.outOf')}</T>
         </Card>
       )}

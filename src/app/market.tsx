@@ -43,7 +43,7 @@ export default function Market() {
         <Card tone="accent" style={s.foot}>
           <View style={{ flex: 1 }}>
             <T v="small" tone="pastelMuted" accessibilityLiveRegion="polite">{cart.length ? t('market.cart', { n: cart.length }) : t('market.none')}</T>
-            <T v="heading" tone="pastel">{local(total, country)}</T>
+            <T v="price" tone="pastel">{local(total, country)}</T>
           </View>
           <Button kind="onPastel" size="cook" label={t('market.find')} onPress={() => router.push('/recipes')} />
         </Card>
@@ -76,7 +76,7 @@ export default function Market() {
               <T v="small" tone="muted">{pick(it.unit)}</T>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <T v="subheading">{local(it.price, country)}</T>
+              <T v="price">{local(it.price, country)}</T>
               {/* ขึ้นลงบอกทั้งลูกศรและคำ ไม่ใช้สีอย่างเดียว */}
               <T v="smallBold" tone={it.change > 0 ? 'warn' : it.change < 0 ? 'success' : 'muted'}>{it.change > 0 ? '↑ ' : it.change < 0 ? '↓ ' : '– '}{ch}</T>
             </View>
