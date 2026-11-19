@@ -103,5 +103,45 @@ and B's chat costs are not the constraint.
 ## Re-test
 
 Same 20 buyer cards (seed 812619), new pitch in `founder/pitch.md` (the old one is
-`founder/pitch-v1.md`), answers in `founder/panel-v2/`. Results below once the
-panel has run.
+`founder/pitch-v1.md`), answers in `founder/panel-v2/`, tally in
+`founder/panel-v2/results.md`.
+
+**The buy rate did not move: 0 of 20 before, 0 of 20 after.** What did move:
+
+| | Before (unlimited questions) | After (a new dish every week) |
+|---|---|---|
+| Buy | 0 / 20 | 0 / 20 |
+| Reason: need (nothing worth paying for) | 20 | 11 |
+| Reason: habit (free clips, mum, a free AI already do it) | 0 | 7 |
+| Reason: price | 0 | 2 |
+| Would refuse at 99 baht (their "too expensive" is 99 or less) | 19 | 11 |
+| Median prices: too cheap / bargain / expensive / too expensive | 10 / 29 / 59 / 99 | 10 / 29 / 59 / 99 |
+| Highest "too expensive" given | 129 | 199 |
+
+The offer removed "there is nothing to pay for" for 9 buyers and lifted the price
+ceiling for 8, but nobody crossed into buying. The objections that replaced it,
+counted by hand from `would_change_my_mind`:
+
+| What would change their mind | Buyers |
+|---|---:|
+| Pay once, no monthly fee (one-time prices named: 59, 99, under 100, 149 baht) | 5 |
+| Proof, in real numbers, that the Sunday plan feeds them for less than street food | 5 |
+| A free taste of a harder dish (green curry) that beats a video, before paying | 4 |
+| Healthy versions with calories, less oil, salt and sugar | 2 |
+| Someone they trust vouching for it | 2 |
+| The Sunday plan every week, not once a month | 1 |
+| Asking the chef out loud instead of typing | 1 |
+
+What this says about the offer, not just the price:
+- **The free tier shows the wrong dishes.** Basil pork and pork omelet are the two
+  dishes every buyer already cooks, so the free app never shows what the
+  membership is worth. Several asked for one hard dish free instead.
+- **A subscription is itself the objection** for a quarter of the panel. A one-time
+  purchase of a dish pack is worth testing against the monthly plan.
+- **Saving money is the result these buyers care about**, more than learning. The
+  Sunday plan only lands if it shows, in baht, that cooking beats a 50-baht plate.
+  The hidden market-price feature could carry that proof.
+
+Next: a third offer that tests those three changes (a free hard dish, a one-time
+pack next to the monthly plan, and the Sunday plan's cost against street food),
+then `/founder-pricing` on the answers and `/founder-cfo` with the content cost.

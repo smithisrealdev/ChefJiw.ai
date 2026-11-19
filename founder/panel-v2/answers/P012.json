@@ -1,0 +1,13 @@
+{
+  "id": "P012",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I learn from YouTube and TikTok for free and it works fine for me. There are a hundred Thai videos each for green curry, tom yum and pad see ew, so I might open the free kaprao once, but I'm not paying 99 baht every month for recipes I can watch for nothing.",
+  "objection": "Every dish they list is already free on YouTube from Thai cooks I already follow, so why pay every month? 99 baht is about two plates of kaprao from the stall downstairs.",
+  "would_change_my_mind": "If the free part let me cook something I actually get wrong from videos, like green curry, and the chef fixed my mistake while I was cooking. Then I'd see it does something a video can't.",
+  "price_too_cheap": 10,
+  "price_cheap": 29,
+  "price_expensive": 59,
+  "price_too_expensive": 99
+}
