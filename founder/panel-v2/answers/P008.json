@@ -1,0 +1,13 @@
+{
+  "id": "P008",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "99 baht every month is a whole delivery meal for me, and I don't pay for subscriptions when YouTube and the back of the curry paste packet show green curry and tom yum for free. The two free dishes are basil pork and pork omelet, which I already cook without help, so there's nothing in the free part that pulls me in.",
+  "objection": "Will the dish actually come out right in my kitchen? 'Cooked by home cooks' sounds nice, but the app can't see my pan or taste my curry, and if it comes out thin and bland I've still wasted the coconut milk and chicken, plus the 99 baht.",
+  "would_change_my_mind": "Let me pay once, around 59 baht, to keep the dishes for good, with no monthly charge I have to remember to cancel.",
+  "price_too_cheap": 9,
+  "price_cheap": 29,
+  "price_expensive": 49,
+  "price_too_expensive": 79
+}
