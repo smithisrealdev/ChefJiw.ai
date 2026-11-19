@@ -1,0 +1,13 @@
+{
+  "id": "P017",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "The free version already gives me 3 typed questions a day, which is more than I'd ever ask while cooking a 10-15 minute dish a few times a week. If I'm really stuck I just ask ChatGPT for free, so I'm not paying 99 baht a month just to ask more questions.",
+  "objection": "A free AI chat already answers my cooking questions, so paying only for unlimited questions makes no sense to me. And the only two dishes are a fried egg and a kai jeow, which I think of as oily food, not how I cook to eat healthy.",
+  "would_change_my_mind": "If the membership gave me lots of lighter Thai recipes with calories, oil and salt shown per serving, not just more questions.",
+  "price_too_cheap": 10,
+  "price_cheap": 29,
+  "price_expensive": 59,
+  "price_too_expensive": 99
+}

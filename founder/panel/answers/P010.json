@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "Kra pao and khai jiao are the first dishes my mum ever taught me, so I don't need an app to walk me through them, and since I only cook on Sundays, 3 free questions a day is already more than I'd ever use. There's nothing here worth 99 baht a month to me.",
+  "objection": "I can watch a free video for this, or just call mum, and I trust her recipe more than an app. Paying every month to type more questions to an AI about dishes I already know feels like paying for nothing.",
+  "would_change_my_mind": "If the membership came with lots of dishes I could batch-cook on Sunday for the whole week, not just two I already know. More questions alone will never make me pay.",
+  "price_too_cheap": 10,
+  "price_cheap": 29,
+  "price_expensive": 59,
+  "price_too_expensive": 99
+}

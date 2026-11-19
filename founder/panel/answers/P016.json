@@ -1,0 +1,13 @@
+{
+  "id": "P016",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I only cook on weekends, so 3 free questions a day is already more than I'd use, and when I get stuck I just ask the free AI app I already have. Paying 99 baht a month for more questions I don't need makes no sense to me.",
+  "objection": "Only two dishes, and I can already make basil pork and a pork omelet without help. I'd be done with it after two dinners, so what am I actually paying for, more chat questions I get free somewhere else?",
+  "would_change_my_mind": "A real library of dozens of dishes, including weekend projects I can't make yet like a curry from scratch, with the membership unlocking those guided recipes instead of just more questions.",
+  "price_too_cheap": 19,
+  "price_cheap": 39,
+  "price_expensive": 69,
+  "price_too_expensive": 99
+}

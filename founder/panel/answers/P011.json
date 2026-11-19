@@ -1,0 +1,13 @@
+{
+  "id": "P011",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I'd download it free if a friend sent it and try the basil pork, but 3 questions a day is already more than I'd ever ask, so paying 99 baht a month just for unlimited questions makes no sense. With only two dishes I'd probably delete it after a week or two.",
+  "objection": "It's another monthly subscription for something the free version already covers, and two dishes I can learn from YouTube or TikTok for free. I already know how to make a pork omelet.",
+  "would_change_my_mind": "If the membership unlocked a lot more everyday dishes, like a new one every week, instead of just more questions.",
+  "price_too_cheap": 10,
+  "price_cheap": 29,
+  "price_expensive": 59,
+  "price_too_expensive": 99
+}
