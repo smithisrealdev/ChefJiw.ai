@@ -1,0 +1,13 @@
+{
+  "id": "P016",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I only cook on weekends and I already ask my free AI app for any recipe I want, so a list of 14 dishes plus one a week gives me less than what I have now. The two free dishes are kra pao and khai jiao, which I can make without looking, so there is nothing to hook me before it asks me to subscribe.",
+  "objection": "Only two dishes, and I already know both. I'd run out after two dinners and never see why this beats asking my AI for free. And I don't want another auto-renewing subscription I have to remember to cancel, just for a weekend hobby.",
+  "would_change_my_mind": "Let me cook one of the hard dishes, like green curry from paste, free without starting a subscription. If it clearly comes out better than what my AI tells me, 99 baht is nothing.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 99,
+  "price_too_expensive": 199
+}

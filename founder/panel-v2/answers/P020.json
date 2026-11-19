@@ -1,0 +1,13 @@
+{
+  "id": "P020",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "Most days I just buy a plate downstairs for 50-60 baht, and when I do cook, mum's recipes on LINE, YouTube and the two free dishes are enough. I won't pay 99 baht a month for an app I'd open maybe twice.",
+  "objection": "I can watch a free video for this, and mum already sends me recipes. Making green curry or tom yum just for me probably costs more in ingredients than buying a plate for 50 baht, so why pay to learn it?",
+  "would_change_my_mind": "If the Sunday cook-ahead plan really fed me for the whole week for less than buying street food, so the 99 baht paid for itself.",
+  "price_too_cheap": 10,
+  "price_cheap": 29,
+  "price_expensive": 59,
+  "price_too_expensive": 99
+}
