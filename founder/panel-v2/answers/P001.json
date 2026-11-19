@@ -1,0 +1,13 @@
+{
+  "id": "P001",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I have cooked kaprao and kai jeow for my family for years, so I don't need an elephant to teach me. What I'm short of is time, and on busy days a 50-baht plate from the stall downstairs beats any app; 99 baht a month is two plates of food.",
+  "objection": "The free part is two dishes I already make with my eyes closed, so I'd run out after two dinners, and then it wants 99 baht every month for dishes like green curry that I can make from the instructions on the paste packet or a free YouTube video.",
+  "would_change_my_mind": "Seeing, with my own market's prices, that its dishes really feed my family for clearly less than buying plates downstairs, even after paying the 99 baht.",
+  "price_too_cheap": 10,
+  "price_cheap": 29,
+  "price_expensive": 59,
+  "price_too_expensive": 99
+}
