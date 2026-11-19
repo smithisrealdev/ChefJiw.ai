@@ -5,7 +5,7 @@ import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, Scroll
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
-import { MASCOT, type Motion, type SCENE } from '@/data/images';
+import { MASCOT, type Layers, type Motion, type SCENE } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -83,32 +83,59 @@ export function Card({ tone = 'soft', children, style, onPress, label }: { tone?
   );
 }
 
-/** ทำให้ภาพมีชีวิต: bob = ลอยขึ้นลงช้าๆ sway = โยกซ้ายขวา (โบกมือ ยืนคิด) jump = กระโดดสองจังหวะพร้อมเงาที่พื้น
- *  หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว delay = หน่วงก่อนเริ่ม ให้ตัวละครหลายตัวไม่ขยับพร้อมกัน */
-export function Float({ children, motion = 'bob', delay = 0 }: { children: ReactNode; motion?: Motion; delay?: number }) {
+type Ease = 'sin' | 'up' | 'down';
+const EASE = { sin: Easing.inOut(Easing.sin), up: Easing.out(Easing.quad), down: Easing.in(Easing.quad) };
+// แต่ละจังหวะ: [ค่าปลายทาง, เวลา (ms), การเร่ง] แล้วพัก rest ก่อนวนใหม่
+const MOVES: Record<Motion | 'wave', { steps: [number, number, Ease][]; rest: number }> = {
+  bob: { steps: [[-6, 1400, 'sin'], [0, 1400, 'sin']], rest: 0 },
+  sway: { steps: [[1, 800, 'sin'], [-1, 1600, 'sin'], [0, 800, 'sin']], rest: 0 },
+  jump: { steps: [[-20, 240, 'up'], [0, 240, 'down'], [-12, 180, 'up'], [0, 180, 'down']], rest: 900 },
+  shake: { steps: [[-5, 70, 'sin'], [5, 140, 'sin'], [-5, 140, 'sin'], [5, 140, 'sin'], [0, 70, 'sin']], rest: 1800 },
+  wave: { steps: [[1, 260, 'sin'], [-1, 260, 'sin'], [1, 260, 'sin'], [-1, 260, 'sin'], [0, 200, 'sin']], rest: 1500 },
+};
+/** วนการขยับชุดหนึ่งไปเรื่อยๆ หลังหน่วง delay หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว */
+function useMove(move: keyof typeof MOVES, delay = 0) {
   const [v] = useState(() => new Animated.Value(0));
   useEffect(() => {
     let loop: Animated.CompositeAnimation | undefined;
-    const to = (toValue: number, duration: number, easing: (t: number) => number) => Animated.timing(v, { toValue, duration, easing, useNativeDriver: Platform.OS !== 'web' });
-    const sin = Easing.inOut(Easing.sin), up = Easing.out(Easing.quad), down = Easing.in(Easing.quad);
-    const steps = {
-      bob: [to(-6, 1400, sin), to(0, 1400, sin)],
-      sway: [to(1, 800, sin), to(-1, 1600, sin), to(0, 800, sin)],
-      jump: [to(-20, 240, up), to(0, 240, down), to(-12, 180, up), to(0, 180, down), Animated.delay(900)],
-    }[motion];
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const { steps, rest } = MOVES[move];
+    const frames = steps.map(([toValue, duration, ease]) => Animated.timing(v, { toValue, duration, easing: EASE[ease], useNativeDriver: Platform.OS !== 'web' }));
     AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
-      if (!reduce) timer = setTimeout(() => { loop = Animated.loop(Animated.sequence(steps)); loop.start(); }, delay);
+      if (!reduce) timer = setTimeout(() => { loop = Animated.loop(Animated.sequence([...frames, Animated.delay(rest)])); loop.start(); }, delay);
     }).catch(() => {});
     return () => { clearTimeout(timer); loop?.stop(); };
-  }, [v, motion, delay]);
+  }, [v, move, delay]);
+  return v;
+}
+
+/** ทำให้ภาพมีชีวิต: bob = ลอยขึ้นลงช้าๆ sway = โยกซ้ายขวา shake = สั่นตกใจ jump = กระโดดสองจังหวะพร้อมเงาที่พื้น
+ *  delay = หน่วงก่อนเริ่ม ให้ตัวละครหลายตัวไม่ขยับพร้อมกัน */
+export function Float({ children, motion = 'bob', delay = 0 }: { children: ReactNode; motion?: Motion; delay?: number }) {
+  const v = useMove(motion, delay);
   if (motion === 'sway') return <Animated.View style={{ transformOrigin: 'bottom', transform: [{ rotate: v.interpolate({ inputRange: [-1, 1], outputRange: ['-4deg', '4deg'] }) }] }}>{children}</Animated.View>;
+  if (motion === 'shake') return <Animated.View style={{ transform: [{ translateX: v }] }}>{children}</Animated.View>;
   if (motion === 'bob') return <Animated.View style={{ transform: [{ translateY: v }] }}>{children}</Animated.View>;
   return (
     <View>
       <Animated.View style={{ transform: [{ translateY: v }] }}>{children}</Animated.View>
       {/* เงาอยู่กับพื้น หดเล็กลงตอนตัวลอย */}
       <Animated.View style={{ alignSelf: 'center', width: '46%', height: 6, marginTop: -4, borderRadius: radius.pill, backgroundColor: 'rgba(36,33,43,0.14)', transform: [{ scaleX: v.interpolate({ inputRange: [-20, 0], outputRange: [0.6, 1] }) }] }} />
+    </View>
+  );
+}
+
+/** ภาพตัวละครจัตุรัส ถ้าส่งชั้นแยกของท่าโบกมือมา แขนจะโบกจริงรอบหัวไหล่ */
+export function Mascot({ source, wave, size }: { source: number; wave?: Layers; size: number | '100%' }) {
+  const v = useMove('wave', 300);
+  if (!wave) return <Image source={source} style={{ width: size, aspectRatio: 1 }} contentFit="contain" accessible={false} />;
+  return (
+    <View style={{ width: size, aspectRatio: 1 }}>
+      {/* แขนอยู่หลังตัว หมุนรอบหัวไหล่ */}
+      <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: `${wave.pivot[0] * 100}% ${wave.pivot[1] * 100}%`, transform: [{ rotate: v.interpolate({ inputRange: [-1, 1], outputRange: ['-9deg', '13deg'] }) }] }]}>
+        <Image source={wave.arm} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
+      </Animated.View>
+      <Image source={wave.body} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
     </View>
   );
 }
@@ -133,7 +160,7 @@ export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel
           <Image source={scene.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
           {scene.cast.map((c, k) => (
             <View key={k} style={{ position: 'absolute', left: `${c.left * 100}%`, top: `${c.top * 100}%`, width: `${c.width * 100}%`, aspectRatio: 1 }}>
-              <Float motion={c.motion} delay={c.delay}><Image source={c.source} style={{ width: '100%', aspectRatio: 1 }} contentFit="contain" accessible={false} /></Float>
+              <Float motion={c.motion} delay={c.delay}><Mascot source={c.source} wave={'wave' in c ? c.wave : undefined} size="100%" /></Float>
             </View>
           ))}
         </View>
@@ -195,7 +222,7 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
           <T v="subheading" style={{ color: kind === 'offline' ? onPastel.ink : onPastel.warn }}>{title}</T>
           <T tone="pastel">{body}</T>
         </View>
-        <Image source={MASCOT.oops} style={{ width: 72, height: 72 }} contentFit="contain" accessible={false} />
+        <Float motion="shake"><Image source={MASCOT.oops} style={{ width: 72, height: 72 }} contentFit="contain" accessible={false} /></Float>
       </View>
       {onRetry && (kind === 'offline' || kind === 'failed') && <Button kind="onPastel" label={t('common.retry')} onPress={onRetry} style={{ alignSelf: 'flex-start' }} />}
       {kind === 'unauthorized' && <Button kind="onPastel" label={t('me.signIn')} onPress={() => router.push('/login')} style={{ alignSelf: 'flex-start' }} />}

@@ -1,11 +1,10 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Card, Chip, Float, T, Thumb } from '@/components/ui';
-import { IMG, MASCOT } from '@/data/images';
+import { Button, Card, Chip, Float, Mascot, T, Thumb } from '@/components/ui';
+import { IMG, LAYERS, MASCOT } from '@/data/images';
 import { DEFAULT_OPTS, MENU } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
@@ -36,7 +35,7 @@ export default function Onboarding() {
       <View style={[s.top, { paddingTop: insets.top + space.md }]}>
         <Button kind={isDark ? 'secondary' : 'onPastelLight'} label={t('ob.skip')} onPress={() => finish('/')} />
       </View>
-      <View style={{ alignSelf: 'center' }}><Float motion="sway"><Image source={MASCOT.hi} style={s.mascot} contentFit="contain" accessible={false} /></Float></View>
+      <View style={{ alignSelf: 'center' }}><Float><Mascot source={MASCOT.hi} wave={LAYERS.hi} size={200} /></Float></View>
       <View style={[s.sheet, { backgroundColor: colors.bg, paddingBottom: Math.max(insets.bottom, space.lg) }]}>
         <ScrollView contentContainerStyle={{ gap: space.md }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }} accessibilityLabel={t('ob.count', { n: step + 1, total: 4 })}>
@@ -97,7 +96,6 @@ export default function Onboarding() {
 
 const s = StyleSheet.create({
   top: { alignItems: 'flex-end', paddingHorizontal: space.lg },
-  mascot: { width: 200, height: 200, alignSelf: 'center' },
   sheet: { flex: 1, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, padding: space.lg },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   dish: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.sm, paddingRight: space.lg, borderRadius: radius.lg, borderWidth: 3 },

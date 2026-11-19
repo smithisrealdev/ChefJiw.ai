@@ -5,8 +5,8 @@ import { View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { ResumeCard } from '@/components/resume-card';
-import { Button, Card, Float, Pill, Screen, T, Thumb } from '@/components/ui';
-import { IMG, MASCOT, SCENE } from '@/data/images';
+import { Button, Card, Float, Mascot, Pill, Screen, T, Thumb } from '@/components/ui';
+import { IMG, LAYERS, MASCOT, SCENE } from '@/data/images';
 import { MENU, planShopping } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import type { L } from '@/lib/i18n';
@@ -58,7 +58,7 @@ export default function Home() {
           <T v="hero" tone="yellow">{price(PER_MEAL)}</T>
           <T v="small" tone="onNavyMuted">{t('plan.sub')}</T>
         </View>
-        <Float><Image source={MASCOT.shop} style={{ width: 104, height: 104 }} contentFit="contain" accessible={false} /></Float>
+        <Float><Mascot source={MASCOT.shop} wave={LAYERS.shop} size={104} /></Float>
         <Icon name="next" color="#FFFFFF" />
       </Card>
       {!BETA && (

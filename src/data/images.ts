@@ -47,22 +47,28 @@ export const MASCOT = {
   hmm: require('@/assets/images/chef/hmm.png'), // ยังปรับได้อีก
 };
 
-export type Motion = 'bob' | 'jump' | 'sway';
+export type Motion = 'bob' | 'jump' | 'sway' | 'shake';
+/** ท่าโบกมือแยกเป็นสองชั้น: ตัว กับแขนที่โบก แอปหมุนชั้นแขนรอบหัวไหล่ (pivot เป็นสัดส่วนของภาพ พิมพ์ออกมาตอนรัน draw.py) */
+export type Layers = { body: number; arm: number; pivot: [number, number] };
+export const LAYERS = {
+  hi: { body: require('@/assets/images/chef/hi-body.png'), arm: require('@/assets/images/chef/hi-arm.png'), pivot: [0.328, 0.606] },
+  shop: { body: require('@/assets/images/chef/shop-body.png'), arm: require('@/assets/images/chef/shop-arm.png'), pivot: [0.367, 0.579] },
+} satisfies Record<string, Layers>;
 /** ฉากเต็มความกว้างใต้ชื่อหน้าจอ: ภาพพื้นหลังโปร่งใสที่วาดให้เข้ากับสีหัวจอ แล้ววางตัวละครทับทีละตัวเพื่อให้ขยับได้
  *  ตำแหน่งเป็นสัดส่วนของฉาก (ซ้าย บน กว้าง) ตัวละครเป็นภาพจัตุรัส */
 export const SCENE = {
-  // ครัวของทีมเชฟ (หัวจอสีน้ำเงิน): ใบเตยกลับจากตลาด เชฟจิ๋วโบกมือ น้องชิมกระโดดรอ
+  // ครัวของทีมเชฟ (หัวจอสีน้ำเงิน): ใบเตยกลับจากตลาดโบกมือ เชฟจิ๋วโบกมือ น้องชิมกระโดดรอ
   home: {
     source: require('@/assets/images/chef/scene-home.png'), ratio: 780 / 360,
     cast: [
-      { source: MASCOT.shop, left: 0.008, top: 0.46, width: 0.246, motion: 'bob', delay: 400 },
-      { source: MASCOT.hi, left: 0.344, top: 0.278, width: 0.326, motion: 'sway', delay: 0 },
+      { source: MASCOT.shop, wave: LAYERS.shop, left: 0.008, top: 0.46, width: 0.246, motion: 'bob', delay: 400 },
+      { source: MASCOT.hi, wave: LAYERS.hi, left: 0.344, top: 0.278, width: 0.326, motion: 'bob', delay: 0 },
       { source: MASCOT.yum, left: 0.759, top: 0.528, width: 0.215, motion: 'jump', delay: 900 },
     ],
   },
   // แผงตลาด (หัวจอสีส้ม): ใบเตยเดินเลือกของ
   plan: {
     source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300,
-    cast: [{ source: MASCOT.shop, left: 0.038, top: 0.233, width: 0.295, motion: 'bob', delay: 0 }],
+    cast: [{ source: MASCOT.shop, wave: LAYERS.shop, left: 0.038, top: 0.233, width: 0.295, motion: 'bob', delay: 0 }],
   },
-} satisfies Record<string, { source: number; ratio: number; cast: { source: number; left: number; top: number; width: number; motion: Motion; delay: number }[] }>;
+} satisfies Record<string, { source: number; ratio: number; cast: { source: number; wave?: Layers; left: number; top: number; width: number; motion: Motion; delay: number }[] }>;
