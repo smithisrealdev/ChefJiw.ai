@@ -58,7 +58,7 @@ export default function Home() {
           <T v="hero" tone="yellow">{price(PER_MEAL)}</T>
           <T v="small" tone="onNavyMuted">{t('plan.sub')}</T>
         </View>
-        <Image source={MASCOT.shop} style={{ width: 104, height: 104 }} contentFit="contain" accessible={false} />
+        <Float><Image source={MASCOT.shop} style={{ width: 104, height: 104 }} contentFit="contain" accessible={false} /></Float>
         <Icon name="next" color="#FFFFFF" />
       </Card>
       {!BETA && (
@@ -75,7 +75,7 @@ export default function Home() {
           <T v="hero" tone="pastel">{runs.length}</T>
           <T v="bodyBold" tone="pastel">{t('home.cooked')}</T>
         </View>
-        <Image source={runs.length ? MASCOT.cheer : MASCOT.cook} style={{ width: 96, height: 96 }} contentFit="contain" accessible={false} />
+        <Float motion={runs.length ? 'jump' : 'sway'}><Image source={runs.length ? MASCOT.cheer : MASCOT.cook} style={{ width: 96, height: 96 }} contentFit="contain" accessible={false} /></Float>
       </Card>
     </Screen>
   );

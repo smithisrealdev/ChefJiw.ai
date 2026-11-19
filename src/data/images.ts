@@ -30,12 +30,6 @@ export const DISH_TINT: Record<string, string> = {
   'green-curry': '#8FDB8A', 'moo-palo': '#A7B0FF', 'prik-khing': '#FFB35C',
 };
 
-// ฉากเต็มความกว้างใต้ชื่อหน้าจอ พื้นโปร่งใส วาดให้เข้ากับสีหัวจอของหน้านั้น
-export const SCENE = {
-  home: { source: require('@/assets/images/chef/scene-home.png'), ratio: 780 / 360 }, // ครัวของทีมเชฟ (หัวจอสีน้ำเงิน)
-  plan: { source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300 }, // แผงตลาดที่ใบเตยไปซื้อของ (หัวจอสีส้ม)
-};
-
 // ทีมเชฟ ตัวละครสามตัว แต่ละตัวดูแลงานของตัวเอง ใช้เฉพาะจังหวะที่ท่านั้นมีความหมาย ไม่แปะทุกหน้า
 export const MASCOT = {
   // เชฟจิ๋ว: พาทำอาหาร
@@ -52,3 +46,23 @@ export const MASCOT = {
   yum: require('@/assets/images/chef/yum.png'), // คะแนนดี
   hmm: require('@/assets/images/chef/hmm.png'), // ยังปรับได้อีก
 };
+
+export type Motion = 'bob' | 'jump' | 'sway';
+/** ฉากเต็มความกว้างใต้ชื่อหน้าจอ: ภาพพื้นหลังโปร่งใสที่วาดให้เข้ากับสีหัวจอ แล้ววางตัวละครทับทีละตัวเพื่อให้ขยับได้
+ *  ตำแหน่งเป็นสัดส่วนของฉาก (ซ้าย บน กว้าง) ตัวละครเป็นภาพจัตุรัส */
+export const SCENE = {
+  // ครัวของทีมเชฟ (หัวจอสีน้ำเงิน): ใบเตยกลับจากตลาด เชฟจิ๋วโบกมือ น้องชิมกระโดดรอ
+  home: {
+    source: require('@/assets/images/chef/scene-home.png'), ratio: 780 / 360,
+    cast: [
+      { source: MASCOT.shop, left: 0.008, top: 0.46, width: 0.246, motion: 'bob', delay: 400 },
+      { source: MASCOT.hi, left: 0.344, top: 0.278, width: 0.326, motion: 'sway', delay: 0 },
+      { source: MASCOT.yum, left: 0.759, top: 0.528, width: 0.215, motion: 'jump', delay: 900 },
+    ],
+  },
+  // แผงตลาด (หัวจอสีส้ม): ใบเตยเดินเลือกของ
+  plan: {
+    source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300,
+    cast: [{ source: MASCOT.shop, left: 0.038, top: 0.233, width: 0.295, motion: 'bob', delay: 0 }],
+  },
+} satisfies Record<string, { source: number; ratio: number; cast: { source: number; left: number; top: number; width: number; motion: Motion; delay: number }[] }>;

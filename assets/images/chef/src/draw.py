@@ -45,14 +45,14 @@ def legs(skin, sock, accent, feet, drop):
     return out
 _n = [0]
 def person(skin, top, clothes, hair, accent, look=(0, 0), mouth=True, sock='#FFFFFF', back='', under_head='', arms_back='', arms_front='', hat='', front='', blush=0.85,
-           lean=0, tilt=0, feet=STAND, drop=0, ground=''):
-    """lean = เอนตัวท่อนบน (องศา) tilt = เอียงคอ feet = ตำแหน่งเท้า drop = ย่อตัวลง (นั่ง) ground = ของที่พื้น การกระโดดทำเป็นแอนิเมชันในแอป"""
+           lean=0, tilt=0, feet=STAND, drop=0, ground='', legs_front=False):
+    """lean = เอนตัวท่อนบน (องศา) tilt = เอียงคอ feet = ตำแหน่งเท้า drop = ย่อตัวลง (นั่ง) legs_front = ขาอยู่หน้าตัว (นั่งเหยียดขามาข้างหน้า) ground = ของที่พื้น การกระโดดทำเป็นแอนิเมชันในแอป"""
     _n[0] += 1; cid = f'c{_n[0]}'
-    return SVG(f'''<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{ground}<g>{legs(skin, sock, accent, feet, drop)}
+    return SVG(f'''<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{ground}<g>{'' if legs_front else legs(skin, sock, accent, feet, drop)}
 <g transform="translate(0 {drop}) rotate({lean} 240 384)">{back}{arms_back}
 <clipPath id="{cid}"><path d="{TORSO}"/></clipPath><path d="{TORSO}" fill="{top}"/><g clip-path="url(#{cid})">{clothes}</g>
 <g transform="rotate({tilt} 240 236)">{under_head}<path d="{HEAD}" fill="{skin}"/>{hair}{hat}{face(look, mouth, blush)}</g>
-{arms_front}</g></g>{front}</g>''')
+{arms_front}</g>{legs(skin, sock, accent, feet, drop) if legs_front else ''}</g>{front}</g>''')
 
 # ---------- เชฟจิ๋ว: หมวกเชฟ ผมหน้าม้าปัดข้าง เสื้อแขนยาวฟ้า ผ้ากันเปื้อนเต็มตัวสีส้มมีกระเป๋า ----------
 S1, SKY, BROWN = '#FFE3C2', '#BFD9FF', '#6B4632'
@@ -131,7 +131,7 @@ A3 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S3, BUTTER, 0.8)
 bigspoon = lambda x, y, r: f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y+22} v-136" stroke="{WOOD}" stroke-width="12" stroke-linecap="round"/><ellipse cx="{x}" cy="{y-136}" rx="26" ry="35" fill="{WOOD}"/></g>'
 POSES.update({
   # นั่งแบะขาบนเบาะ ชิมจากช้อน
-  'sip': chim(mouth=False, tilt=-6, drop=40, feet=((66, 440, -78), (414, 440, 78)), ground=f'<ellipse cx="240" cy="456" rx="214" ry="22" fill="#CFE3FF"/>',
+  'sip': chim(mouth=False, tilt=-6, drop=40, legs_front=True, feet=((112, 448, -62), (368, 448, 62)), ground=f'<ellipse cx="240" cy="456" rx="214" ry="22" fill="#CFE3FF"/>',
               arms_front=f'<path d="M312 206 L262 192" stroke="{WOOD}" stroke-width="11" stroke-linecap="round"/><ellipse cx="248" cy="188" rx="22" ry="14" fill="{WOOD}"/>' + A3('R', 316, 212, 46, 18) + A3('L', 208, 338, -34, 14),
               front=heart(420, 150, 1.1) + heart(62, 184, 0.7)),
   # กระโดดชูช้อน ขาข้างหนึ่งเตะไปข้างหลัง
@@ -143,9 +143,7 @@ POSES.update({
 })
 for n, svg in POSES.items(): open(n + '.svg', 'w').write(svg)
 
-# ฉาก: ตัวละครอยู่ในที่ของตัวเอง พื้นหลังโปร่งใส ใช้สีอ่อนเข้มของสีหัวจอ แล้วแต้มสีสดเฉพาะของชิ้นเล็ก
-inner = lambda svg: svg[svg.index('>') + 1:svg.rindex('</svg>')]
-put = lambda name, x, y, s: f'<g transform="translate({x} {y}) scale({s})">{inner(POSES[name])}</g>'
+# ฉาก: วาดเฉพาะของในฉาก ตัวละครวางทับในแอปเพื่อให้ขยับได้ (ตำแหน่งอยู่ใน SCENE ที่ src/data/images.ts) พื้นหลังโปร่งใส ใช้สีอ่อนเข้มของสีหัวจอ แล้วแต้มสีสดเฉพาะของชิ้นเล็ก
 scene = lambda w, h, body: f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}">\n{body}\n</svg>'
 steam = lambda x, y, c='#FFFFFF': f'<path d="M{x} {y} q-10 -12 0 -24 q10 -12 0 -24 M{x+24} {y+4} q-10 -12 0 -24 q10 -12 0 -24" stroke="{c}" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.9"/>'
 
@@ -178,7 +176,6 @@ home = scene(780, 360, ''.join([
   f'<path d="M524 168 h12 M624 168 h12" stroke="{CORAL}" stroke-width="10" stroke-linecap="round"/>',
   # หม้อหุงข้าว
   f'<rect x="672" y="140" width="84" height="60" rx="22" fill="#FFFFFF"/><rect x="672" y="156" width="84" height="8" fill="{HAT_D}"/><circle cx="714" cy="182" r="6" fill="{CORAL}"/>',
-  put('shop', 6, 166, 0.4), put('hi', 268, 100, 0.53), put('yum', 592, 190, 0.35),
 ]))
 open('scene-home.svg', 'w').write(home)
 
@@ -199,6 +196,6 @@ market = scene(780, 300, ''.join([
   f'<ellipse cx="634" cy="204" rx="15" ry="19" fill="#FFFFFF"/><ellipse cx="664" cy="200" rx="15" ry="19" fill="#FFF3DC"/><ellipse cx="694" cy="204" rx="15" ry="19" fill="#FFFFFF"/><ellipse cx="650" cy="186" rx="14" ry="18" fill="#FFF3DC"/><ellipse cx="680" cy="186" rx="14" ry="18" fill="#FFFFFF"/>', crate(604, 212, 128),
   # ป้ายราคา
   ''.join(f'<rect x="{x}" y="238" width="44" height="26" rx="8" fill="#FFFFFF"/><path d="M{x+10} 251 h24" stroke="{O1}" stroke-width="5" stroke-linecap="round"/>' for x in (354, 500, 646)),
-  put('shop', 30, 70, 0.48), star(248, 120, 13, '#FFFFFF'),
+  star(248, 120, 13, '#FFFFFF'),
 ]))
 open('scene-plan.svg', 'w').write(market)

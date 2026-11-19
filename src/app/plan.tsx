@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
-import { Button, Card, Screen, T, Thumb } from '@/components/ui';
+import { Button, Card, Float, Screen, T, Thumb } from '@/components/ui';
 import { DISH_TINT, IMG, MASCOT, SCENE } from '@/data/images';
 import { MENU, planShopping, SUNDAY_PLAN } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
@@ -61,7 +61,7 @@ export default function Plan() {
           <T v="subheading" accessibilityRole="header">{t('plan.shop')}</T>
           <T v="small" tone="muted">{t('detail.haveHint')}</T>
         </View>
-        <Image source={MASCOT.list} style={{ width: 84, height: 84 }} contentFit="contain" accessible={false} />
+        <Float motion="sway"><Image source={MASCOT.list} style={{ width: 84, height: 84 }} contentFit="contain" accessible={false} /></Float>
       </View>
       {SHOP.items.map((g) => {
         const on = have.includes(g.id);

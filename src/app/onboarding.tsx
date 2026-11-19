@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Card, Chip, T, Thumb } from '@/components/ui';
+import { Button, Card, Chip, Float, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT } from '@/data/images';
 import { DEFAULT_OPTS, MENU } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
@@ -36,7 +36,7 @@ export default function Onboarding() {
       <View style={[s.top, { paddingTop: insets.top + space.md }]}>
         <Button kind={isDark ? 'secondary' : 'onPastelLight'} label={t('ob.skip')} onPress={() => finish('/')} />
       </View>
-      <Image source={MASCOT.hi} style={s.mascot} contentFit="contain" accessible={false} />
+      <View style={{ alignSelf: 'center' }}><Float motion="sway"><Image source={MASCOT.hi} style={s.mascot} contentFit="contain" accessible={false} /></Float></View>
       <View style={[s.sheet, { backgroundColor: colors.bg, paddingBottom: Math.max(insets.bottom, space.lg) }]}>
         <ScrollView contentContainerStyle={{ gap: space.md }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }} accessibilityLabel={t('ob.count', { n: step + 1, total: 4 })}>

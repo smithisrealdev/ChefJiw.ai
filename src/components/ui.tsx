@@ -5,7 +5,7 @@ import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, Scroll
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
-import { MASCOT } from '@/data/images';
+import { MASCOT, type Motion, type SCENE } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -83,30 +83,38 @@ export function Card({ tone = 'soft', children, style, onPress, label }: { tone?
   );
 }
 
-/** ลอยขึ้นลงช้าๆ ให้ภาพดูมีชีวิต หรือ jump = กระโดดดีใจเป็นจังหวะพร้อมเงาที่พื้น หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว */
-export function Float({ children, jump }: { children: ReactNode; jump?: boolean }) {
-  const [y] = useState(() => new Animated.Value(0));
+/** ทำให้ภาพมีชีวิต: bob = ลอยขึ้นลงช้าๆ sway = โยกซ้ายขวา (โบกมือ ยืนคิด) jump = กระโดดสองจังหวะพร้อมเงาที่พื้น
+ *  หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว delay = หน่วงก่อนเริ่ม ให้ตัวละครหลายตัวไม่ขยับพร้อมกัน */
+export function Float({ children, motion = 'bob', delay = 0 }: { children: ReactNode; motion?: Motion; delay?: number }) {
+  const [v] = useState(() => new Animated.Value(0));
   useEffect(() => {
     let loop: Animated.CompositeAnimation | undefined;
-    const to = (toValue: number, duration: number, easing: (t: number) => number) => Animated.timing(y, { toValue, duration, easing, useNativeDriver: Platform.OS !== 'web' });
-    const steps = jump
-      ? [to(-20, 240, Easing.out(Easing.quad)), to(0, 240, Easing.in(Easing.quad)), to(-12, 180, Easing.out(Easing.quad)), to(0, 180, Easing.in(Easing.quad)), Animated.delay(700)]
-      : [to(-6, 1400, Easing.inOut(Easing.sin)), to(0, 1400, Easing.inOut(Easing.sin))];
-    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => { if (!reduce) { loop = Animated.loop(Animated.sequence(steps)); loop.start(); } }).catch(() => {});
-    return () => loop?.stop();
-  }, [y, jump]);
-  if (!jump) return <Animated.View style={{ transform: [{ translateY: y }] }}>{children}</Animated.View>;
+    const to = (toValue: number, duration: number, easing: (t: number) => number) => Animated.timing(v, { toValue, duration, easing, useNativeDriver: Platform.OS !== 'web' });
+    const sin = Easing.inOut(Easing.sin), up = Easing.out(Easing.quad), down = Easing.in(Easing.quad);
+    const steps = {
+      bob: [to(-6, 1400, sin), to(0, 1400, sin)],
+      sway: [to(1, 800, sin), to(-1, 1600, sin), to(0, 800, sin)],
+      jump: [to(-20, 240, up), to(0, 240, down), to(-12, 180, up), to(0, 180, down), Animated.delay(900)],
+    }[motion];
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
+      if (!reduce) timer = setTimeout(() => { loop = Animated.loop(Animated.sequence(steps)); loop.start(); }, delay);
+    }).catch(() => {});
+    return () => { clearTimeout(timer); loop?.stop(); };
+  }, [v, motion, delay]);
+  if (motion === 'sway') return <Animated.View style={{ transformOrigin: 'bottom', transform: [{ rotate: v.interpolate({ inputRange: [-1, 1], outputRange: ['-4deg', '4deg'] }) }] }}>{children}</Animated.View>;
+  if (motion === 'bob') return <Animated.View style={{ transform: [{ translateY: v }] }}>{children}</Animated.View>;
   return (
-    <View style={{ alignItems: 'center' }}>
-      <Animated.View style={{ transform: [{ translateY: y }] }}>{children}</Animated.View>
+    <View>
+      <Animated.View style={{ transform: [{ translateY: v }] }}>{children}</Animated.View>
       {/* เงาอยู่กับพื้น หดเล็กลงตอนตัวลอย */}
-      <Animated.View style={{ width: 56, height: 8, marginTop: -4, borderRadius: radius.pill, backgroundColor: 'rgba(36,33,43,0.14)', transform: [{ scaleX: y.interpolate({ inputRange: [-20, 0], outputRange: [0.6, 1] }) }] }} />
+      <Animated.View style={{ alignSelf: 'center', width: '46%', height: 6, marginTop: -4, borderRadius: radius.pill, backgroundColor: 'rgba(36,33,43,0.14)', transform: [{ scaleX: v.interpolate({ inputRange: [-20, 0], outputRange: [0.6, 1] }) }] }} />
     </View>
   );
 }
 
 /** หัวหน้าจอพร้อมมาสคอต พื้นสีสดประจำหน้า แล้วต่อด้วยแผ่นเนื้อหาสีพื้น */
-export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; mascot?: number; scene?: { source: number; ratio: number }; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
+export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; mascot?: number; scene?: (typeof SCENE)[keyof typeof SCENE]; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   const { colors, isDark } = useSettings();
   const insets = useSafeAreaInsets();
   return (
@@ -120,7 +128,16 @@ export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel
         {right}
         {mascot && <Float><Image source={mascot} style={s.mascot} contentFit="contain" accessible={false} /></Float>}
       </View>
-      {scene && <Image source={scene.source} style={{ width: '100%', aspectRatio: scene.ratio, marginTop: -space.sm }} contentFit="contain" accessible={false} />}
+      {scene && (
+        <View style={{ width: '100%', aspectRatio: scene.ratio, marginTop: -space.sm }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          <Image source={scene.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
+          {scene.cast.map((c, k) => (
+            <View key={k} style={{ position: 'absolute', left: `${c.left * 100}%`, top: `${c.top * 100}%`, width: `${c.width * 100}%`, aspectRatio: 1 }}>
+              <Float motion={c.motion} delay={c.delay}><Image source={c.source} style={{ width: '100%', aspectRatio: 1 }} contentFit="contain" accessible={false} /></Float>
+            </View>
+          ))}
+        </View>
+      )}
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
         <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: footer ? 120 : space.xxl }} keyboardShouldPersistTaps="handled">
           {children}
@@ -155,7 +172,7 @@ export function Skeleton({ lines = 2, label }: { lines?: number; label: string }
   return (
     <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={[s.card, { backgroundColor: colors.surfaceSoft, gap: space.sm }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.sm }}>
-        <Image source={MASCOT.think} style={{ width: 48, height: 48 }} contentFit="contain" accessible={false} />
+        <Float motion="sway"><Image source={MASCOT.think} style={{ width: 48, height: 48 }} contentFit="contain" accessible={false} /></Float>
         <T v="smallBold" tone="muted">{label}</T>
       </View>
       {Array.from({ length: lines }, (_, k) => <View key={k} style={{ height: 14, width: k === lines - 1 ? '60%' : '100%', borderRadius: radius.pill, backgroundColor: colors.line }} />)}
