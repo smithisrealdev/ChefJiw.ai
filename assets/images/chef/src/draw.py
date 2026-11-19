@@ -35,21 +35,20 @@ def legs(skin, sock, accent, feet, drop):
     """ขาจากสะโพกถึงเท้า เท้าแต่ละข้างกำหนดเป็น (x, y, มุมหมุนรองเท้า) จึงยกขา ก้าว หรือนั่งแบะขาได้"""
     out = ''
     for (hx, hy), (fx, fy, rot) in zip(((208, 372 + drop), (272, 372 + drop)), feet):
-        ax, ay = fx, fy - 14; mx, my = (hx + ax) / 2, (hy + ay) / 2
+        ax, ay = fx, fy - 14; mx, my = hx + (ax - hx) * 0.62, hy + (ay - hy) * 0.62  # ถุงเท้าคลุมช่วงล่างของขา
         dx, dy = ax - hx, ay - hy; n = max(1.0, (dx * dx + dy * dy) ** 0.5); px, py = -dy / n * 19, dx / n * 19
-        sx, sy = hx + dx * 0.66, hy + dy * 0.66
+        sx, sy = hx + dx * 0.74, hy + dy * 0.74
         out += (f'<path d="M{hx} {hy} L{ax} {ay}" stroke="{skin}" stroke-width="38" stroke-linecap="round"/><path d="M{mx} {my} L{ax} {ay}" stroke="{sock}" stroke-width="38"/><circle cx="{ax}" cy="{ay}" r="19" fill="{sock}"/>'
                 f'<path d="M{sx - px} {sy - py} L{sx + px} {sy + py}" stroke="{accent}" stroke-width="6"/>'
                 f'<g transform="rotate({rot} {fx} {fy})"><ellipse cx="{fx}" cy="{fy}" rx="36" ry="18" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="4"/>'
                 f'<path d="M{fx-26} {fy+10} q26 8 52 0" stroke="{accent}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M{fx-6} {fy-10} l9 11" stroke="{accent}" stroke-width="6" stroke-linecap="round"/></g>')
     return out
-shadow = '<ellipse cx="240" cy="462" rx="92" ry="10" fill="#24212B" opacity="0.12"/>'
 _n = [0]
 def person(skin, top, clothes, hair, accent, look=(0, 0), mouth=True, sock='#FFFFFF', back='', under_head='', arms_back='', arms_front='', hat='', front='', blush=0.85,
-           lean=0, tilt=0, feet=STAND, lift=0, drop=0, ground=''):
-    """lean = เอนตัวท่อนบน (องศา) tilt = เอียงคอ feet = ตำแหน่งเท้า lift = ลอยจากพื้น (กระโดด) drop = ย่อตัวลง (นั่ง) ground = ของที่พื้น"""
+           lean=0, tilt=0, feet=STAND, drop=0, ground=''):
+    """lean = เอนตัวท่อนบน (องศา) tilt = เอียงคอ feet = ตำแหน่งเท้า drop = ย่อตัวลง (นั่ง) ground = ของที่พื้น การกระโดดทำเป็นแอนิเมชันในแอป"""
     _n[0] += 1; cid = f'c{_n[0]}'
-    return SVG(f'''<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{ground}<g transform="translate(0 {-lift})">{legs(skin, sock, accent, feet, drop)}
+    return SVG(f'''<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{ground}<g>{legs(skin, sock, accent, feet, drop)}
 <g transform="translate(0 {drop}) rotate({lean} 240 384)">{back}{arms_back}
 <clipPath id="{cid}"><path d="{TORSO}"/></clipPath><path d="{TORSO}" fill="{top}"/><g clip-path="url(#{cid})">{clothes}</g>
 <g transform="rotate({tilt} 240 236)">{under_head}<path d="{HEAD}" fill="{skin}"/>{hair}{hat}{face(look, mouth, blush)}</g>
@@ -78,10 +77,10 @@ POSES = {
   # เอนตัวตามกระทะ ของในกระทะลอยขึ้น
   'cook': chef(lean=9, tilt=-6, feet=((186, 440, -8), (286, 440, 10)), arms_front=wok(262, 346, -10) + A1('L', 200, 340, -34, 12) + A1('R', 356, 328, 30, 8)),
   # กระโดดตัวลอย แขนขากาง
-  'cheer': chef(lift=30, feet=((170, 432, -22), (310, 432, 22)), ground=shadow, arms_back=A1('L', 88, 172, -14, 16) + A1('R', 392, 172, 14, 16), hat=toque(-14),
+  'cheer': chef(feet=((170, 432, -22), (310, 432, 22)), arms_back=A1('L', 88, 172, -14, 16) + A1('R', 392, 172, 14, 16), hat=toque(-14),
                 front=star(50, 96, 22) + star(432, 84, 26) + star(400, 22, 13) + star(96, 30, 12)),
   # เอียงคอคิด เท้าไขว้
-  'think': chef(look=(10, -8), tilt=11, lean=3, feet=((214, 440, 0), (250, 438, -24)), arms_front=A1('L', 230, 334, -38, 16) + A1('R', 300, 252, 50, 10), hat=toque(4), blush=0.6,
+  'think': chef(look=(10, -8), tilt=11, lean=3, feet=((214, 440, 0), (250, 438, -24)), arms_front=A1('L', 230, 334, -38, 16) + A1('R', 262, 268, 54, 44), hat=toque(4), blush=0.6,
                 front=f'<circle cx="392" cy="112" r="8" fill="{HAT_D}"/><circle cx="414" cy="82" r="13" fill="{HAT_D}"/><circle cx="442" cy="40" r="22" fill="{HAT_D}"/>'),
   # ผงะถอยหลัง ยกขาข้างหนึ่ง มือกุมแก้ม
   'oops': chef(lean=-10, tilt=-4, feet=((214, 440, 0), (318, 410, 34)), arms_front=A1('L', 170, 214, -44, 22) + A1('R', 310, 214, 44, 22), hat=toque(-20), blush=0.5,
@@ -132,11 +131,11 @@ A3 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S3, BUTTER, 0.8)
 bigspoon = lambda x, y, r: f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y+22} v-136" stroke="{WOOD}" stroke-width="12" stroke-linecap="round"/><ellipse cx="{x}" cy="{y-136}" rx="26" ry="35" fill="{WOOD}"/></g>'
 POSES.update({
   # นั่งแบะขาบนเบาะ ชิมจากช้อน
-  'sip': chim(mouth=False, tilt=-6, drop=46, feet=((138, 446, -62), (342, 446, 62)), ground=f'<ellipse cx="240" cy="452" rx="176" ry="24" fill="{ROSE}"/>',
+  'sip': chim(mouth=False, tilt=-6, drop=40, feet=((66, 440, -78), (414, 440, 78)), ground=f'<ellipse cx="240" cy="456" rx="214" ry="22" fill="#CFE3FF"/>',
               arms_front=f'<path d="M312 206 L262 192" stroke="{WOOD}" stroke-width="11" stroke-linecap="round"/><ellipse cx="248" cy="188" rx="22" ry="14" fill="{WOOD}"/>' + A3('R', 316, 212, 46, 18) + A3('L', 208, 338, -34, 14),
               front=heart(420, 150, 1.1) + heart(62, 184, 0.7)),
   # กระโดดชูช้อน ขาข้างหนึ่งเตะไปข้างหลัง
-  'yum': chim(lift=34, lean=7, tilt=-6, feet=((184, 436, -14), (318, 408, 46)), ground=shadow, arms_back=A3('L', 96, 176, -14, 16), arms_front=bigspoon(384, 286, 14) + A3('R', 382, 300, 22, -2),
+  'yum': chim(lean=7, tilt=-6, feet=((184, 436, -14), (318, 408, 46)), arms_back=A3('L', 96, 176, -14, 16), arms_front=bigspoon(384, 286, 14) + A3('R', 382, 300, 22, -2),
               front=star(52, 96, 20) + star(436, 26, 14) + star(108, 30, 11)),
   # เอียงคอสงสัย เท้าเขี่ยพื้น
   'hmm': chim(look=(-9, -7), tilt=-13, lean=-4, feet=((204, 440, 0), (296, 434, 30)), arms_front=bigspoon(368, 340, 22) + A3('R', 362, 340, 26, 2) + A3('L', 208, 338, -34, 14), blush=0.6,

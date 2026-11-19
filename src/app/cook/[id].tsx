@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Icon } from '@/components/icon';
-import { ApiNotice, Button, Card, IconButton, mmss, Sheet, Skeleton, T } from '@/components/ui';
+import { ApiNotice, Button, Card, Float, IconButton, mmss, Sheet, Skeleton, T } from '@/components/ui';
 import { MASCOT } from '@/data/images';
 import { buildRecipe, MENU, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
@@ -187,7 +187,7 @@ function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: st
           <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke={done ? onPastel.success : vivid.indigo} strokeWidth={14} strokeLinecap="round" fill="none"
             strokeDasharray={RING_C} strokeDashoffset={RING_C * (1 - Math.max(0, Math.min(1, left / seconds)))} />
         </Svg>
-        {done ? <Image source={MASCOT.cheer} style={{ width: 124, height: 124 }} contentFit="contain" accessible={false} /> : <>
+        {done ? <Float jump><Image source={MASCOT.cheer} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} /></Float> : <>
           <T v="smallBold" tone="pastelMuted">{t('cook.timer')}</T>
           <T v="hero" tone="pastel" accessibilityRole="header">{mmss(left)}</T>
         </>}
@@ -301,7 +301,8 @@ function Taste({ r }: { r: Recipe }) {
           <T v="title" accessibilityRole="header">{score === null ? t('taste.title') : t('taste.result')}</T>
           {score === null && <T tone="muted">{t('taste.intro')}</T>}
         </View>
-        <Image source={score === null ? MASCOT.sip : score >= 4 ? MASCOT.yum : MASCOT.hmm} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} />
+        {score !== null && score >= 4 ? <Float jump><Image source={MASCOT.yum} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} /></Float>
+          : <Image source={score === null ? MASCOT.sip : MASCOT.hmm} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} />}
       </View>
       {score !== null && (
         <Card tone="accent" style={{ alignItems: 'center' }}>
