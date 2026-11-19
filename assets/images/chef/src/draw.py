@@ -19,63 +19,79 @@ HEAD = 'M146 152 C146 78 334 78 334 152 L336 194 C336 254 144 254 144 194 Z'
 def hair_cap(color, fringe, key):
     return (f'<clipPath id="h{key}"><path d="{fringe}"/></clipPath>'
             f'<path d="{HEAD}" fill="{color}" stroke="{color}" stroke-width="12" stroke-linejoin="round" clip-path="url(#h{key})"/>')
-TORSO = 'M180 232 C142 242 126 300 118 384 Q240 404 362 384 C354 300 338 242 300 232 Z'
-SHOULDER = {'L': (176, 268), 'R': (304, 268)}
+# ตัวเป็นทรงระฆังที่ขึ้นไปซ่อนใต้หัว ไหล่จึงต่อจากคางเป็นเส้นเดียว แขนเสื้อสีเดียวกับตัวเสื้อจึงกลืนเป็นก้อนเดียว
+TORSO = 'M164 206 C134 246 122 310 114 384 Q240 406 366 384 C358 310 346 246 316 206 Z'
+SHOULDER = {'L': (160, 268), 'R': (320, 268)}
 def arm(side, hx, hy, bx=0, by=0, skin='#FFE3C2', sleeve=None, cut=0.62):
     """แขนโค้งจากไหล่ถึงมือ ท่อนบนเป็นแขนเสื้อที่กว้างกว่า ปลายแขนกับมือเรียวกว่า"""
     x0, y0 = SHOULDER[side]; cx, cy = (x0 + hx) / 2 + bx, (y0 + hy) / 2 + by
     out = f'<path d="M{x0} {y0} Q{cx} {cy} {hx} {hy}" stroke="{skin}" stroke-width="32" stroke-linecap="round" fill="none"/>'
     if sleeve:
         t = cut; ax, ay = x0 + (cx - x0) * t, y0 + (cy - y0) * t; bx2, by2 = cx + (hx - cx) * t, cy + (hy - cy) * t
-        out += f'<path d="M{x0} {y0} Q{ax} {ay} {ax + (bx2 - ax) * t} {ay + (by2 - ay) * t}" stroke="{sleeve}" stroke-width="46" stroke-linecap="round" fill="none"/>'
+        out += f'<path d="M{x0} {y0} Q{ax} {ay} {ax + (bx2 - ax) * t} {ay + (by2 - ay) * t}" stroke="{sleeve}" stroke-width="48" stroke-linecap="round" fill="none"/>'
     return out
-def sneakers(accent):  # ผ้าใบขาวพื้นหนา มีแถบสี
-    return ''.join(f'<ellipse cx="{x}" cy="440" rx="36" ry="18" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="4"/><path d="M{x-26} 450 q26 8 52 0" stroke="{accent}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M{x-6} 430 l9 11" stroke="{accent}" stroke-width="6" stroke-linecap="round"/>' for x in (202, 278))
-def legs(skin, sock, stripe):  # ขา ถุงเท้ายาวมีแถบ
-    return (f'<path d="M206 372 V424 M274 372 V424" stroke="{skin}" stroke-width="38" stroke-linecap="round"/><path d="M206 402 V426 M274 402 V426" stroke="{sock}" stroke-width="38" stroke-linecap="butt"/>'
-            f'<path d="M187 408 h38 M255 408 h38" stroke="{stripe}" stroke-width="6"/>')
+STAND = ((202, 440, 0), (278, 440, 0))
+def legs(skin, sock, accent, feet, drop):
+    """ขาจากสะโพกถึงเท้า เท้าแต่ละข้างกำหนดเป็น (x, y, มุมหมุนรองเท้า) จึงยกขา ก้าว หรือนั่งแบะขาได้"""
+    out = ''
+    for (hx, hy), (fx, fy, rot) in zip(((208, 372 + drop), (272, 372 + drop)), feet):
+        ax, ay = fx, fy - 14; mx, my = (hx + ax) / 2, (hy + ay) / 2
+        dx, dy = ax - hx, ay - hy; n = max(1.0, (dx * dx + dy * dy) ** 0.5); px, py = -dy / n * 19, dx / n * 19
+        sx, sy = hx + dx * 0.66, hy + dy * 0.66
+        out += (f'<path d="M{hx} {hy} L{ax} {ay}" stroke="{skin}" stroke-width="38" stroke-linecap="round"/><path d="M{mx} {my} L{ax} {ay}" stroke="{sock}" stroke-width="38"/><circle cx="{ax}" cy="{ay}" r="19" fill="{sock}"/>'
+                f'<path d="M{sx - px} {sy - py} L{sx + px} {sy + py}" stroke="{accent}" stroke-width="6"/>'
+                f'<g transform="rotate({rot} {fx} {fy})"><ellipse cx="{fx}" cy="{fy}" rx="36" ry="18" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="4"/>'
+                f'<path d="M{fx-26} {fy+10} q26 8 52 0" stroke="{accent}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M{fx-6} {fy-10} l9 11" stroke="{accent}" stroke-width="6" stroke-linecap="round"/></g>')
+    return out
+shadow = '<ellipse cx="240" cy="462" rx="92" ry="10" fill="#24212B" opacity="0.12"/>'
 _n = [0]
-def person(skin, top, clothes, hair, look, mouth, accent, sock='#FFFFFF', back='', under_head='', arms_back='', arms_front='', hat='', front='', blush=0.85):
-    """ลำดับชั้น: ของหลังตัว ขา รองเท้า แขนหลัง ตัวเสื้อ ของหลังหัว (ฮู้ด ผมยาว) หัว ผม หมวก หน้า แขนหน้า ของหน้าสุด"""
+def person(skin, top, clothes, hair, accent, look=(0, 0), mouth=True, sock='#FFFFFF', back='', under_head='', arms_back='', arms_front='', hat='', front='', blush=0.85,
+           lean=0, tilt=0, feet=STAND, lift=0, drop=0, ground=''):
+    """lean = เอนตัวท่อนบน (องศา) tilt = เอียงคอ feet = ตำแหน่งเท้า lift = ลอยจากพื้น (กระโดด) drop = ย่อตัวลง (นั่ง) ground = ของที่พื้น"""
     _n[0] += 1; cid = f'c{_n[0]}'
-    return SVG(f'''{back}{legs(skin, sock, accent)}{sneakers(accent)}{arms_back}
+    return SVG(f'''<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{ground}<g transform="translate(0 {-lift})">{legs(skin, sock, accent, feet, drop)}
+<g transform="translate(0 {drop}) rotate({lean} 240 384)">{back}{arms_back}
 <clipPath id="{cid}"><path d="{TORSO}"/></clipPath><path d="{TORSO}" fill="{top}"/><g clip-path="url(#{cid})">{clothes}</g>
-{under_head}<path d="{HEAD}" fill="{skin}"/>{hair}{hat}{face(look, mouth, blush)}
-{arms_front}{front}''')
+<g transform="rotate({tilt} 240 236)">{under_head}<path d="{HEAD}" fill="{skin}"/>{hair}{hat}{face(look, mouth, blush)}</g>
+{arms_front}</g></g>{front}</g>''')
 
-# ---------- เชฟจิ๋ว: หมวกเชฟ ผมหน้าม้าปัดข้าง ฮู้ดฟ้า ผ้ากันเปื้อนเต็มตัวสีส้มมีกระเป๋า ----------
-S1, SKY, SKY_D, BROWN = '#FFE3C2', '#BFD9FF', '#8FB6F2', '#6B4632'
-apron = (f'<path d="M204 232 V268 M276 232 V268" stroke="{CORAL_D}" stroke-width="9" stroke-linecap="round"/>'
-         f'<path d="M198 264 H282 Q290 264 290 272 V300 L326 312 L336 400 H144 L154 312 L190 300 V272 Q190 264 198 264 Z" fill="{CORAL}"/><rect x="212" y="326" width="56" height="38" rx="13" fill="{CORAL_L}"/>')
+# ---------- เชฟจิ๋ว: หมวกเชฟ ผมหน้าม้าปัดข้าง เสื้อแขนยาวฟ้า ผ้ากันเปื้อนเต็มตัวสีส้มมีกระเป๋า ----------
+S1, SKY, BROWN = '#FFE3C2', '#BFD9FF', '#6B4632'
+apron = (f'<path d="M204 216 V268 M276 216 V268" stroke="{CORAL_D}" stroke-width="9" stroke-linecap="round"/>'
+         f'<path d="M198 264 H282 Q290 264 290 272 V300 L326 312 L338 404 H142 L154 312 L190 300 V272 Q190 264 198 264 Z" fill="{CORAL}"/><rect x="212" y="326" width="56" height="38" rx="13" fill="{CORAL_L}"/>')
 chef_hair = hair_cap(BROWN, 'M100 40 H380 V182 C356 154 324 142 292 142 Q262 166 226 138 Q166 144 100 192 Z', 'chef')
-hood_down = lambda c: f'<ellipse cx="240" cy="246" rx="86" ry="26" fill="{c}"/>'
 def toque(rot=-8):
     return (f'<g transform="translate(240 96) rotate({rot}) scale(0.86) translate(-240 -150)"><path d="M184 152 Q240 134 296 152 L296 122 Q240 106 184 122 Z" fill="{HAT_D}" stroke="{HAT_D}" stroke-width="5" stroke-linejoin="round"/>'
             f'<path d="M180 124 C146 108 152 58 194 58 C202 20 278 20 286 58 C328 58 334 108 300 124 Q240 106 180 124 Z" fill="{HAT}" stroke="{HAT_D}" stroke-width="5" stroke-linejoin="round"/>'
             f'<path d="M214 64 q6 22 0 42 M266 64 q-6 22 0 42" stroke="{HAT_D}" stroke-width="5" stroke-linecap="round" fill="none"/></g>')
-def chef(look=(0, 0), mouth=True, **k):
+def chef(**k):
     k.setdefault('hat', toque())
-    return person(S1, SKY, apron, chef_hair, look, mouth, CORAL, under_head=hood_down(SKY_D), **k)
+    return person(S1, SKY, apron, chef_hair, CORAL, **k)
 A1 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S1, SKY)
 ladle = lambda x, y, r: f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y+26} V{y-66}" stroke="{WOOD}" stroke-width="10" stroke-linecap="round"/><path d="M{x-22} {y-70} a22 22 0 0 0 44 0 z" fill="{WOOD}"/></g>'
-wok = lambda x, y: (f'<path d="M{x-66} {y} q66 56 132 0 z" fill="{INK}"/><path d="M{x+62} {y+2} l48 -12" stroke="{INK}" stroke-width="13" stroke-linecap="round"/>'
-                    f'<circle cx="{x-28}" cy="{y-24}" r="9" fill="{GREEN_L}"/><circle cx="{x+2}" cy="{y-42}" r="9" fill="{CORAL}"/><circle cx="{x+28}" cy="{y-22}" r="9" fill="{YEL}"/><circle cx="{x-6}" cy="{y-12}" r="8" fill="{GREEN}"/>'
-                    f'<path d="M{x-50} {y-54} q-9 -11 0 -22 M{x+48} {y-58} q9 -11 0 -22" stroke="{HAT_D}" stroke-width="6" stroke-linecap="round" fill="none"/>')
+wok = lambda x, y, r=0: (f'<g transform="rotate({r} {x} {y})"><path d="M{x-66} {y} q66 56 132 0 z" fill="{INK}"/><path d="M{x+62} {y+2} l48 -12" stroke="{INK}" stroke-width="13" stroke-linecap="round"/></g>'
+                    f'<circle cx="{x-34}" cy="{y-40}" r="9" fill="{GREEN_L}"/><circle cx="{x-2}" cy="{y-66}" r="9" fill="{CORAL}"/><circle cx="{x+30}" cy="{y-44}" r="9" fill="{YEL}"/><circle cx="{x-10}" cy="{y-24}" r="8" fill="{GREEN}"/><circle cx="{x+16}" cy="{y-84}" r="7" fill="{GREEN_L}"/>')
 POSES = {
-  'hi': chef(arms_back=A1('L', 104, 196, -18, 14), arms_front=ladle(372, 300, 14) + A1('R', 368, 318, 20, -6),
-             front=f'<path d="M66 172 q-12 -14 -8 -32 M90 156 q-6 -12 -2 -26" stroke="{YEL}" stroke-width="7" stroke-linecap="round" fill="none"/>'),
-  'cook': chef(arms_front=wok(256, 350) + A1('L', 196, 344, -34, 12) + A1('R', 352, 340, 30, 8)),
-  'cheer': chef(arms_back=A1('L', 100, 176, -14, 16) + A1('R', 380, 176, 14, 16), hat=toque(-14), front=star(58, 116, 22) + star(426, 104, 26) + star(398, 36, 13) + star(100, 50, 12)),
-  'think': chef(look=(10, -8), arms_front=A1('L', 226, 334, -38, 16) + A1('R', 290, 232, 48, 12), hat=toque(6), blush=0.6,
-                front=f'<circle cx="376" cy="110" r="8" fill="{HAT_D}"/><circle cx="400" cy="80" r="13" fill="{HAT_D}"/><circle cx="430" cy="36" r="22" fill="{HAT_D}"/>'),
-  'oops': chef(arms_front=A1('L', 174, 214, -44, 22) + A1('R', 306, 214, 44, 22), hat=toque(-18), blush=0.5,
-               front='<path d="M404 86 q22 34 0 46 q-22 -12 0 -46 z" fill="#6CC5F5"/><path d="M70 110 l-22 -10 M64 144 l-24 2" stroke="#6CC5F5" stroke-width="7" stroke-linecap="round"/>'),
+  # โบกมือ เอนตัวนิดๆ เท้าหนึ่งเขย่ง
+  'hi': chef(lean=-5, tilt=5, feet=((200, 440, 0), (292, 432, 24)), arms_back=A1('L', 92, 196, -18, 14), arms_front=ladle(378, 300, 14) + A1('R', 374, 318, 20, -6),
+             front=f'<path d="M52 168 q-12 -14 -8 -32 M76 152 q-6 -12 -2 -26" stroke="{YEL}" stroke-width="7" stroke-linecap="round" fill="none"/>'),
+  # เอนตัวตามกระทะ ของในกระทะลอยขึ้น
+  'cook': chef(lean=9, tilt=-6, feet=((186, 440, -8), (286, 440, 10)), arms_front=wok(262, 346, -10) + A1('L', 200, 340, -34, 12) + A1('R', 356, 328, 30, 8)),
+  # กระโดดตัวลอย แขนขากาง
+  'cheer': chef(lift=30, feet=((170, 432, -22), (310, 432, 22)), ground=shadow, arms_back=A1('L', 88, 172, -14, 16) + A1('R', 392, 172, 14, 16), hat=toque(-14),
+                front=star(50, 96, 22) + star(432, 84, 26) + star(400, 22, 13) + star(96, 30, 12)),
+  # เอียงคอคิด เท้าไขว้
+  'think': chef(look=(10, -8), tilt=11, lean=3, feet=((214, 440, 0), (250, 438, -24)), arms_front=A1('L', 230, 334, -38, 16) + A1('R', 300, 252, 50, 10), hat=toque(4), blush=0.6,
+                front=f'<circle cx="392" cy="112" r="8" fill="{HAT_D}"/><circle cx="414" cy="82" r="13" fill="{HAT_D}"/><circle cx="442" cy="40" r="22" fill="{HAT_D}"/>'),
+  # ผงะถอยหลัง ยกขาข้างหนึ่ง มือกุมแก้ม
+  'oops': chef(lean=-10, tilt=-4, feet=((214, 440, 0), (318, 410, 34)), arms_front=A1('L', 170, 214, -44, 22) + A1('R', 310, 214, 44, 22), hat=toque(-20), blush=0.5,
+               front='<path d="M408 96 q22 34 0 46 q-22 -12 0 -46 z" fill="#6CC5F5"/><path d="M56 122 l-22 -10 M50 156 l-24 2" stroke="#6CC5F5" stroke-width="7" stroke-linecap="round"/>'),
 }
 
 # ---------- ใบเตย: หมวกบักเก็ต ผมเปียคู่ผูกโบว์ เสื้อยืดเขียวมินต์ เอี๊ยมกระโปรงยีนส์ติดกระดุมเหลือง ถุงผ้าใส่ผัก ----------
 S2, MINT, DENIM, DENIM_D, CREAM, CREAM_D, DARKHAIR = '#FFDDBE', '#A6ECCF', '#7C9BF0', '#5E7FE0', '#FFF3DC', '#EAD9B4', '#4A3A36'
-pinafore = (f'<path d="M206 232 V270 M274 232 V270" stroke="{DENIM}" stroke-width="16" stroke-linecap="round"/>'
-            f'<path d="M196 262 H284 Q292 262 292 270 V304 L334 314 L346 404 H134 L146 314 L188 304 V270 Q188 262 196 262 Z" fill="{DENIM}"/>'
+pinafore = (f'<path d="M206 214 V270 M274 214 V270" stroke="{DENIM}" stroke-width="16" stroke-linecap="round"/>'
+            f'<path d="M196 262 H284 Q292 262 292 270 V304 L334 314 L348 406 H132 L146 314 L188 304 V270 Q188 262 196 262 Z" fill="{DENIM}"/>'
             f'<circle cx="206" cy="276" r="7" fill="{YEL}"/><circle cx="274" cy="276" r="7" fill="{YEL}"/><path d="M216 316 H264 V340 Q240 352 216 340 Z" fill="none" stroke="{DENIM_D}" stroke-width="5" stroke-linejoin="round"/>'
             f'<path d="M150 346 Q240 336 330 346" stroke="{DENIM_D}" stroke-width="5" fill="none"/>')
 braid = lambda x, d: (f'<path d="M{x} 206 q{d*14} 34 {d*4} 68 q{-d*6} 24 {d*6} 44" stroke="{DARKHAIR}" stroke-width="30" stroke-linecap="round" fill="none"/>'
@@ -83,15 +99,19 @@ braid = lambda x, d: (f'<path d="M{x} 206 q{d*14} 34 {d*4} 68 q{-d*6} 24 {d*6} 4
 toey_hair = hair_cap(DARKHAIR, 'M100 40 H380 V190 C356 160 322 150 296 148 Q240 170 184 148 C158 150 124 160 100 190 Z', 'toey')
 bucket = (f'<g transform="translate(240 92) scale(0.86) translate(-240 -130)"><path d="M96 132 Q240 96 384 132 Q396 150 372 156 Q240 126 108 156 Q84 150 96 132 Z" fill="{CREAM_D}"/>'
           f'<path d="M140 136 C132 60 186 26 240 26 C294 26 348 60 340 136 Q240 110 140 136 Z" fill="{CREAM}"/><path d="M146 112 Q240 88 334 112" stroke="{CREAM_D}" stroke-width="6" fill="none"/></g>')
-def toey(look=(0, 0), mouth=True, **k):
-    return person(S2, MINT, pinafore, toey_hair, look, mouth, GREEN, back=braid(156, -1) + braid(324, 1), hat=bucket, **k)
+def toey(**k):
+    return person(S2, MINT, pinafore, toey_hair, GREEN, back=braid(150, -1) + braid(330, 1), hat=bucket, **k)
 A2 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S2, MINT, 0.4)
 tote = lambda x, y: (f'<path d="M{x-24} {y-4} q24 -60 48 0" stroke="{CREAM_D}" stroke-width="8" fill="none" stroke-linecap="round"/>'
     f'<path d="M{x-26} {y+2} q-20 -42 6 -58 q24 18 8 58 z" fill="{GREEN}"/><path d="M{x-2} {y+2} q-8 -50 24 -62 q18 28 -4 62 z" fill="{GREEN_L}"/><path d="M{x+16} {y+4} l20 -50 q10 4 6 14 l-12 38 z" fill="{CORAL}"/>'
     f'<path d="M{x-44} {y} h88 l-6 68 q-38 10 -76 0 z" fill="{CREAM}" stroke="{CREAM_D}" stroke-width="4" stroke-linejoin="round"/>' + heart(x, y + 36, 0.75, CORAL))
 POSES.update({
-  'shop': toey(arms_back=A2('L', 106, 200, -18, 14), arms_front=tote(382, 330) + A2('R', 374, 322, 22, -4), front=star(64, 150, 15)),
-  'list': toey(arms_front=f'<rect x="262" y="292" width="104" height="116" rx="14" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="5"/>'
+  # เดินกลับจากตลาด ก้าวขา แกว่งถุงผ้า
+  'shop': toey(lean=5, tilt=-5, feet=((190, 442, -6), (300, 424, 30)), arms_back=A2('L', 96, 204, -18, 14), arms_front=tote(390, 326) + A2('R', 382, 318, 22, -4), front=star(56, 150, 15)),
+  # นั่งบนลังไม้ อ่านรายการของ แกว่งขา
+  'list': toey(tilt=7, feet=((196, 446, -14), (292, 434, 22)),
+               ground=f'<rect x="126" y="384" width="228" height="80" rx="12" fill="{STRAW}"/><path d="M138 412 h204 M138 438 h204" stroke="{STRAW_D}" stroke-width="6" stroke-linecap="round"/>',
+               arms_front=f'<rect x="262" y="292" width="104" height="116" rx="14" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="5"/>'
            f'<path d="M280 322 l8 8 l14 -16 M280 354 l8 8 l14 -16" stroke="{GREEN}" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
            f'<path d="M316 324 h34 M316 356 h34 M282 386 h66" stroke="{HAT_D}" stroke-width="7" stroke-linecap="round"/>' + A2('R', 348, 352, 30, 0) + A2('L', 208, 340, -34, 14)),
 })
@@ -100,22 +120,27 @@ POSES.update({
 S3, BUTTER, BUTTER_D, ROSE, ROSE_D, BLACK = '#FFDCCB', '#FFE27A', '#F2C744', '#FFB3C4', '#F58CA5', '#3A2F33'
 bear_hood = (f'<circle cx="162" cy="92" r="30" fill="{BUTTER}"/><circle cx="318" cy="92" r="30" fill="{BUTTER}"/><circle cx="162" cy="92" r="15" fill="{BUTTER_D}"/><circle cx="318" cy="92" r="15" fill="{BUTTER_D}"/>'
              f'<path d="M126 158 C126 50 354 50 354 158 L356 200 C356 262 310 272 240 272 C170 272 124 262 124 200 Z" fill="{BUTTER}"/>')
-chim_clothes = (f'<path d="M222 262 v30 M258 262 v30" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><circle cx="222" cy="296" r="5" fill="#FFFFFF"/><circle cx="258" cy="296" r="5" fill="#FFFFFF"/>'
-                + heart(240, 326, 0.8, CORAL) + f'<path d="M110 354 Q240 342 370 354 V420 H110 Z" fill="{ROSE}"/><path d="M162 352 V410 M214 348 V410 M266 348 V410 M318 352 V410" stroke="{ROSE_D}" stroke-width="5" stroke-linecap="round"/>')
+chim_clothes = (f'<path d="M222 268 v26 M258 268 v26" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><circle cx="222" cy="298" r="5" fill="#FFFFFF"/><circle cx="258" cy="298" r="5" fill="#FFFFFF"/>'
+                + heart(240, 328, 0.8, CORAL) + f'<path d="M106 356 Q240 344 374 356 V420 H106 Z" fill="{ROSE}"/><path d="M160 354 V410 M214 350 V410 M266 350 V410 M320 354 V410" stroke="{ROSE_D}" stroke-width="5" stroke-linecap="round"/>')
 chim_hair = f'<path d="M158 160 C158 92 322 92 322 160 Q296 138 268 158 Q240 136 212 158 Q184 138 158 160 Z" fill="{BLACK}"/>'
-def chim(look=(0, 0), mouth=True, **k):
+def chim(**k):
     k.setdefault('blush', 0.95)
-    inner = person(S3, BUTTER, chim_clothes, chim_hair, look, mouth, ROSE_D, sock=ROSE, under_head=bear_hood, **k)
+    inner = person(S3, BUTTER, chim_clothes, chim_hair, ROSE_D, sock=ROSE, under_head=bear_hood, **k)
     body = inner[inner.index('>') + 1:inner.rindex('</svg>')]
-    return SVG(f'<g transform="translate(240 460) scale(0.88) translate(-240 -460)">{body}</g>')  # ตัวเล็กกว่าพี่ๆ
+    return SVG(f'<g transform="translate(240 464) scale(0.88) translate(-240 -464)">{body}</g>')  # ตัวเล็กกว่าพี่ๆ
 A3 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S3, BUTTER, 0.8)
 bigspoon = lambda x, y, r: f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y+22} v-136" stroke="{WOOD}" stroke-width="12" stroke-linecap="round"/><ellipse cx="{x}" cy="{y-136}" rx="26" ry="35" fill="{WOOD}"/></g>'
 POSES.update({
-  'sip': chim(mouth=False, arms_front=f'<path d="M312 206 L262 192" stroke="{WOOD}" stroke-width="11" stroke-linecap="round"/><ellipse cx="248" cy="188" rx="22" ry="14" fill="{WOOD}"/>' + A3('R', 316, 212, 46, 18) + A3('L', 208, 338, -34, 14),
-              front=heart(416, 110, 1.1) + heart(70, 140, 0.7)),
-  'yum': chim(arms_back=A3('L', 104, 184, -14, 16), arms_front=bigspoon(374, 292, 12) + A3('R', 372, 306, 22, -2), front=star(60, 120, 20) + star(432, 50, 14) + star(112, 50, 11)),
-  'hmm': chim(look=(-9, -7), arms_front=bigspoon(364, 340, 22) + A3('R', 358, 340, 26, 2) + A3('L', 208, 338, -34, 14), blush=0.6,
-              front=f'<circle cx="112" cy="70" r="7" fill="{HAT_D}"/><circle cx="88" cy="42" r="11" fill="{HAT_D}"/><circle cx="58" cy="6" r="16" fill="{HAT_D}"/>'),
+  # นั่งแบะขาบนเบาะ ชิมจากช้อน
+  'sip': chim(mouth=False, tilt=-6, drop=46, feet=((138, 446, -62), (342, 446, 62)), ground=f'<ellipse cx="240" cy="452" rx="176" ry="24" fill="{ROSE}"/>',
+              arms_front=f'<path d="M312 206 L262 192" stroke="{WOOD}" stroke-width="11" stroke-linecap="round"/><ellipse cx="248" cy="188" rx="22" ry="14" fill="{WOOD}"/>' + A3('R', 316, 212, 46, 18) + A3('L', 208, 338, -34, 14),
+              front=heart(420, 150, 1.1) + heart(62, 184, 0.7)),
+  # กระโดดชูช้อน ขาข้างหนึ่งเตะไปข้างหลัง
+  'yum': chim(lift=34, lean=7, tilt=-6, feet=((184, 436, -14), (318, 408, 46)), ground=shadow, arms_back=A3('L', 96, 176, -14, 16), arms_front=bigspoon(384, 286, 14) + A3('R', 382, 300, 22, -2),
+              front=star(52, 96, 20) + star(436, 26, 14) + star(108, 30, 11)),
+  # เอียงคอสงสัย เท้าเขี่ยพื้น
+  'hmm': chim(look=(-9, -7), tilt=-13, lean=-4, feet=((204, 440, 0), (296, 434, 30)), arms_front=bigspoon(368, 340, 22) + A3('R', 362, 340, 26, 2) + A3('L', 208, 338, -34, 14), blush=0.6,
+              front=f'<circle cx="100" cy="92" r="7" fill="{HAT_D}"/><circle cx="76" cy="64" r="11" fill="{HAT_D}"/><circle cx="46" cy="28" r="16" fill="{HAT_D}"/>'),
 })
 for n, svg in POSES.items(): open(n + '.svg', 'w').write(svg)
 
