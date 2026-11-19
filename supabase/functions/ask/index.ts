@@ -1,5 +1,5 @@
 // ถามเชฟช้าง: ต้องเข้าสู่ระบบ ฟรีวันละ 3 คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวคืนสิทธิ์
-import { admin, chat, cors, FREE_PER_DAY, isLang, isText, json, localDay, requireUser } from '../_shared/common.ts';
+import { admin, chat, cors, FREE_PER_DAY, isLang, isText, json, localDay, MODELS, requireUser } from '../_shared/common.ts';
 
 const SYSTEM = `You are Chef Elephant, the cooking coach inside a step-by-step cooking app for home cooks in Thailand and beyond.
 The person is cooking right now, often with messy hands, so answer in 2 to 4 short, plain sentences they can act on at the stove.
@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   if (!allowed) return json({ error: 'quota' }, 429);
 
   try {
-    const answer = await chat({
+    const answer = await chat(MODELS.ask, {
       max_tokens: 2000,
       reasoning: { effort: 'low' },
       messages: [

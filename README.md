@@ -42,7 +42,7 @@ npm test
 | `supabase/functions/prices` | อ่านราคาล่าสุดของประเทศ |
 | `supabase/functions/update-prices` | งานรายวัน ค้นราคาจากเว็บผ่านปลั๊กอิน web ของ OpenRouter แล้วบันทึก |
 
-โมเดลคือ `anthropic/claude-opus-5.5` เรียกผ่าน OpenRouter ตั้งไว้ที่ `supabase/functions/_shared/common.ts`
+เรียกโมเดลผ่าน OpenRouter แยกตามงาน (ตั้งที่ `MODELS` ใน `supabase/functions/_shared/common.ts`): ถามเชฟใช้ GPT-6 Luna คิดเมนูใช้ Claude Haiku 5.5 อัปเดตราคาใช้ Claude Sonnet 5.5 แต่ละงานมีโมเดลสำรองให้ OpenRouter สลับเมื่อตัวหลักล่ม
 
 โปรเจกต์จริง: `jqfjqsvpjzcktfrnvobo` (migration ทั้งหมด ฟังก์ชันทั้งสี่ และงาน cron รายวัน deploy แล้ว)
 

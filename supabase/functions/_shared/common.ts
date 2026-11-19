@@ -1,6 +1,11 @@
 import { createClient, type User } from '@supabase/supabase-js';
 
-export const MODEL = 'anthropic/claude-opus-5.5'; // ผ่าน OpenRouter
+// โมเดลต่องานผ่าน OpenRouter ตัวแรกคือตัวหลัก ตัวถัดไปเป็นสำรองเมื่อตัวหลักล่ม (เลือกจากการทดสอบแบบปิดชื่อ)
+export const MODELS = {
+  ask: ['openai/gpt-6-luna', 'anthropic/claude-haiku-5.5'],
+  menus: ['anthropic/claude-haiku-5.5', 'openai/gpt-6-luna'],
+  prices: ['anthropic/claude-sonnet-5.5', 'anthropic/claude-haiku-5.5'],
+};
 export const FREE_PER_DAY = 3;
 export const COUNTRIES = ['TH', 'JP', 'US'] as const;
 export type Country = (typeof COUNTRIES)[number];
@@ -33,11 +38,11 @@ export const isLang = (v: unknown): v is 'th' | 'en' => v === 'th' || v === 'en'
 export const isCountry = (v: unknown): v is Country => COUNTRIES.includes(v as Country);
 
 /** เรียกโมเดลผ่าน OpenRouter (key อยู่ใน secret OPENROUTER_API_KEY ของ edge function) คืนข้อความตอบ โยน error เมื่อล้มเหลว ถูกกรอง หรือว่าง */
-export async function chat(body: Record<string, unknown>): Promise<string> {
+export async function chat(models: string[], body: Record<string, unknown>): Promise<string> {
   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: { Authorization: `Bearer ${Deno.env.get('OPENROUTER_API_KEY')}`, 'Content-Type': 'application/json', 'X-Title': 'ChefJiw' },
-    body: JSON.stringify({ model: MODEL, ...body }),
+    body: JSON.stringify({ models, ...body }),
   });
   if (!res.ok) throw new Error(`openrouter ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const choice = (await res.json()).choices?.[0];

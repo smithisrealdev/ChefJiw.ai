@@ -1,6 +1,6 @@
-// งานรายวัน: ให้ Claude ค้นราคาวัตถุดิบจากเว็บต่อประเทศ แล้วบันทึกลงตาราง prices
+// งานรายวัน: ให้โมเดลค้นราคาวัตถุดิบจากเว็บต่อประเทศ แล้วบันทึกลงตาราง prices
 // เรียกจาก pg_cron เท่านั้น ตรวจ x-cron-secret กับ Vault ผ่าน check_cron_secret
-import { admin, chat, cors, json, type Country } from '../_shared/common.ts';
+import { admin, chat, cors, json, MODELS, type Country } from '../_shared/common.ts';
 
 // ตรงกับรายการใน src/data/market.ts ของแอป
 const ITEMS: Record<Country, { id: string; name: string; unit: string; currency: string }[]> = {
@@ -21,7 +21,7 @@ async function lookup(country: Country) {
     items.map((i) => `- ${i.id}: ${i.name}, ${i.unit}, in ${i.currency}`).join('\n') +
     `\n\nReply with only a JSON object: {"source": "<main site name>", "rows": [{"id": "<id>", "price": <number>}]}. Skip items you cannot find.`;
   // ปลั๊กอิน web ของ OpenRouter ค้นเว็บให้ก่อนส่งให้โมเดล
-  const text = await chat({ max_tokens: 8000, reasoning: { effort: 'medium' }, plugins: [{ id: 'web', max_results: 8 }], messages: [{ role: 'user', content: prompt }] });
+  const text = await chat(MODELS.prices, { max_tokens: 8000, reasoning: { effort: 'medium' }, plugins: [{ id: 'web', max_results: 8 }], messages: [{ role: 'user', content: prompt }] });
   const parsed = JSON.parse(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1));
   const known = new Set(items.map((i) => i.id));
   const rows = (Array.isArray(parsed.rows) ? parsed.rows : [])

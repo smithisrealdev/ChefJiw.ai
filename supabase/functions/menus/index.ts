@@ -1,5 +1,5 @@
 // คิดเมนูจากของที่มี: นับรวมในโควตาเดียวกับการถามเชฟ เพราะใช้โมเดลเหมือนกัน
-import { admin, chat, cors, FREE_PER_DAY, isCountry, isLang, isText, json, localDay, requireUser } from '../_shared/common.ts';
+import { admin, chat, cors, FREE_PER_DAY, isCountry, isLang, isText, json, localDay, MODELS, requireUser } from '../_shared/common.ts';
 
 const SCHEMA = {
   type: 'object',
@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
   if (!allowed) return json({ error: 'quota' }, 429);
 
   try {
-    const text = await chat({
+    const text = await chat(MODELS.menus, {
       max_tokens: 4000,
       reasoning: { effort: 'low' },
       response_format: { type: 'json_schema', json_schema: { name: 'menu_ideas', strict: true, schema: SCHEMA } },
