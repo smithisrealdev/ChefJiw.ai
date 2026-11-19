@@ -5,13 +5,14 @@ INK, CORAL, CORAL_L, CORAL_D, HAT, HAT_D, WOOD, PINK, YEL = '#24212B', '#FF7A59'
 GREEN, GREEN_L, STRAW, STRAW_D = '#2FB383', '#7BE0B5', '#F2C57C', '#D9A250'
 SVG = lambda body: f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" width="480" height="480">\n{body}\n</svg>'
 
-def face(look=(0, 0), mouth=True, blush=0.85):
+def face(look=(0, 0), mouth=True, blush=0.85, show='all'):
     """หน้าเดียวทุกท่า: ตาจุดกลมห่างกัน ปากขีดสั้นอยู่ระหว่างตา แก้มชมพูใต้ตา อารมณ์มาจากท่าทางและของรอบตัว
-    look = ขยับลูกตาเวลามองไปทางอื่น mouth=False เมื่อมีของบังปาก"""
+    look = ขยับลูกตาเวลามองไปทางอื่น mouth=False เมื่อมีของบังปาก show = 'eyes' วาดเฉพาะตา 'noeyes' วาดทุกอย่างยกเว้นตา (ชั้นแยกสำหรับกะพริบตา)"""
     L, R, Y = 196 + look[0], 284 + look[0], 262 + look[1]
-    return (f'<g transform="translate(240 178) scale(0.8) translate(-240 -262)"><ellipse cx="164" cy="290" rx="22" ry="15" fill="#FF8FB1" opacity="{blush}"/><ellipse cx="316" cy="290" rx="22" ry="15" fill="#FF8FB1" opacity="{blush}"/>'
-            f'<circle cx="{L}" cy="{Y}" r="12.5" fill="{INK}"/><circle cx="{R}" cy="{Y}" r="12.5" fill="{INK}"/>'
-            + (f'<path d="M229 267 h22" stroke="{INK}" stroke-width="8" stroke-linecap="round"/>' if mouth else '') + '</g>')
+    eyes = f'<circle cx="{L}" cy="{Y}" r="12.5" fill="{INK}"/><circle cx="{R}" cy="{Y}" r="12.5" fill="{INK}"/>'
+    rest = (f'<ellipse cx="164" cy="290" rx="22" ry="15" fill="#FF8FB1" opacity="{blush}"/><ellipse cx="316" cy="290" rx="22" ry="15" fill="#FF8FB1" opacity="{blush}"/>'
+            + (f'<path d="M229 267 h22" stroke="{INK}" stroke-width="8" stroke-linecap="round"/>' if mouth else ''))
+    return f'<g transform="translate(240 178) scale(0.8) translate(-240 -262)">{eyes if show == "eyes" else rest if show == "noeyes" else rest + eyes}</g>'
 star = lambda x, y, s, c=YEL: f'<path d="M{x} {y-s} q{s*0.18} {s*0.82} {s} {s} q-{s*0.82} {s*0.18} -{s} {s} q-{s*0.18} -{s*0.82} -{s} -{s} q{s*0.82} -{s*0.18} {s} -{s} z" fill="{c}"/>'
 heart = lambda x, y, k=1.0, c=PINK: f'<path transform="translate({x} {y}) scale({k})" d="M0 -6 c-12 -16 -34 0 -19 17 l19 19 l19 -19 c15 -17 -7 -33 -19 -17 z" fill="{c}"/>'
 
@@ -58,6 +59,12 @@ def person(skin, top, clothes, hair, accent, look=(0, 0), mouth=True, sock='#FFF
     if layer in bparts: return upper(bparts[layer])
     if layer in extras: return fit(extras[layer])
     if layer == 'ground': return fit(ground)
+    # หัวเป็นชั้นของตัวเอง (เอียงคอ พยักหน้าได้) ตาอยู่อีกชั้น (กะพริบได้) แขนที่อยู่หน้าหัวอยู่ชั้น front
+    neck = lambda inner: f'<g transform="rotate({tilt} 240 236)">{inner}</g>'
+    head = neck(f'{under_head}<path d="{HEAD}" fill="{skin}"/>{hair}{hat}{face(look, mouth, blush, "all" if layer == "all" else "noeyes")}')
+    if layer == 'head': return upper(head)
+    if layer == 'eyes': return upper(neck(face(look, mouth, blush, 'eyes')))
+    if layer == 'front': return upper(arms_front)
     if layer in ('legL', 'legR'): return fit(legs(skin, sock, accent, feet, drop, only=('legL', 'legR').index(layer)))
     whole = layer == 'all'
     moving, moving_back, around = (''.join(d.values()) if whole else '' for d in (parts, bparts, extras))
@@ -66,8 +73,8 @@ def person(skin, top, clothes, hair, accent, look=(0, 0), mouth=True, sock='#FFF
     return SVG(f'''<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{ground}<g>{'' if legs_front else both_legs}
 <g transform="translate(0 {drop}) rotate({lean} 240 384)">{back}{moving_back}{arms_back}
 <clipPath id="{cid}"><path d="{TORSO}"/></clipPath><path d="{TORSO}" fill="{top}"/><g clip-path="url(#{cid})">{clothes}</g>
-<g transform="rotate({tilt} 240 236)">{under_head}<path d="{HEAD}" fill="{skin}"/>{hair}{hat}{face(look, mouth, blush)}</g>
-{arms_front}{moving}</g>{both_legs if legs_front else ''}</g>{front}{around}</g>''')
+{head if whole else ''}
+{arms_front if whole else ''}{moving}</g>{both_legs if legs_front else ''}</g>{front}{around}</g>''')
 
 # ---------- เชฟจิ๋ว: หมวกเชฟ ผมหน้าม้าปัดข้าง เสื้อแขนยาวฟ้า ผ้ากันเปื้อนเต็มตัวสีส้มมีกระเป๋า ----------
 S1, SKY, BROWN = '#FFE3C2', '#BFD9FF', '#6B4632'
@@ -161,9 +168,10 @@ def build():
 POSES = build()
 # ท่าที่ขยับทีละส่วนทำเป็นหลายชั้น: ตัว (-body) กับส่วนที่ขยับ แอปวางซ้อนกันแล้วขยับแต่ละชั้นตาม LAYERS ที่ src/data/images.ts
 SPLIT = {
-    'cook': ('body', 'wok', 'food'), 'cheer': ('body', 'armL', 'armR', 'stars'), 'think': ('body', 'hand', 'bubbles'), 'oops': ('body', 'sweat', 'lines'),
-    'shop': ('body', 'legL', 'legR'), 'list': ('body', 'ground', 'legL', 'legR'),
-    'sip': ('body', 'spoon', 'hearts'), 'yum': ('body', 'arm', 'spoon', 'stars'), 'hmm': ('body', 'spoon', 'bubbles'),
+    'cook': ('body', 'head', 'eyes', 'wok', 'food'), 'cheer': ('body', 'head', 'eyes', 'armL', 'armR', 'stars'),
+    'think': ('body', 'head', 'eyes', 'front', 'hand', 'bubbles'), 'oops': ('body', 'head', 'eyes', 'front', 'sweat', 'lines'),
+    'shop': ('body', 'head', 'eyes', 'front', 'legL', 'legR'), 'list': ('body', 'head', 'eyes', 'front', 'ground', 'legL', 'legR'),
+    'sip': ('body', 'head', 'eyes', 'front', 'spoon', 'hearts'), 'yum': ('body', 'head', 'eyes', 'arm', 'spoon', 'stars'), 'hmm': ('body', 'head', 'eyes', 'front', 'spoon', 'bubbles'),
 }
 for name, layers in SPLIT.items():
     for layer in layers:
@@ -238,6 +246,14 @@ def pivot(x, y, lean=0, drop=0, upper=True, small=False):
     x, y = 240 + (x - 240) * 0.92, 470 + (y - 470) * 0.92
     if small: x, y = 240 + (x - 240) * 0.88, 464 + (y - 464) * 0.88
     return [round(x / 480, 3), round(y / 480, 3)]
+def head_points(lean=0, tilt=0, drop=0, look=(0, 0), small=False):
+    """คอ (จุดที่หัวเอียง) กับกึ่งกลางระหว่างตา (แกนที่ตาหุบตอนกะพริบ)"""
+    a = math.radians(tilt); ex, ey = 240 + 0.8 * look[0] - 240, 178 + 0.8 * look[1] - 236
+    eye = (240 + ex * math.cos(a) - ey * math.sin(a), 236 + ex * math.sin(a) + ey * math.cos(a))
+    return pivot(240, 236, lean, drop, small=small), pivot(*eye, lean, drop, small=small)
+for label, kw in [('cook', dict(lean=9, tilt=-6)), ('cheer', {}), ('think', dict(lean=3, tilt=11, look=(10, -8))), ('oops', dict(lean=-10, tilt=-4)), ('shop', dict(lean=5, tilt=-5)), ('list', dict(tilt=7)),
+                  ('sip', dict(tilt=-6, drop=40, small=True)), ('yum', dict(lean=7, tilt=-6, small=True)), ('hmm', dict(lean=-4, tilt=-13, look=(-9, -7), small=True))]:
+    print(label, 'neck, eyes', *head_points(**kw))
 L, R = SHOULDER['L'], SHOULDER['R']
 for label, p in [('cook wok', pivot(262, 346, lean=9)), ('cheer armL', pivot(*L)), ('cheer armR', pivot(*R)), ('think hand', pivot(*R, lean=3)),
                  ('list legL', pivot(208, 372, upper=False)), ('list legR', pivot(272, 372, upper=False)), ('sip spoon', pivot(*R, drop=40, small=True)),

@@ -5,7 +5,7 @@ import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, Scroll
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
-import { LAYERS, type BodyMove, type MascotName, type Motion, type Part, type PartMove, type SCENE } from '@/data/images';
+import { LAYERS, type BodyMove, type Head, type MascotName, type Motion, type Part, type PartMove, type SCENE } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -86,7 +86,7 @@ export function Card({ tone = 'soft', children, style, onPress, label }: { tone?
 type Ease = 'sin' | 'up' | 'down';
 const EASE = { sin: Easing.inOut(Easing.sin), up: Easing.out(Easing.quad), down: Easing.in(Easing.quad) };
 // แต่ละจังหวะ: [ค่าปลายทาง, เวลา (ms), การเร่ง] แล้วพัก rest ก่อนวนใหม่
-const MOVES: Record<Motion | PartMove | BodyMove, { steps: [number, number, Ease][]; rest: number }> = {
+const MOVES: Record<Motion | PartMove | BodyMove | 'blink', { steps: [number, number, Ease][]; rest: number }> = {
   bob: { steps: [[-6, 1400, 'sin'], [0, 1400, 'sin']], rest: 0 },
   sway: { steps: [[1, 800, 'sin'], [-1, 1600, 'sin'], [0, 800, 'sin']], rest: 0 },
   jump: { steps: [[-20, 240, 'up'], [0, 240, 'down'], [-12, 180, 'up'], [0, 180, 'down']], rest: 900 },
@@ -110,6 +110,8 @@ const MOVES: Record<Motion | PartMove | BodyMove, { steps: [number, number, Ease
   // วิบวับ (ดาว เส้นตกใจ)
   twinkle: { steps: [[1, 450, 'sin'], [0, 450, 'sin']], rest: 250 },
   still: { steps: [], rest: 0 },
+  // กะพริบตา: หลับเร็ว ลืมช้ากว่านิด แล้วเว้นช่วงยาว
+  blink: { steps: [[1, 70, 'sin'], [0, 110, 'sin']], rest: 2900 },
   // ขาแกว่งตอนนั่ง: สองข้างสวนทางกัน
   swingL: { steps: [[1, 450, 'sin'], [0, 450, 'sin'], [-1, 450, 'sin'], [0, 450, 'sin']], rest: 0 },
   swingR: { steps: [[-1, 450, 'sin'], [0, 450, 'sin'], [1, 450, 'sin'], [0, 450, 'sin']], rest: 0 },
@@ -153,7 +155,7 @@ export function Float({ children, motion = 'bob', delay = 0 }: { children: React
 }
 
 /** ชั้นหนึ่งของตัวละครที่ขยับเอง: หมุนรอบข้อต่อ (pivot) และหรือยกขึ้นลง ระยะเป็นสัดส่วนของขนาดภาพ จึงขยับเท่ากันทุกขนาด */
-function Limb({ part, width }: { part: Part; width: number }) {
+function Limb({ part, width, children }: { part: Part; width: number; children?: ReactNode }) {
   const v = useMove(part.move);
   const deg = part.deg ?? 0;
   const transform = [
@@ -165,13 +167,30 @@ function Limb({ part, width }: { part: Part; width: number }) {
   const opacity = part.move === 'twinkle' ? v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.45] })
     : part.move === 'drip' ? v.interpolate({ inputRange: [0, 0.6, 1], outputRange: [1, 1, 0] }) : 1;
   const origin = part.pivot ? `${part.pivot[0] * 100}% ${part.pivot[1] * 100}%` : 'center';
-  return <Animated.View style={[StyleSheet.absoluteFill, { opacity, transformOrigin: origin, transform }]}><Image source={part.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} /></Animated.View>;
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, { opacity, transformOrigin: origin, transform }]}>
+      <Image source={part.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
+      {children}
+    </Animated.View>
+  );
+}
+
+/** หัว: เอียงหรือเด้งรอบคอตามจังหวะของท่า และกะพริบตาเป็นระยะ (ตาอยู่ในชั้นของหัว จึงเอียงไปด้วยกัน) */
+function HeadLayer({ head, width, blinkDelay }: { head: Head; width: number; blinkDelay: number }) {
+  const eyes = useMove('blink', blinkDelay);
+  return (
+    <Limb part={{ source: head.source, move: head.move, lift: head.lift, deg: head.deg, pivot: head.neck }} width={width}>
+      <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: `${head.eye[0] * 100}% ${head.eye[1] * 100}%`, transform: [{ scaleY: eyes.interpolate({ inputRange: [0, 1], outputRange: [1, 0.12] }) }] }]}>
+        <Image source={head.eyes} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
+      </Animated.View>
+    </Limb>
+  );
 }
 
 /** ตัวละครหนึ่งท่า ภาพจัตุรัส: ทั้งตัวขยับไปด้วยกันก่อน (หายใจ โยกตัว) แล้วแขนขาและของในมือขยับรอบข้อต่อของตัวเอง จึงดูเป็นร่างเดียว */
 export function Mascot({ name, size }: { name: MascotName; size: number | '100%' }) {
   const [width, setWidth] = useState(typeof size === 'number' ? size : 0);
-  const { body, parts, sway } = LAYERS[name];
+  const { body, head, front, parts, sway } = LAYERS[name];
   const v = useMove(sway ?? 'still');
   const whole = sway === 'breathe' ? [{ scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.022] }) }, { scaleX: v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.99] }) }]
     : sway === 'squash' ? [{ scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.03] }) }]
@@ -181,6 +200,9 @@ export function Mascot({ name, size }: { name: MascotName; size: number | '100%'
     <Animated.View style={{ width: size, aspectRatio: 1, transformOrigin: 'bottom', transform: whole }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
       {parts.filter((p) => p.behind).map((p, k) => <Limb key={k} part={p} width={width} />)}
       <Image source={body} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
+      {/* กะพริบตาไม่พร้อมกันทุกตัว: หน่วงต่างกันตามชื่อท่า */}
+      <HeadLayer head={head} width={width} blinkDelay={name.length * 430} />
+      {front !== undefined && <Image source={front} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />}
       {parts.filter((p) => !p.behind).map((p, k) => <Limb key={k} part={p} width={width} />)}
     </Animated.View>
   );

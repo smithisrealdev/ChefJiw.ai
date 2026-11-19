@@ -47,63 +47,100 @@ export const MASCOT = {
 };
 
 export type Motion = 'bob' | 'jump' | 'sway' | 'shake';
-/** ทุกท่าแยกเป็นหลายชั้น: ภาพตัว แล้วซ้อนด้วยส่วนที่ขยับเอง (ทุกชั้นขนาดเท่ากัน วางทับกันพอดี)
- *  ให้ดูเป็นร่างเดียว: sway = ทั้งตัวขยับไปด้วยกัน (หายใจ โยกตัว) แขนขาหมุนรอบข้อต่อ (pivot = หัวไหล่หรือสะโพก เป็นสัดส่วนของภาพ deg = องศาที่หมุน)
- *  ของที่ลอยหรือยก ใช้ lift = ระยะเป็นสัดส่วนของภาพ behind = อยู่หลังตัว ชั้นและจุดหมุนสร้างจาก assets/images/chef/src/draw.py */
+/** ทุกท่าแยกเป็นหลายชั้น (ทุกชั้นขนาดเท่ากัน วางทับกันพอดี) ลำดับจากหลังมาหน้า: ส่วนที่ behind, ตัว, หัว, ตา, front (แขนที่อยู่หน้าหัว), ส่วนอื่น
+ *  ให้ดูเป็นร่างเดียว: sway = ทั้งตัวขยับไปด้วยกัน (หายใจ โยกตัว) หัวเอียงรอบคอ (neck) และกะพริบตา (eye = กึ่งกลางระหว่างตา) แขนขาหมุนรอบข้อต่อ (pivot)
+ *  deg = องศาที่หมุน lift = ระยะยกเป็นสัดส่วนของภาพ ชั้นและจุดหมุนสร้างจาก assets/images/chef/src/draw.py */
 export type PartMove = 'toss' | 'fly' | 'stepL' | 'stepR' | 'swingL' | 'swingR' | 'sip' | 'tap' | 'puff' | 'drip' | 'pump' | 'twinkle' | 'still';
 export type BodyMove = 'breathe' | 'waddle' | 'ponder' | 'squash';
-export type Part = { source: number; move: PartMove; lift?: number; deg?: number; pivot?: [number, number]; behind?: boolean };
-export type Layers = { body: number; sway?: BodyMove; parts: Part[] };
+export type Part = { source: number; move: PartMove | BodyMove; lift?: number; deg?: number; pivot?: [number, number]; behind?: boolean };
+export type Head = { source: number; eyes: number; neck: [number, number]; eye: [number, number]; move: PartMove | BodyMove; lift?: number; deg?: number };
+export type Layers = { body: number; head: Head; front?: number; sway?: BodyMove; parts: Part[] };
 export type MascotName = keyof typeof MASCOT;
 export const LAYERS: Record<MascotName, Layers> = {
-  // เชฟจิ๋วผัดกระทะ: ตัวยืดขึ้นตามจังหวะ กระทะกระดกรอบมือ ผักลอยขึ้นสูงกว่า
-  cook: { body: require('@/assets/images/chef/cook-body.png'), sway: 'squash', parts: [
-    { source: require('@/assets/images/chef/cook-food.png'), move: 'fly', lift: 0.1 },
-    { source: require('@/assets/images/chef/cook-wok.png'), move: 'toss', lift: 0.02, deg: 5, pivot: [0.553, 0.749] },
-  ] },
-  // เชฟจิ๋วดีใจ: แขนสองข้างชูรอบหัวไหล่ ดาววิบวับ (การกระโดดอยู่ที่ Float)
-  cheer: { body: require('@/assets/images/chef/cheer-body.png'), parts: [
-    { source: require('@/assets/images/chef/cheer-armL.png'), move: 'pump', deg: -8, pivot: [0.347, 0.592], behind: true },
-    { source: require('@/assets/images/chef/cheer-armR.png'), move: 'pump', deg: 8, pivot: [0.653, 0.592], behind: true },
-    { source: require('@/assets/images/chef/cheer-stars.png'), move: 'twinkle' },
-  ] },
-  // เชฟจิ๋วคิด: โยกตัวช้าๆ มือเคาะคางรอบหัวไหล่ ฟองความคิดลอย
-  think: { body: require('@/assets/images/chef/think-body.png'), sway: 'ponder', parts: [
-    { source: require('@/assets/images/chef/think-hand.png'), move: 'tap', deg: -4, pivot: [0.665, 0.6] },
-    { source: require('@/assets/images/chef/think-bubbles.png'), move: 'puff', lift: 0.03 },
-  ] },
+  // เชฟจิ๋วผัดกระทะ: ตัวยืดขึ้นตามจังหวะ หัวเด้งตาม กระทะกระดกรอบมือ ผักลอยขึ้นสูงกว่า
+  cook: {
+    body: require('@/assets/images/chef/cook-body.png'), sway: 'squash',
+    head: { source: require('@/assets/images/chef/cook-head.png'), eyes: require('@/assets/images/chef/cook-eyes.png'), neck: [0.544, 0.534], eye: [0.55, 0.423], move: 'toss', lift: 0.012 },
+    parts: [
+      { source: require('@/assets/images/chef/cook-food.png'), move: 'fly', lift: 0.1 },
+      { source: require('@/assets/images/chef/cook-wok.png'), move: 'toss', lift: 0.02, deg: 5, pivot: [0.553, 0.749] },
+    ],
+  },
+  // เชฟจิ๋วดีใจ: หัวเด้ง แขนสองข้างชูรอบหัวไหล่ ดาววิบวับ (การกระโดดอยู่ที่ Float)
+  cheer: {
+    body: require('@/assets/images/chef/cheer-body.png'),
+    head: { source: require('@/assets/images/chef/cheer-head.png'), eyes: require('@/assets/images/chef/cheer-eyes.png'), neck: [0.5, 0.531], eye: [0.5, 0.42], move: 'pump', lift: 0.012 },
+    parts: [
+      { source: require('@/assets/images/chef/cheer-armL.png'), move: 'pump', deg: -8, pivot: [0.347, 0.592], behind: true },
+      { source: require('@/assets/images/chef/cheer-armR.png'), move: 'pump', deg: 8, pivot: [0.653, 0.592], behind: true },
+      { source: require('@/assets/images/chef/cheer-stars.png'), move: 'twinkle' },
+    ],
+  },
+  // เชฟจิ๋วคิด: โยกตัวช้าๆ เอียงคอไปมา มือเคาะคางรอบหัวไหล่ ฟองความคิดลอย
+  think: {
+    body: require('@/assets/images/chef/think-body.png'), sway: 'ponder', front: require('@/assets/images/chef/think-front.png'),
+    head: { source: require('@/assets/images/chef/think-head.png'), eyes: require('@/assets/images/chef/think-eyes.png'), neck: [0.515, 0.531], eye: [0.56, 0.415], move: 'ponder', deg: 3 },
+    parts: [
+      { source: require('@/assets/images/chef/think-hand.png'), move: 'tap', deg: -4, pivot: [0.665, 0.6] },
+      { source: require('@/assets/images/chef/think-bubbles.png'), move: 'puff', lift: 0.03 },
+    ],
+  },
   // เชฟจิ๋วตกใจ: เหงื่อหยด เส้นตกใจกะพริบ (การสั่นอยู่ที่ Float)
-  oops: { body: require('@/assets/images/chef/oops-body.png'), parts: [
-    { source: require('@/assets/images/chef/oops-sweat.png'), move: 'drip', lift: 0.1 },
-    { source: require('@/assets/images/chef/oops-lines.png'), move: 'twinkle' },
-  ] },
-  // ใบเตยเดิน: โยกตัวซ้ายขวา ขาข้างที่ไม่ได้รับน้ำหนักยกขึ้น
-  shop: { body: require('@/assets/images/chef/shop-body.png'), sway: 'waddle', parts: [
-    { source: require('@/assets/images/chef/shop-legL.png'), move: 'stepL', lift: 0.03, behind: true },
-    { source: require('@/assets/images/chef/shop-legR.png'), move: 'stepR', lift: 0.03, behind: true },
-  ] },
-  // ใบเตยนั่งบนลัง: หายใจ ขาแกว่งรอบสะโพกสลับกัน
-  list: { body: require('@/assets/images/chef/list-body.png'), sway: 'breathe', parts: [
-    { source: require('@/assets/images/chef/list-ground.png'), move: 'still', behind: true },
-    { source: require('@/assets/images/chef/list-legL.png'), move: 'swingL', deg: 7, pivot: [0.439, 0.791], behind: true },
-    { source: require('@/assets/images/chef/list-legR.png'), move: 'swingR', deg: 7, pivot: [0.561, 0.791], behind: true },
-  ] },
-  // น้องชิมชิม: หายใจ แขนที่ถือช้อนลดลงรอบหัวไหล่แล้วยกกลับมาที่ปาก หัวใจลอย
-  sip: { body: require('@/assets/images/chef/sip-body.png'), sway: 'breathe', parts: [
-    { source: require('@/assets/images/chef/sip-spoon.png'), move: 'sip', deg: -14, pivot: [0.635, 0.704] },
-    { source: require('@/assets/images/chef/sip-hearts.png'), move: 'puff', lift: 0.03 },
-  ] },
-  // น้องชิมดีใจ: แขนกับช้อนชูรอบหัวไหล่ ดาววิบวับ (การกระโดดอยู่ที่ Float)
-  yum: { body: require('@/assets/images/chef/yum-body.png'), parts: [
-    { source: require('@/assets/images/chef/yum-arm.png'), move: 'pump', deg: -8, pivot: [0.39, 0.622], behind: true },
-    { source: require('@/assets/images/chef/yum-spoon.png'), move: 'pump', deg: 8, pivot: [0.658, 0.655] },
-    { source: require('@/assets/images/chef/yum-stars.png'), move: 'twinkle' },
-  ] },
-  // น้องชิมสงสัย: โยกตัวช้าๆ ช้อนเคาะรอบหัวไหล่ ฟองความคิดลอย
-  hmm: { body: require('@/assets/images/chef/hmm-body.png'), sway: 'ponder', parts: [
-    { source: require('@/assets/images/chef/hmm-spoon.png'), move: 'tap', deg: 4, pivot: [0.621, 0.628] },
-    { source: require('@/assets/images/chef/hmm-bubbles.png'), move: 'puff', lift: 0.03 },
-  ] },
+  oops: {
+    body: require('@/assets/images/chef/oops-body.png'), front: require('@/assets/images/chef/oops-front.png'),
+    head: { source: require('@/assets/images/chef/oops-head.png'), eyes: require('@/assets/images/chef/oops-eyes.png'), neck: [0.451, 0.535], eye: [0.424, 0.427], move: 'still' },
+    parts: [
+      { source: require('@/assets/images/chef/oops-sweat.png'), move: 'drip', lift: 0.1 },
+      { source: require('@/assets/images/chef/oops-lines.png'), move: 'twinkle' },
+    ],
+  },
+  // ใบเตยเดิน: โยกตัวซ้ายขวา หัวเอียงสวนเล็กน้อยให้ทรงตัว ขาข้างที่ไม่ได้รับน้ำหนักยกขึ้น
+  shop: {
+    body: require('@/assets/images/chef/shop-body.png'), sway: 'waddle', front: require('@/assets/images/chef/shop-front.png'),
+    head: { source: require('@/assets/images/chef/shop-head.png'), eyes: require('@/assets/images/chef/shop-eyes.png'), neck: [0.525, 0.532], eye: [0.525, 0.421], move: 'waddle', deg: -1.5 },
+    parts: [
+      { source: require('@/assets/images/chef/shop-legL.png'), move: 'stepL', lift: 0.03, behind: true },
+      { source: require('@/assets/images/chef/shop-legR.png'), move: 'stepR', lift: 0.03, behind: true },
+    ],
+  },
+  // ใบเตยนั่งบนลัง: หายใจ เอียงคออ่านรายการ ขาแกว่งรอบสะโพกสลับกัน
+  list: {
+    body: require('@/assets/images/chef/list-body.png'), sway: 'breathe', front: require('@/assets/images/chef/list-front.png'),
+    head: { source: require('@/assets/images/chef/list-head.png'), eyes: require('@/assets/images/chef/list-eyes.png'), neck: [0.5, 0.531], eye: [0.514, 0.42], move: 'ponder', deg: 2.5 },
+    parts: [
+      { source: require('@/assets/images/chef/list-ground.png'), move: 'still', behind: true },
+      { source: require('@/assets/images/chef/list-legL.png'), move: 'swingL', deg: 7, pivot: [0.439, 0.791], behind: true },
+      { source: require('@/assets/images/chef/list-legR.png'), move: 'swingR', deg: 7, pivot: [0.561, 0.791], behind: true },
+    ],
+  },
+  // น้องชิมชิม: หายใจ เอียงคอ แขนที่ถือช้อนลดลงรอบหัวไหล่แล้วยกกลับมาที่ปาก หัวใจลอย
+  sip: {
+    body: require('@/assets/images/chef/sip-body.png'), sway: 'breathe', front: require('@/assets/images/chef/sip-front.png'),
+    head: { source: require('@/assets/images/chef/sip-head.png'), eyes: require('@/assets/images/chef/sip-eyes.png'), neck: [0.5, 0.65], eye: [0.49, 0.553], move: 'ponder', deg: 2 },
+    parts: [
+      { source: require('@/assets/images/chef/sip-spoon.png'), move: 'sip', deg: -14, pivot: [0.635, 0.704] },
+      { source: require('@/assets/images/chef/sip-hearts.png'), move: 'puff', lift: 0.03 },
+    ],
+  },
+  // น้องชิมดีใจ: หัวเด้ง แขนกับช้อนชูรอบหัวไหล่ ดาววิบวับ (การกระโดดอยู่ที่ Float)
+  yum: {
+    body: require('@/assets/images/chef/yum-body.png'),
+    head: { source: require('@/assets/images/chef/yum-head.png'), eyes: require('@/assets/images/chef/yum-eyes.png'), neck: [0.53, 0.585], eye: [0.532, 0.487], move: 'pump', lift: 0.012 },
+    parts: [
+      { source: require('@/assets/images/chef/yum-arm.png'), move: 'pump', deg: -8, pivot: [0.39, 0.622], behind: true },
+      { source: require('@/assets/images/chef/yum-spoon.png'), move: 'pump', deg: 8, pivot: [0.658, 0.655] },
+      { source: require('@/assets/images/chef/yum-stars.png'), move: 'twinkle' },
+    ],
+  },
+  // น้องชิมสงสัย: โยกตัวช้าๆ เอียงคอไปมา ช้อนเคาะรอบหัวไหล่ ฟองความคิดลอย
+  hmm: {
+    body: require('@/assets/images/chef/hmm-body.png'), sway: 'ponder', front: require('@/assets/images/chef/hmm-front.png'),
+    head: { source: require('@/assets/images/chef/hmm-head.png'), eyes: require('@/assets/images/chef/hmm-eyes.png'), neck: [0.483, 0.584], eye: [0.44, 0.485], move: 'ponder', deg: 3 },
+    parts: [
+      { source: require('@/assets/images/chef/hmm-spoon.png'), move: 'tap', deg: 4, pivot: [0.621, 0.628] },
+      { source: require('@/assets/images/chef/hmm-bubbles.png'), move: 'puff', lift: 0.03 },
+    ],
+  },
 };
 /** ฉากเต็มความกว้างใต้ชื่อหน้าจอ: ภาพพื้นหลังโปร่งใสที่วาดให้เข้ากับสีหัวจอ แล้ววางตัวละครทับทีละตัวเพื่อให้ขยับได้
  *  ตำแหน่งเป็นสัดส่วนของฉาก (ซ้าย บน กว้าง) ตัวละครเป็นภาพจัตุรัส */
