@@ -1,0 +1,13 @@
+{
+  "id": "P008",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "I'd cook the free green curry because it costs nothing, but 99 baht is two plates of rice on my allowance, and I can find tom yum or pad see ew on YouTube for free. I'd stop at the free dishes.",
+  "objection": "Whether the dishes really come out right when I cook them myself: one free curry turning out okay doesn't prove the other twelve will. When a dish fails I've already wasted 100-150 baht of coconut milk and chicken, and an 'It didn't work' button doesn't give that back.",
+  "would_change_my_mind": "Let me try one Sunday cook-ahead plan for free. If my week's meals really come out cheaper than a 50-baht plate, the 99 baht pays for itself and I'd buy.",
+  "price_too_cheap": 10,
+  "price_cheap": 39,
+  "price_expensive": 79,
+  "price_too_expensive": 149
+}
