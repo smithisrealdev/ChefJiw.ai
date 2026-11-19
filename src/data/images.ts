@@ -33,8 +33,7 @@ export const DISH_TINT: Record<string, string> = {
 // ทีมเชฟ ตัวละครสามตัว แต่ละตัวดูแลงานของตัวเอง ใช้เฉพาะจังหวะที่ท่านั้นมีความหมาย ไม่แปะทุกหน้า
 export const MASCOT = {
   // เชฟจิ๋ว: พาทำอาหาร
-  hi: require('@/assets/images/chef/hi.png'), // ทักทาย: หน้าร้าน หน้าแนะนำแอป
-  cook: require('@/assets/images/chef/cook.png'), // ยังไม่เคยทำจานไหน
+  cook: require('@/assets/images/chef/cook.png'), // ผัดกระทะ: หน้าร้าน หน้าแนะนำแอป ยังไม่เคยทำจานไหน
   cheer: require('@/assets/images/chef/cheer.png'), // สำเร็จ: ครบเวลา ทำจานแรกแล้ว
   think: require('@/assets/images/chef/think.png'), // กำลังรอคำตอบ
   oops: require('@/assets/images/chef/oops.png'), // มีอะไรผิดพลาด
@@ -48,27 +47,32 @@ export const MASCOT = {
 };
 
 export type Motion = 'bob' | 'jump' | 'sway' | 'shake';
-/** ท่าโบกมือแยกเป็นสองชั้น: ตัว กับแขนที่โบก แอปหมุนชั้นแขนรอบหัวไหล่ (pivot เป็นสัดส่วนของภาพ พิมพ์ออกมาตอนรัน draw.py) */
-export type Layers = { body: number; arm: number; pivot: [number, number] };
+/** ท่าที่ขยับทีละส่วน: ภาพตัว แล้วซ้อนด้วยส่วนที่ขยับ (ทุกชั้นขนาดเท่ากัน วางทับกันพอดี) behind = อยู่หลังตัว */
+export type PartMove = 'toss' | 'fly' | 'stepL' | 'stepR';
+export type Layers = { body: number; parts: { source: number; move: PartMove; behind?: boolean }[] };
 export const LAYERS = {
-  hi: { body: require('@/assets/images/chef/hi-body.png'), arm: require('@/assets/images/chef/hi-arm.png'), pivot: [0.328, 0.606] },
-  shop: { body: require('@/assets/images/chef/shop-body.png'), arm: require('@/assets/images/chef/shop-arm.png'), pivot: [0.367, 0.579] },
+  // เชฟจิ๋วผัดกระทะ: กระทะกับแขนกระดกขึ้น ของในกระทะลอยขึ้นสูงกว่า
+  cook: { body: require('@/assets/images/chef/cook-body.png'), parts: [
+    { source: require('@/assets/images/chef/cook-food.png'), move: 'fly' }, { source: require('@/assets/images/chef/cook-wok.png'), move: 'toss' }] },
+  // ใบเตยเดิน: ขาซ้ายขวายกสลับกัน
+  shop: { body: require('@/assets/images/chef/shop-body.png'), parts: [
+    { source: require('@/assets/images/chef/shop-legL.png'), move: 'stepL', behind: true }, { source: require('@/assets/images/chef/shop-legR.png'), move: 'stepR', behind: true }] },
 } satisfies Record<string, Layers>;
 /** ฉากเต็มความกว้างใต้ชื่อหน้าจอ: ภาพพื้นหลังโปร่งใสที่วาดให้เข้ากับสีหัวจอ แล้ววางตัวละครทับทีละตัวเพื่อให้ขยับได้
  *  ตำแหน่งเป็นสัดส่วนของฉาก (ซ้าย บน กว้าง) ตัวละครเป็นภาพจัตุรัส */
 export const SCENE = {
-  // ครัวของทีมเชฟ (หัวจอสีน้ำเงิน): ใบเตยกลับจากตลาดโบกมือ เชฟจิ๋วโบกมือ น้องชิมกระโดดรอ
+  // ครัวของทีมเชฟ (หัวจอสีน้ำเงิน): ใบเตยเดินกลับจากตลาด เชฟจิ๋วผัดกระทะ น้องชิมกระโดดรอ
   home: {
     source: require('@/assets/images/chef/scene-home.png'), ratio: 780 / 360,
     cast: [
-      { source: MASCOT.shop, wave: LAYERS.shop, left: 0.008, top: 0.46, width: 0.246, motion: 'bob', delay: 400 },
-      { source: MASCOT.hi, wave: LAYERS.hi, left: 0.344, top: 0.278, width: 0.326, motion: 'bob', delay: 0 },
+      { source: MASCOT.shop, layers: LAYERS.shop, left: 0.008, top: 0.46, width: 0.246, motion: 'bob', delay: 400 },
+      { source: MASCOT.cook, layers: LAYERS.cook, left: 0.344, top: 0.278, width: 0.326, motion: 'bob', delay: 0 },
       { source: MASCOT.yum, left: 0.759, top: 0.528, width: 0.215, motion: 'jump', delay: 900 },
     ],
   },
   // แผงตลาด (หัวจอสีส้ม): ใบเตยเดินเลือกของ
   plan: {
     source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300,
-    cast: [{ source: MASCOT.shop, wave: LAYERS.shop, left: 0.038, top: 0.233, width: 0.295, motion: 'bob', delay: 0 }],
+    cast: [{ source: MASCOT.shop, layers: LAYERS.shop, left: 0.038, top: 0.233, width: 0.295, motion: 'bob', delay: 0 }],
   },
-} satisfies Record<string, { source: number; ratio: number; cast: { source: number; wave?: Layers; left: number; top: number; width: number; motion: Motion; delay: number }[] }>;
+} satisfies Record<string, { source: number; ratio: number; cast: { source: number; layers?: Layers; left: number; top: number; width: number; motion: Motion; delay: number }[] }>;

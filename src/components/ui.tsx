@@ -5,7 +5,7 @@ import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, Scroll
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
-import { MASCOT, type Layers, type Motion, type SCENE } from '@/data/images';
+import { MASCOT, type Layers, type Motion, type PartMove, type SCENE } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -86,12 +86,17 @@ export function Card({ tone = 'soft', children, style, onPress, label }: { tone?
 type Ease = 'sin' | 'up' | 'down';
 const EASE = { sin: Easing.inOut(Easing.sin), up: Easing.out(Easing.quad), down: Easing.in(Easing.quad) };
 // แต่ละจังหวะ: [ค่าปลายทาง, เวลา (ms), การเร่ง] แล้วพัก rest ก่อนวนใหม่
-const MOVES: Record<Motion | 'wave', { steps: [number, number, Ease][]; rest: number }> = {
+const MOVES: Record<Motion | PartMove, { steps: [number, number, Ease][]; rest: number }> = {
   bob: { steps: [[-6, 1400, 'sin'], [0, 1400, 'sin']], rest: 0 },
   sway: { steps: [[1, 800, 'sin'], [-1, 1600, 'sin'], [0, 800, 'sin']], rest: 0 },
   jump: { steps: [[-20, 240, 'up'], [0, 240, 'down'], [-12, 180, 'up'], [0, 180, 'down']], rest: 900 },
   shake: { steps: [[-5, 70, 'sin'], [5, 140, 'sin'], [-5, 140, 'sin'], [5, 140, 'sin'], [0, 70, 'sin']], rest: 1800 },
-  wave: { steps: [[1, 260, 'sin'], [-1, 260, 'sin'], [1, 260, 'sin'], [-1, 260, 'sin'], [0, 200, 'sin']], rest: 1500 },
+  // ผัดกระทะ: กระทะกระดกแล้วของลอยขึ้นสูงกว่า รอบละเท่ากัน (1.2 วินาที) จึงเข้าจังหวะกัน
+  toss: { steps: [[-1, 200, 'up'], [0, 260, 'down']], rest: 740 },
+  fly: { steps: [[-1, 330, 'up'], [0, 330, 'down']], rest: 540 },
+  // เดิน: ยกขาสลับข้าง ขาขวาเริ่มหลังขาซ้ายครึ่งรอบ
+  stepL: { steps: [[-1, 200, 'up'], [0, 200, 'down']], rest: 400 },
+  stepR: { steps: [[0, 400, 'sin'], [-1, 200, 'up'], [0, 200, 'down']], rest: 0 },
 };
 /** วนการขยับชุดหนึ่งไปเรื่อยๆ หลังหน่วง delay หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว */
 function useMove(move: keyof typeof MOVES, delay = 0) {
@@ -125,17 +130,25 @@ export function Float({ children, motion = 'bob', delay = 0 }: { children: React
   );
 }
 
-/** ภาพตัวละครจัตุรัส ถ้าส่งชั้นแยกของท่าโบกมือมา แขนจะโบกจริงรอบหัวไหล่ */
-export function Mascot({ source, wave, size }: { source: number; wave?: Layers; size: number | '100%' }) {
-  const v = useMove('wave', 300);
-  if (!wave) return <Image source={source} style={{ width: size, aspectRatio: 1 }} contentFit="contain" accessible={false} />;
+// ระยะที่แต่ละส่วนขยับ เป็นสัดส่วนของขนาดภาพ ตัวละครจึงขยับเท่ากันไม่ว่าจะแสดงเล็กหรือใหญ่
+const REACH: Record<PartMove, number> = { toss: 0.035, fly: 0.11, stepL: 0.035, stepR: 0.035 };
+/** ชั้นหนึ่งของตัวละครที่ขยับเอง: กระทะกระดก ของในกระทะลอย หรือขายกสลับข้าง */
+function Part({ source, move, width }: { source: number; move: PartMove; width: number }) {
+  const v = useMove(move);
+  const lift = { translateY: Animated.multiply(v, width * REACH[move]) };
+  const transform = move === 'toss' ? [lift, { rotate: v.interpolate({ inputRange: [-1, 0], outputRange: ['-6deg', '0deg'] }) }] : [lift];
+  return <Animated.View style={[StyleSheet.absoluteFill, { transform }]}><Image source={source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} /></Animated.View>;
+}
+
+/** ภาพตัวละครจัตุรัส ถ้าส่ง layers มา ส่วนที่แยกชั้นไว้จะขยับเอง (เช่น ผัดกระทะ ก้าวขา) */
+export function Mascot({ source, layers, size }: { source: number; layers?: Layers; size: number | '100%' }) {
+  const [width, setWidth] = useState(typeof size === 'number' ? size : 0);
+  if (!layers) return <Image source={source} style={{ width: size, aspectRatio: 1 }} contentFit="contain" accessible={false} />;
   return (
-    <View style={{ width: size, aspectRatio: 1 }}>
-      {/* แขนอยู่หลังตัว หมุนรอบหัวไหล่ */}
-      <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: `${wave.pivot[0] * 100}% ${wave.pivot[1] * 100}%`, transform: [{ rotate: v.interpolate({ inputRange: [-1, 1], outputRange: ['-9deg', '13deg'] }) }] }]}>
-        <Image source={wave.arm} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
-      </Animated.View>
-      <Image source={wave.body} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
+    <View style={{ width: size, aspectRatio: 1 }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      {layers.parts.filter((p) => p.behind).map((p, k) => <Part key={k} source={p.source} move={p.move} width={width} />)}
+      <Image source={layers.body} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
+      {layers.parts.filter((p) => !p.behind).map((p, k) => <Part key={k} source={p.source} move={p.move} width={width} />)}
     </View>
   );
 }
@@ -160,7 +173,7 @@ export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel
           <Image source={scene.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
           {scene.cast.map((c, k) => (
             <View key={k} style={{ position: 'absolute', left: `${c.left * 100}%`, top: `${c.top * 100}%`, width: `${c.width * 100}%`, aspectRatio: 1 }}>
-              <Float motion={c.motion} delay={c.delay}><Mascot source={c.source} wave={'wave' in c ? c.wave : undefined} size="100%" /></Float>
+              <Float motion={c.motion} delay={c.delay}><Mascot source={c.source} layers={'layers' in c ? c.layers : undefined} size="100%" /></Float>
             </View>
           ))}
         </View>

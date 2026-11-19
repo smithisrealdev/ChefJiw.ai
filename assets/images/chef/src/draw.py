@@ -31,10 +31,11 @@ def arm(side, hx, hy, bx=0, by=0, skin='#FFE3C2', sleeve=None, cut=0.62):
         out += f'<path d="M{x0} {y0} Q{ax} {ay} {ax + (bx2 - ax) * t} {ay + (by2 - ay) * t}" stroke="{sleeve}" stroke-width="48" stroke-linecap="round" fill="none"/>'
     return out
 STAND = ((202, 440, 0), (278, 440, 0))
-def legs(skin, sock, accent, feet, drop):
+def legs(skin, sock, accent, feet, drop, only=None):
     """ขาจากสะโพกถึงเท้า เท้าแต่ละข้างกำหนดเป็น (x, y, มุมหมุนรองเท้า) จึงยกขา ก้าว หรือนั่งแบะขาได้"""
     out = ''
-    for (hx, hy), (fx, fy, rot) in zip(((208, 372 + drop), (272, 372 + drop)), feet):
+    for k, ((hx, hy), (fx, fy, rot)) in enumerate(zip(((208, 372 + drop), (272, 372 + drop)), feet)):
+        if only is not None and k != only: continue
         ax, ay = fx, fy - 14; mx, my = hx + (ax - hx) * 0.62, hy + (ay - hy) * 0.62  # ถุงเท้าคลุมช่วงล่างของขา
         dx, dy = ax - hx, ay - hy; n = max(1.0, (dx * dx + dy * dy) ** 0.5); px, py = -dy / n * 19, dx / n * 19
         sx, sy = hx + dx * 0.74, hy + dy * 0.74
@@ -43,19 +44,23 @@ def legs(skin, sock, accent, feet, drop):
                 f'<g transform="rotate({rot} {fx} {fy})"><ellipse cx="{fx}" cy="{fy}" rx="36" ry="18" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="4"/>'
                 f'<path d="M{fx-26} {fy+10} q26 8 52 0" stroke="{accent}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M{fx-6} {fy-10} l9 11" stroke="{accent}" stroke-width="6" stroke-linecap="round"/></g>')
     return out
-LAYER = ['all']  # 'body' = ไม่วาดแขนที่โบก  'wave' = วาดเฉพาะแขนที่โบก ใช้ทำภาพแยกชั้นให้แอปขยับแขนได้
+LAYER = ['all']  # 'all' = ภาพเต็ม  'body' = ตัดส่วนที่ขยับแยกออก  ชื่อส่วน หรือ 'legL' 'legR' = วาดเฉพาะส่วนนั้น ใช้ทำภาพแยกชั้นให้แอปขยับทีละส่วน
 _n = [0]
 def person(skin, top, clothes, hair, accent, look=(0, 0), mouth=True, sock='#FFFFFF', back='', under_head='', arms_back='', arms_front='', hat='', front='', blush=0.85,
-           lean=0, tilt=0, feet=STAND, drop=0, ground='', legs_front=False, wave=''):
+           lean=0, tilt=0, feet=STAND, drop=0, ground='', legs_front=False, parts=None, split_legs=False):
     """lean = เอนตัวท่อนบน (องศา) tilt = เอียงคอ feet = ตำแหน่งเท้า drop = ย่อตัวลง (นั่ง) legs_front = ขาอยู่หน้าตัว (นั่งเหยียดขามาข้างหน้า) ground = ของที่พื้น การกระโดดทำเป็นแอนิเมชันในแอป"""
     _n[0] += 1; cid = f'c{_n[0]}'
-    if LAYER[0] == 'wave': return SVG(f'<g transform="translate(240 470) scale(0.92) translate(-240 -470)"><g transform="translate(0 {drop}) rotate({lean} 240 384)">{wave}</g></g>')
-    if LAYER[0] == 'body': wave = ''
-    return SVG(f'''<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{ground}<g>{'' if legs_front else legs(skin, sock, accent, feet, drop)}
-<g transform="translate(0 {drop}) rotate({lean} 240 384)">{back}{wave}{arms_back}
+    layer, parts = LAYER[0], parts or {}
+    fit = lambda inner: SVG(f'<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{inner}</g>')
+    if layer in parts: return fit(f'<g transform="translate(0 {drop}) rotate({lean} 240 384)">{parts[layer]}</g>')
+    if layer in ('legL', 'legR'): return fit(legs(skin, sock, accent, feet, drop, only=('legL', 'legR').index(layer)))
+    moving = ''.join(parts.values()) if layer == 'all' else ''
+    both_legs = '' if (split_legs and layer == 'body') else legs(skin, sock, accent, feet, drop)
+    return SVG(f'''<g transform="translate(240 470) scale(0.92) translate(-240 -470)">{ground}<g>{'' if legs_front else both_legs}
+<g transform="translate(0 {drop}) rotate({lean} 240 384)">{back}{arms_back}
 <clipPath id="{cid}"><path d="{TORSO}"/></clipPath><path d="{TORSO}" fill="{top}"/><g clip-path="url(#{cid})">{clothes}</g>
 <g transform="rotate({tilt} 240 236)">{under_head}<path d="{HEAD}" fill="{skin}"/>{hair}{hat}{face(look, mouth, blush)}</g>
-{arms_front}</g>{legs(skin, sock, accent, feet, drop) if legs_front else ''}</g>{front}</g>''')
+{arms_front}{moving}</g>{both_legs if legs_front else ''}</g>{front}</g>''')
 
 # ---------- เชฟจิ๋ว: หมวกเชฟ ผมหน้าม้าปัดข้าง เสื้อแขนยาวฟ้า ผ้ากันเปื้อนเต็มตัวสีส้มมีกระเป๋า ----------
 S1, SKY, BROWN = '#FFE3C2', '#BFD9FF', '#6B4632'
@@ -71,14 +76,13 @@ def chef(**k):
     return person(S1, SKY, apron, chef_hair, CORAL, **k)
 A1 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S1, SKY)
 ladle = lambda x, y, r: f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y+26} V{y-66}" stroke="{WOOD}" stroke-width="10" stroke-linecap="round"/><path d="M{x-22} {y-70} a22 22 0 0 0 44 0 z" fill="{WOOD}"/></g>'
-wok = lambda x, y, r=0: (f'<g transform="rotate({r} {x} {y})"><path d="M{x-66} {y} q66 56 132 0 z" fill="{INK}"/><path d="M{x+62} {y+2} l48 -12" stroke="{INK}" stroke-width="13" stroke-linecap="round"/></g>'
-                    f'<circle cx="{x-34}" cy="{y-40}" r="9" fill="{GREEN_L}"/><circle cx="{x-2}" cy="{y-66}" r="9" fill="{CORAL}"/><circle cx="{x+30}" cy="{y-44}" r="9" fill="{YEL}"/><circle cx="{x-10}" cy="{y-24}" r="8" fill="{GREEN}"/><circle cx="{x+16}" cy="{y-84}" r="7" fill="{GREEN_L}"/>')
+wok = lambda x, y, r=0: f'<g transform="rotate({r} {x} {y})"><path d="M{x-66} {y} q66 56 132 0 z" fill="{INK}"/><path d="M{x+62} {y+2} l48 -12" stroke="{INK}" stroke-width="13" stroke-linecap="round"/></g>'
+food = lambda x, y: f'<circle cx="{x-34}" cy="{y-30}" r="9" fill="{GREEN_L}"/><circle cx="{x-2}" cy="{y-50}" r="9" fill="{CORAL}"/><circle cx="{x+30}" cy="{y-34}" r="9" fill="{YEL}"/><circle cx="{x-10}" cy="{y-20}" r="8" fill="{GREEN}"/><circle cx="{x+16}" cy="{y-62}" r="7" fill="{GREEN_L}"/>'
 def build():
     P = {
-      # โบกมือ เอนตัวนิดๆ เท้าหนึ่งเขย่ง
-      'hi': chef(lean=-5, tilt=5, feet=((200, 440, 0), (292, 432, 24)), wave=A1('L', 92, 196, -18, 14), arms_front=ladle(378, 300, 14) + A1('R', 374, 318, 20, -6)),
       # เอนตัวตามกระทะ ของในกระทะลอยขึ้น
-      'cook': chef(lean=9, tilt=-6, feet=((186, 440, -8), (286, 440, 10)), arms_front=wok(262, 346, -10) + A1('L', 200, 340, -34, 12) + A1('R', 356, 328, 30, 8)),
+      'cook': chef(lean=9, tilt=-6, feet=((186, 440, -8), (286, 440, 10)),
+                   parts={'food': food(262, 346), 'wok': wok(262, 346, -10) + A1('L', 200, 340, -34, 12) + A1('R', 356, 328, 30, 8)}),
       # กระโดดตัวลอย แขนขากาง
       'cheer': chef(feet=((170, 432, -22), (310, 432, 22)), arms_back=A1('L', 88, 172, -14, 16) + A1('R', 392, 172, 14, 16), hat=toque(-14),
                     front=star(50, 96, 22) + star(432, 84, 26) + star(400, 22, 13) + star(96, 30, 12)),
@@ -108,8 +112,8 @@ def build():
         f'<path d="M{x-26} {y+2} q-20 -42 6 -58 q24 18 8 58 z" fill="{GREEN}"/><path d="M{x-2} {y+2} q-8 -50 24 -62 q18 28 -4 62 z" fill="{GREEN_L}"/><path d="M{x+16} {y+4} l20 -50 q10 4 6 14 l-12 38 z" fill="{CORAL}"/>'
         f'<path d="M{x-44} {y} h88 l-6 68 q-38 10 -76 0 z" fill="{CREAM}" stroke="{CREAM_D}" stroke-width="4" stroke-linejoin="round"/>' + heart(x, y + 36, 0.75, CORAL))
     P.update({
-      # เดินกลับจากตลาด ก้าวขา แกว่งถุงผ้า
-      'shop': toey(lean=5, tilt=-5, feet=((190, 442, -6), (300, 424, 30)), wave=A2('L', 96, 204, -18, 14), arms_front=tote(390, 326) + A2('R', 382, 318, 22, -4), front=star(56, 150, 15)),
+      # เดินกลับจากตลาด ก้าวขา มือหนึ่งหิ้วถุงผ้า อีกมือแกว่งข้างตัว
+      'shop': toey(lean=5, tilt=-5, feet=((196, 442, -6), (290, 440, 14)), split_legs=True, arms_back=A2('L', 122, 336, -26, 4), arms_front=tote(390, 326) + A2('R', 382, 318, 22, -4), front=star(56, 150, 15)),
       # นั่งบนลังไม้ อ่านรายการของ แกว่งขา
       'list': toey(tilt=7, feet=((196, 446, -14), (292, 434, 22)),
                    ground=f'<rect x="126" y="384" width="228" height="80" rx="12" fill="{STRAW}"/><path d="M138 412 h204 M138 438 h204" stroke="{STRAW_D}" stroke-width="6" stroke-linecap="round"/>',
@@ -147,15 +151,11 @@ def build():
     return P
 
 POSES = build()
-# ท่าโบกมือทำเป็นสองชั้น (ตัว กับแขนที่โบก) แอปหมุนชั้นแขนรอบหัวไหล่ จุดหมุนพิมพ์ออกมาเป็นสัดส่วนของภาพ ใส่ใน LAYERS ที่ src/data/images.ts
-import math
-for name, lean in (('hi', -5), ('shop', 5)):
-    for layer, suffix in (('body', '-body'), ('wave', '-arm')):
-        LAYER[0] = layer; POSES[name + suffix] = build()[name]
-    LAYER[0] = 'all'
-    x, y = SHOULDER['L']; a = math.radians(lean); dx, dy = x - 240, y - 384
-    rx, ry = 240 + dx * math.cos(a) - dy * math.sin(a), 384 + dx * math.sin(a) + dy * math.cos(a)
-    print(name, 'pivot', round((240 + (rx - 240) * 0.92) / 480, 3), round((470 + (ry - 470) * 0.92) / 480, 3))
+# ท่าที่ขยับทีละส่วนทำเป็นหลายชั้น: ตัว (-body) กับส่วนที่ขยับ แอปวางซ้อนกันแล้วขยับแต่ละชั้นตาม LAYERS ที่ src/data/images.ts
+for name, layers in (('cook', ('body', 'wok', 'food')), ('shop', ('body', 'legL', 'legR'))):
+    for layer in layers:
+        LAYER[0] = layer; POSES[f'{name}-{layer}'] = build()[name]
+LAYER[0] = 'all'
 for n, svg in POSES.items(): open(n + '.svg', 'w').write(svg)
 
 # ฉาก: วาดเฉพาะของในฉาก ตัวละครวางทับในแอปเพื่อให้ขยับได้ (ตำแหน่งอยู่ใน SCENE ที่ src/data/images.ts) พื้นหลังโปร่งใส ใช้สีอ่อนเข้มของสีหัวจอ แล้วแต้มสีสดเฉพาะของชิ้นเล็ก
