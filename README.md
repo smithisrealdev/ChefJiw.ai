@@ -59,6 +59,25 @@ npm test
 
 ทดสอบฝั่ง edge function: `cd supabase/functions && SUPABASE_URL=http://x SUPABASE_SERVICE_ROLE_KEY=x deno test --allow-env _shared/common.test.ts`
 
+## หน้า waitlist (`waitlist/`)
+
+หน้าเว็บหน้าเดียวไว้แชร์ในกลุ่มทำอาหารตาม `founder/launch.md`: ลงชื่อรอเปิดตัว หรือโอนพร้อมเพย์สั่งจองชุด 12 จาน 99 บาทแล้วแจ้งโอน ข้อมูลเข้าตาราง `waitlist` (หน้าเว็บเขียนได้อย่างเดียว และบันทึกได้เมื่อติ๊กยินยอมแล้วเท่านั้น) เป็นไฟล์ HTML ไฟล์เดียวกับรูปในโฟลเดอร์ ไม่ต้อง build
+
+ก่อนแชร์:
+1. แก้ `CONFIG` ท้าย `waitlist/index.html`: `promptpay` (เลขพร้อมเพย์) `payee` (ชื่อบัญชี) และ `contact` (ช่องทางขอคืนเงินหรือขอลบข้อมูล) แล้วตรวจวันส่งชุดกับวันตัดสินใจ ถ้ากรอกไม่ครบ หน้าจะขึ้นแถบเตือนด้านบน
+2. อ่านเงื่อนไขคืนเงิน (โอนคืนภายใน 7 วัน) และเรื่องข้อมูลส่วนตัว (เก็บไม่เกิน 90 วันหลังเปิดตัว) ว่าตรงกับที่ตั้งใจ
+3. เอาโฟลเดอร์ `waitlist/` ขึ้นโฮสต์ไฟล์นิ่งที่ไหนก็ได้ (Vercel, Netlify, Cloudflare Pages) แล้วแก้ `og:image` เป็น URL เต็ม รูปพรีวิวตอนแชร์ลิงก์คือ `waitlist/img/og.png`
+4. ใช้ลิงก์แยกต่อกลุ่ม เช่น `?g=fb1` `?g=fb2` `?g=line1` จะได้รู้ว่าคนมาจากกลุ่มไหน
+
+ดูผล (เป้า 100 คนลงชื่อ และสั่งจอง 10 คนใน 14 วัน):
+
+```sql
+select kind, source, count(*) from waitlist group by 1, 2 order by 1, 2;
+select created_at, kind, name, contact, paid_note, source from waitlist order by created_at desc;
+```
+
+มีคนขอลบข้อมูล: `delete from waitlist where contact = '...';`
+
 ## สถานะ
 
 ทำแล้ว: ทุกหน้าจอในต้นแบบที่อยู่ใน v1 พร้อมโหมดมืดและสองภาษา

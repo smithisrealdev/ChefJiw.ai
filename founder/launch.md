@@ -67,7 +67,8 @@ changes). ★ marks the critical path: if it slips, launch day slips.
   the results don't depend on memory. Deadline Fri 27 Nov. **Done 19 Nov**.
 - Developer: a test build the 8 cooks can install. Needs the founder's Expo
   account for an EAS build. Deadline Sun 29 Nov.
-- Founder or Developer: the one-page waitlist. Deadline Sun 29 Nov.
+- Founder or Developer: the one-page waitlist. Deadline Sun 29 Nov. **Page built 19 Nov**
+  (`waitlist/`); still needs the PromptPay number, payee name, a contact and hosting.
 
 **Week 2, Mon 30 Nov - Sun 6 Dec: cook**
 - ★ Founder: 8 green curry sessions (weekday evenings), 8 Sunday plans (Sun 6 Dec).
