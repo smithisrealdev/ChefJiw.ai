@@ -5,7 +5,7 @@ export type Palette = {
   primary: string; onPrimary: string;
   accent: string; onAccent: string; note: string; ai: string; done: string; danger: string;
   success: string; warn: string; flame: string;
-  header: { home: string; recipes: string; cook: string; me: string; cookFlow: string };
+  header: { home: string; recipes: string; cook: string; me: string; cookFlow: string; market: string };
 };
 
 // ทุกคู่ข้อความ/พื้นผ่าน 4.5:1 ตามที่คำนวณไว้ในแผน พื้นพาสเทล (accent note ai done danger) ใช้ตัวอักษรเข้มเสมอทั้งสองธีม
@@ -15,7 +15,7 @@ export const light: Palette = {
   primary: '#24212B', onPrimary: '#FFFFFF',
   accent: '#FFE66D', onAccent: '#24212B', note: '#FFF3B0', ai: '#E9E6FF', done: '#C9F2CF', danger: '#FFE3D6',
   success: '#1E7A45', warn: '#8A3B12', flame: '#C2512E',
-  header: { home: '#FBEBD2', recipes: '#FFA9C6', cook: '#FFC98A', me: '#8FE3CF', cookFlow: '#FFD84D' },
+  header: { home: '#FBEBD2', recipes: '#FFA9C6', cook: '#FFC98A', me: '#8FE3CF', cookFlow: '#FFD84D', market: '#8FD8F2' },
 };
 
 export const dark: Palette = {
@@ -24,7 +24,7 @@ export const dark: Palette = {
   primary: '#F3F1FA', onPrimary: '#24212B',
   accent: '#FFE66D', onAccent: '#24212B', note: '#FFF3B0', ai: '#E9E6FF', done: '#C9F2CF', danger: '#FFE3D6',
   success: '#7FD9A0', warn: '#FFB38A', flame: '#FF9A6B',
-  header: { home: '#17151D', recipes: '#17151D', cook: '#17151D', me: '#17151D', cookFlow: '#17151D' },
+  header: { home: '#17151D', recipes: '#17151D', cook: '#17151D', me: '#17151D', cookFlow: '#17151D', market: '#17151D' },
 };
 
 // สีข้อความบนพื้นพาสเทลที่ไม่เปลี่ยนตามธีม

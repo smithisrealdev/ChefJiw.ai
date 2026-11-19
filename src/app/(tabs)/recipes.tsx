@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
-import { Button, Card, Chip, Screen, T, Thumb } from '@/components/ui';
+import { ApiNotice, Button, Card, Chip, Screen, Skeleton, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT } from '@/data/images';
 import { fridgeFit, MENU, PANTRY, type MenuItem } from '@/data/recipes';
+import { api, ApiError, type ApiErrorKind, type MenuIdea } from '@/lib/api';
 import { useSettings } from '@/lib/settings';
 import { fonts, radius, space, type } from '@/theme/tokens';
 
@@ -14,7 +15,13 @@ const TESTS: Record<Filter, (m: MenuItem) => boolean> = { all: () => true, fast:
 const TINT: Record<string, string> = { kaprao: '#FFD9CC', omelet: '#FFF0B8', 'fried-rice': '#FFE2C2', 'morning-glory': '#D6F5D9', 'tom-yum': '#FFD6DF', 'green-curry': '#DCDCFF' };
 
 export default function Recipes() {
-  const { colors, t, pick, price, runs } = useSettings();
+  const { colors, t, pick, price, runs, lang, country } = useSettings();
+  const [ai, setAi] = useState<{ kind: 'idle' | 'loading' | 'done' | 'error'; ideas?: MenuIdea[]; error?: ApiErrorKind }>({ kind: 'idle' });
+  const askAi = async () => {
+    setAi({ kind: 'loading' });
+    try { setAi({ kind: 'done', ideas: (await api.suggestMenus(have, country, lang)).ideas }); }
+    catch (e) { setAi({ kind: 'error', error: e instanceof ApiError ? e.kind : 'failed' }); }
+  };
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
   const [fridgeOpen, setFridgeOpen] = useState(false);
@@ -63,12 +70,27 @@ export default function Recipes() {
             {PANTRY.map((p) => {
               const on = have.includes(p.id);
               return (
-                <Pressable key={p.id} accessibilityRole="checkbox" accessibilityState={{ checked: on }} onPress={() => setHave(on ? have.filter((x) => x !== p.id) : [...have, p.id])}
+                <Pressable key={p.id} accessibilityRole="checkbox" accessibilityState={{ checked: on }} onPress={() => { setHave(on ? have.filter((x) => x !== p.id) : [...have, p.id]); setAi({ kind: 'idle' }); }}
                   style={[s.pantry, { backgroundColor: on ? '#24212B' : '#FFFFFF' }]}>
                   <T v="bodyBold" style={{ color: on ? '#FFFFFF' : '#24212B' }}>{pick(p.name)}</T>
                 </Pressable>
               );
             })}
+          </View>
+        )}
+        {fridgeOpen && <Button kind="onPastel" icon="chat" disabled={have.length === 0 || ai.kind === 'loading'} label={ai.kind === 'done' ? t('ai.again') : t('ai.ideas')} onPress={askAi} style={{ marginTop: space.sm }} />}
+        {ai.kind === 'loading' && <Skeleton label={t('ai.thinking')} lines={3} />}
+        {ai.kind === 'error' && ai.error && <ApiNotice kind={ai.error} onRetry={askAi} />}
+        {ai.kind === 'done' && ai.ideas && (
+          <View style={{ gap: space.sm, marginTop: space.sm }}>
+            <T v="subheading" tone="pastel">{t('ai.result')}</T>
+            {ai.ideas.map((d) => (
+              <Card key={d.name} tone="surface">
+                <T v="bodyBold">{d.name} · {d.country}</T>
+                <T v="small" tone={d.missing.length ? 'warn' : 'success'}>{d.missing.length ? t('recipes.missing', { items: d.missing.join(' ') }) : t('recipes.haveAll')}</T>
+              </Card>
+            ))}
+            <T v="small" tone="pastelMuted">{t('ai.untested')}</T>
           </View>
         )}
       </Card>

@@ -1,4 +1,6 @@
+import { router } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/icon';
@@ -13,7 +15,8 @@ const TABS: { name: string; key: 'tab.home' | 'tab.recipes' | 'tab.cook' | 'tab.
 ];
 
 export default function TabLayout() {
-  const { colors, t } = useSettings();
+  const { colors, t, onboarded } = useSettings();
+  useEffect(() => { if (!onboarded) router.replace('/onboarding'); }, [onboarded]);
   return (
     <Tabs
       screenOptions={{

@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Pressable, Switch, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
@@ -24,7 +25,7 @@ function Row({ label, sub, value, onPress }: { label: string; sub?: string; valu
 }
 
 export default function Me() {
-  const { colors, t, pick, lang, country, theme, isDark, runs, set } = useSettings();
+  const { colors, t, pick, lang, country, theme, isDark, runs, set, signedIn, member } = useSettings();
   const avg = runs.length ? (runs.reduce((s, r) => s + r.score, 0) / runs.length).toFixed(1) : '–';
   return (
     <Screen tint={colors.header.me} title={t('me.title')} mascot={MASCOT.elephant}>
@@ -45,6 +46,10 @@ export default function Me() {
           </Card>
         );
       })}
+
+      <T v="subheading" accessibilityRole="header">{t('me.account')}</T>
+      <Row label={t('me.signIn')} value={signedIn ? t('me.signedIn') : t('me.signedOut')} onPress={() => router.push('/login')} />
+      <Row label={t('me.membership')} sub={member ? t('me.isMember') : t('me.free')} value="" onPress={() => router.push('/paywall')} />
 
       <T v="subheading" accessibilityRole="header">{t('me.settings')}</T>
       <Row label={t('me.lang')} value={lang === 'th' ? 'ไทย' : 'English'} onPress={() => set({ lang: lang === 'th' ? 'en' : 'th' })} />

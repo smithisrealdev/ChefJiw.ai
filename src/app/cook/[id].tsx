@@ -3,16 +3,19 @@ import { useKeepAwake } from 'expo-keep-awake';
 import * as Notifications from 'expo-notifications';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, AppState, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/icon';
-import { Button, Card, IconButton, Sheet, T } from '@/components/ui';
+import { ApiNotice, Button, Card, IconButton, Sheet, Skeleton, T } from '@/components/ui';
 import { MASCOT } from '@/data/images';
 import { buildRecipe, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
+import { api, ApiError, type ApiErrorKind } from '@/lib/api';
+import { freeLeft, localDay, spendOne } from '@/lib/quota';
+import { getToken } from '@/lib/session';
 import { useSettings } from '@/lib/settings';
 import { Image } from 'expo-image';
-import { onPastel, radius, space } from '@/theme/tokens';
+import { fonts, onPastel, radius, space, type } from '@/theme/tokens';
 
 const mmss = (s: number) => Math.floor(s / 60) + ':' + String(Math.max(0, s) % 60).padStart(2, '0');
 
@@ -179,8 +182,57 @@ function AskSheet({ visible, onClose, r, step }: { visible: boolean; onClose: ()
           {open === k && <T tone="pastel">{pick(a)}</T>}
         </Card>
       ))}
-      <T v="small" tone="muted">{t('ask.typeSoon')}</T>
+      <TypedAsk r={r} step={step} onLeave={onClose} />
     </Sheet>
+  );
+}
+
+/** พิมพ์ถามเอง: ต้องเข้าสู่ระบบ ฟรีวันละ 3 คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวไม่ถูกนับ */
+function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => void }) {
+  const { t, lang, colors, signedIn, member, asked, set } = useSettings();
+  const [text, setText] = useState('');
+  const [state, setState] = useState<{ kind: 'idle' | 'login' | 'quota' | 'loading' | 'answer' | 'error'; q?: string; answer?: string; error?: ApiErrorKind }>({ kind: 'idle' });
+  const left = freeLeft(asked, localDay());
+
+  const send = async (question = text.trim()) => {
+    if (!question || state.kind === 'loading') return;
+    if (!signedIn) return setState({ kind: 'login' });
+    if (!member && left <= 0) return setState({ kind: 'quota' });
+    setState({ kind: 'loading', q: question }); setText('');
+    try {
+      const res = await api.askChef(question, { recipe: r.id, step: step.id, lang }, (await getToken()) ?? undefined);
+      if (!member) set({ asked: spendOne(asked, localDay()) });
+      setState({ kind: 'answer', q: question, answer: res.answer });
+    } catch (e) {
+      setState({ kind: 'error', q: question, error: e instanceof ApiError ? e.kind : 'failed' });
+    }
+  };
+  const goTo = (path: '/login' | '/paywall') => { onLeave(); router.push(path); };
+
+  return (
+    <View style={{ gap: space.sm, marginTop: space.sm }}>
+      {state.kind === 'login' && (
+        <Card tone="ai"><T v="subheading" tone="pastel">{t('ask.loginTitle')}</T><T tone="pastel">{t('ask.loginBody')}</T>
+          <Button kind="onPastel" label={t('me.signIn')} onPress={() => goTo('/login')} style={{ alignSelf: 'flex-start', marginTop: space.sm }} /></Card>
+      )}
+      {state.kind === 'quota' && (
+        <Card tone="soft"><T v="subheading">{t('ask.quotaTitle')}</T><T>{t('ask.quotaBody')}</T>
+          <Button kind="accent" label={t('ask.seeMember')} onPress={() => goTo('/paywall')} style={{ alignSelf: 'flex-start', marginTop: space.sm }} /></Card>
+      )}
+      {state.kind === 'loading' && <Skeleton label={t('ask.thinking')} lines={3} />}
+      {state.kind === 'answer' && (
+        <Card tone="ai"><T v="smallBold" tone="pastelMuted">{t('ask.aiAnswer')}</T><T v="bodyBold" tone="pastel">{state.q}</T><T tone="pastel">{state.answer}</T>
+          <T v="small" tone="pastelMuted">{t('ask.aiNote')}</T></Card>
+      )}
+      {state.kind === 'error' && state.error && <ApiNotice kind={state.error} onRetry={() => send(state.q)} />}
+      <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
+        <TextInput value={text} onChangeText={setText} onSubmitEditing={() => send()} returnKeyType="send"
+          placeholder={t('ask.typePlaceholder')} placeholderTextColor={colors.muted} accessibilityLabel={t('ask.typeLabel')}
+          style={{ flex: 1, minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: colors.surfaceSoft, color: colors.ink, fontFamily: fonts.body, fontSize: type.md }} />
+        <IconButton filled icon="next" label={t('ask.send')} onPress={() => send()} />
+      </View>
+      <T v="small" tone="muted">{member ? t('ask.member') : t('ask.left', { n: left })}</T>
+    </View>
   );
 }
 

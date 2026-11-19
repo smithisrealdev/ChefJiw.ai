@@ -25,4 +25,5 @@ export const IMG: Record<ImgKey, number> = {
 export const MASCOT = {
   elephant: require('@/assets/images/mascot/elephant.png'),
   mouse: require('@/assets/images/mascot/mouse.png'),
+  capybara: require('@/assets/images/mascot/capybara.png'),
 };

@@ -28,6 +28,9 @@ function Root() {
         <Stack.Screen name="recipe/[id]" />
         {/* หน้าทำอาหารเต็มจอ ปิดการปัดย้อนกลับ ต้องออกผ่านปุ่มที่ถามยืนยัน */}
         <Stack.Screen name="cook/[id]" options={{ gestureEnabled: false, animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="login" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
       </Stack>
     </ThemeProvider>
   );

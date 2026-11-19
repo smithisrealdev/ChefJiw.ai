@@ -4,13 +4,16 @@ import { useColorScheme } from 'react-native';
 
 import { translate, type Key, type L, type Lang } from '@/lib/i18n';
 import { money, type Country } from '@/lib/money';
+import type { Asked } from '@/lib/quota';
 import { dark, light, type Palette } from '@/theme/tokens';
 
 export type Progress = { recipe: string; o1: number; o2: number; adapt: string[]; step: number; total: number };
 export type Run = { recipe: string; score: number; at: number };
-
-type Saved = { lang: Lang; country: Country; theme: 'system' | 'light' | 'dark'; progress: Progress | null; runs: Run[] };
-const DEFAULTS: Saved = { lang: 'th', country: 'TH', theme: 'system', progress: null, runs: [] };
+type Saved = {
+  lang: Lang; country: Country; theme: 'system' | 'light' | 'dark'; progress: Progress | null; runs: Run[];
+  onboarded: boolean; signedIn: boolean; member: boolean; asked: Asked;
+};
+const DEFAULTS: Saved = { lang: 'th', country: 'TH', theme: 'system', progress: null, runs: [], onboarded: false, signedIn: false, member: false, asked: { day: '', n: 0 } };
 const KEY = 'chefjiw.settings.v1';
 
 type Ctx = Saved & {

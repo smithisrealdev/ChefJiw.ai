@@ -41,13 +41,13 @@ export function Button({ label, onPress, kind = 'primary', icon, size = 'md', di
   );
 }
 
-export function IconButton({ icon, label, onPress, onPastelBg }: { icon: IconName; label: string; onPress: () => void; onPastelBg?: boolean }) {
+export function IconButton({ icon, label, onPress, onPastelBg, filled }: { icon: IconName; label: string; onPress: () => void; onPastelBg?: boolean; filled?: boolean }) {
   const { colors, isDark } = useSettings();
-  const bg = onPastelBg && !isDark ? '#FFFFFF' : colors.surface;
+  const bg = filled ? colors.primary : onPastelBg && !isDark ? '#FFFFFF' : colors.surface;
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} hitSlop={4}
       style={({ pressed }) => [s.iconButton, { backgroundColor: bg, transform: [{ scale: pressed ? 0.94 : 1 }] }]}>
-      <Icon name={icon} color={onPastelBg && !isDark ? onPastel.ink : colors.ink} />
+      <Icon name={icon} color={filled ? colors.onPrimary : onPastelBg && !isDark ? onPastel.ink : colors.ink} />
     </Pressable>
   );
 }
@@ -114,6 +114,32 @@ export function Sheet({ visible, onClose, title, closeLabel, children }: { visib
         <ScrollView contentContainerStyle={{ gap: space.sm, paddingBottom: space.lg }}>{children}</ScrollView>
       </View>
     </Modal>
+  );
+}
+
+/** โครงรอโหลด แสดงทันทีภายใน 0.3 วินาทีระหว่างรอคำตอบ */
+export function Skeleton({ lines = 2, label }: { lines?: number; label: string }) {
+  const { colors } = useSettings();
+  return (
+    <View accessible accessibilityRole="progressbar" accessibilityLabel={label} style={[s.card, { backgroundColor: colors.surfaceSoft, gap: space.sm }]}>
+      <T v="smallBold" tone="muted">{label}</T>
+      {Array.from({ length: lines }, (_, k) => <View key={k} style={{ height: 14, width: k === lines - 1 ? '60%' : '100%', borderRadius: radius.pill, backgroundColor: colors.line }} />)}
+    </View>
+  );
+}
+
+/** สถานะผิดพลาดของการเรียก backend พร้อมทางแก้ */
+export function ApiNotice({ kind, onRetry }: { kind: 'not_configured' | 'offline' | 'failed'; onRetry?: () => void }) {
+  const { t } = useSettings();
+  const [title, body] = kind === 'offline' ? [t('err.offline'), t('err.offlineBody')] : kind === 'failed' ? [t('err.failed'), t('err.failedBody')] : [t('err.notConfigured'), t('err.notConfiguredBody')];
+  return (
+    <Card tone={kind === 'offline' ? 'note' : 'danger'} style={{ gap: space.sm }}>
+      <View accessibilityRole="alert" accessibilityLiveRegion="polite">
+        <T v="subheading" style={{ color: kind === 'offline' ? onPastel.ink : onPastel.warn }}>{title}</T>
+        <T tone="pastel">{body}</T>
+      </View>
+      {onRetry && kind !== 'not_configured' && <Button kind="onPastel" label={t('common.retry')} onPress={onRetry} style={{ alignSelf: 'flex-start' }} />}
+    </Card>
   );
 }
 
