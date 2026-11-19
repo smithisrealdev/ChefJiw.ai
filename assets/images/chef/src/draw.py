@@ -137,9 +137,10 @@ def build():
     A3 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S3, BUTTER, 0.8)
     bigspoon = lambda x, y, r: f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y+22} v-136" stroke="{WOOD}" stroke-width="12" stroke-linecap="round"/><ellipse cx="{x}" cy="{y-136}" rx="26" ry="35" fill="{WOOD}"/></g>'
     P.update({
-      # นั่งแบะขาบนเบาะ ชิมจากช้อน
-      'sip': chim(mouth=False, tilt=-6, drop=40, legs_front=True, feet=((112, 448, -62), (368, 448, 62)), ground=f'<ellipse cx="240" cy="456" rx="214" ry="22" fill="#CFE3FF"/>',
-                  arms_front=f'<path d="M312 206 L262 192" stroke="{WOOD}" stroke-width="11" stroke-linecap="round"/><ellipse cx="248" cy="188" rx="22" ry="14" fill="{WOOD}"/>' + A3('R', 316, 212, 46, 18) + A3('L', 208, 338, -34, 14),
+      # นั่งแบะขาบนเบาะ ชิมจากช้อน (ช้อนกับแขนเป็นชั้นแยก ยกขึ้นลงได้)
+      'sip': chim(tilt=-6, drop=40, legs_front=True, feet=((112, 448, -62), (368, 448, 62)), ground=f'<ellipse cx="240" cy="456" rx="214" ry="22" fill="#CFE3FF"/>',
+                  arms_front=A3('L', 208, 338, -34, 14),
+                  parts={'spoon': f'<path d="M312 206 L262 192" stroke="{WOOD}" stroke-width="11" stroke-linecap="round"/><ellipse cx="248" cy="188" rx="22" ry="14" fill="{WOOD}"/>' + A3('R', 316, 212, 46, 18)},
                   front=heart(420, 150, 1.1) + heart(62, 184, 0.7)),
       # กระโดดชูช้อน ขาข้างหนึ่งเตะไปข้างหลัง
       'yum': chim(lean=7, tilt=-6, feet=((184, 436, -14), (318, 408, 46)), arms_back=A3('L', 96, 176, -14, 16), arms_front=bigspoon(384, 286, 14) + A3('R', 382, 300, 22, -2),
@@ -152,7 +153,7 @@ def build():
 
 POSES = build()
 # ท่าที่ขยับทีละส่วนทำเป็นหลายชั้น: ตัว (-body) กับส่วนที่ขยับ แอปวางซ้อนกันแล้วขยับแต่ละชั้นตาม LAYERS ที่ src/data/images.ts
-for name, layers in (('cook', ('body', 'wok', 'food')), ('shop', ('body', 'legL', 'legR'))):
+for name, layers in (('cook', ('body', 'wok', 'food')), ('shop', ('body', 'legL', 'legR')), ('sip', ('body', 'spoon'))):
     for layer in layers:
         LAYER[0] = layer; POSES[f'{name}-{layer}'] = build()[name]
 LAYER[0] = 'all'

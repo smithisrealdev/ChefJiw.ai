@@ -97,6 +97,8 @@ const MOVES: Record<Motion | PartMove, { steps: [number, number, Ease][]; rest: 
   // เดิน: ยกขาสลับข้าง ขาขวาเริ่มหลังขาซ้ายครึ่งรอบ
   stepL: { steps: [[-1, 200, 'up'], [0, 200, 'down']], rest: 400 },
   stepR: { steps: [[0, 400, 'sin'], [-1, 200, 'up'], [0, 200, 'down']], rest: 0 },
+  // ชิม: ลดช้อนลง ค้างไว้ครู่หนึ่ง แล้วยกกลับมาที่ปากและค้างนานกว่า
+  sip: { steps: [[1, 420, 'sin'], [1, 350, 'sin'], [0, 420, 'sin']], rest: 1400 },
 };
 /** วนการขยับชุดหนึ่งไปเรื่อยๆ หลังหน่วง delay หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว */
 function useMove(move: keyof typeof MOVES, delay = 0) {
@@ -131,12 +133,14 @@ export function Float({ children, motion = 'bob', delay = 0 }: { children: React
 }
 
 // ระยะที่แต่ละส่วนขยับ เป็นสัดส่วนของขนาดภาพ ตัวละครจึงขยับเท่ากันไม่ว่าจะแสดงเล็กหรือใหญ่
-const REACH: Record<PartMove, number> = { toss: 0.035, fly: 0.11, stepL: 0.035, stepR: 0.035 };
-/** ชั้นหนึ่งของตัวละครที่ขยับเอง: กระทะกระดก ของในกระทะลอย หรือขายกสลับข้าง */
+const REACH: Record<PartMove, number> = { toss: 0.035, fly: 0.11, stepL: 0.035, stepR: 0.035, sip: 0.09 };
+/** ชั้นหนึ่งของตัวละครที่ขยับเอง: กระทะกระดก ของในกระทะลอย ขายกสลับข้าง หรือช้อนยกขึ้นลง */
 function Part({ source, move, width }: { source: number; move: PartMove; width: number }) {
   const v = useMove(move);
   const lift = { translateY: Animated.multiply(v, width * REACH[move]) };
-  const transform = move === 'toss' ? [lift, { rotate: v.interpolate({ inputRange: [-1, 0], outputRange: ['-6deg', '0deg'] }) }] : [lift];
+  const transform = move === 'toss' ? [lift, { rotate: v.interpolate({ inputRange: [-1, 0], outputRange: ['-6deg', '0deg'] }) }]
+    : move === 'sip' ? [lift, { translateX: Animated.multiply(v, width * 0.05) }, { rotate: v.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '8deg'] }) }]
+    : [lift];
   return <Animated.View style={[StyleSheet.absoluteFill, { transform }]}><Image source={source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} /></Animated.View>;
 }
 

@@ -8,8 +8,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Icon } from '@/components/icon';
-import { ApiNotice, Button, Card, Float, IconButton, mmss, Sheet, Skeleton, T } from '@/components/ui';
-import { MASCOT } from '@/data/images';
+import { ApiNotice, Button, Card, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
+import { LAYERS, MASCOT } from '@/data/images';
 import { buildRecipe, MENU, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
@@ -302,7 +302,8 @@ function Taste({ r }: { r: Recipe }) {
           {score === null && <T tone="muted">{t('taste.intro')}</T>}
         </View>
         {score !== null && score >= 4 ? <Float motion="jump"><Image source={MASCOT.yum} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} /></Float>
-          : <Float motion={score === null ? 'bob' : 'sway'}><Image source={score === null ? MASCOT.sip : MASCOT.hmm} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} /></Float>}
+          : score === null ? <Mascot source={MASCOT.sip} layers={LAYERS.sip} size={120} />
+          : <Float motion="sway"><Image source={MASCOT.hmm} style={{ width: 120, height: 120 }} contentFit="contain" accessible={false} /></Float>}
       </View>
       {score !== null && (
         <Card tone="accent" style={{ alignItems: 'center' }}>

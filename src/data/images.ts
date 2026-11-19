@@ -48,7 +48,7 @@ export const MASCOT = {
 
 export type Motion = 'bob' | 'jump' | 'sway' | 'shake';
 /** ท่าที่ขยับทีละส่วน: ภาพตัว แล้วซ้อนด้วยส่วนที่ขยับ (ทุกชั้นขนาดเท่ากัน วางทับกันพอดี) behind = อยู่หลังตัว */
-export type PartMove = 'toss' | 'fly' | 'stepL' | 'stepR';
+export type PartMove = 'toss' | 'fly' | 'stepL' | 'stepR' | 'sip';
 export type Layers = { body: number; parts: { source: number; move: PartMove; behind?: boolean }[] };
 export const LAYERS = {
   // เชฟจิ๋วผัดกระทะ: กระทะกับแขนกระดกขึ้น ของในกระทะลอยขึ้นสูงกว่า
@@ -57,6 +57,8 @@ export const LAYERS = {
   // ใบเตยเดิน: ขาซ้ายขวายกสลับกัน
   shop: { body: require('@/assets/images/chef/shop-body.png'), parts: [
     { source: require('@/assets/images/chef/shop-legL.png'), move: 'stepL', behind: true }, { source: require('@/assets/images/chef/shop-legR.png'), move: 'stepR', behind: true }] },
+  // น้องชิมชิม: ช้อนกับแขนลดลงแล้วยกกลับมาที่ปาก
+  sip: { body: require('@/assets/images/chef/sip-body.png'), parts: [{ source: require('@/assets/images/chef/sip-spoon.png'), move: 'sip' }] },
 } satisfies Record<string, Layers>;
 /** ฉากเต็มความกว้างใต้ชื่อหน้าจอ: ภาพพื้นหลังโปร่งใสที่วาดให้เข้ากับสีหัวจอ แล้ววางตัวละครทับทีละตัวเพื่อให้ขยับได้
  *  ตำแหน่งเป็นสัดส่วนของฉาก (ซ้าย บน กว้าง) ตัวละครเป็นภาพจัตุรัส */
