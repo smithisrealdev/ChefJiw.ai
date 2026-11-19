@@ -1,0 +1,13 @@
+{
+  "id": "P017",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I might try the two free dishes, but I wouldn't pay 99 baht a month. I cook to cut oil, salt and calories, nothing here says it helps with that, and I already ask a free AI chat and watch free clips when I'm stuck.",
+  "objection": "Basil pork with a fried egg, pad see ew, green curry with coconut milk: these are exactly the oily, salty dishes I'm trying to make lighter, and it never says how many calories they have or how to cut the oil. If a free AI chat already answers my questions, why pay every month?",
+  "would_change_my_mind": "A tested healthy version of every dish, with the calories shown and the chef telling me exactly how little oil, salt and sugar to use.",
+  "price_too_cheap": 19,
+  "price_cheap": 39,
+  "price_expensive": 89,
+  "price_too_expensive": 149
+}
