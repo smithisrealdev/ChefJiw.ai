@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I already cook every Sunday from my mum's recipes, and when I don't know a dish I call her or watch a free video. 99 baht isn't much money, but I don't see why I'd pay an app for something my family already gives me.",
+  "objection": "Why would I trust a chef in an app over my mum? Tom yum and massaman are free on YouTube, and her version is the taste I actually want.",
+  "would_change_my_mind": "My mum, my sister or a friend I cook with telling me they used it and the dishes really tasted like home.",
+  "price_too_cheap": 20,
+  "price_cheap": 49,
+  "price_expensive": 150,
+  "price_too_expensive": 250
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P006",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I already cook kra pao and green curry without looking, and when I want something new I watch a free clip in bed. Paying 99 baht, two plates of food, to learn dishes I can see for free doesn't make sense for me.",
+  "objection": "I don't lack recipes, I lack time and space. After work a 50-baht plate from the stall is faster than cooking for the family in my tiny kitchen with one pan, and an app can't give me more time.",
+  "would_change_my_mind": "If I could try one Sunday plan for free and it really fed my family for less than street food, using only my one pan, I would pay the 99.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 99,
+  "price_too_expensive": 149
+}
