@@ -1,0 +1,13 @@
+{
+  "id": "P001",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I have cooked kra pao and green curry for my kids for years, and most days I buy a 50-baht plate because I have no time, not because I don't know how. I won't pay 99 baht for recipes when I can watch the same dishes free on YouTube.",
+  "objection": "Only two free dishes, and I already cook both, so I would run out after two dinners and learn nothing. My problem is time and a tiny kitchen corner, not recipes, and more recipes don't fix that.",
+  "would_change_my_mind": "Let me try one Sunday cook-ahead plan free. If it really feeds my family for less than buying 50-baht plates and works in my small kitchen corner, I would pay the 99 baht.",
+  "price_too_cheap": 10,
+  "price_cheap": 29,
+  "price_expensive": 59,
+  "price_too_expensive": 120
+}

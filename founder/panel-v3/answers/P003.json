@@ -1,0 +1,13 @@
+{
+  "id": "P003",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I learn from free YouTube and TikTok clips, and my mum sends me recipes on LINE and tells me what to do when I mess up, so paying for recipes is just not something I do. I might cook the two free dishes, but then I would go back to the videos.",
+  "objection": "Only two free dishes, and basil pork I can already make, so I can't tell if the 12 paid dishes are really better than a free video or my mum's recipe before I pay. 99 baht is two plates of food for recipes I can find for free.",
+  "would_change_my_mind": "More free dishes to try first, like five instead of two and including one I find hard, so I can see it really comes out better than following a video.",
+  "price_too_cheap": 10,
+  "price_cheap": 49,
+  "price_expensive": 99,
+  "price_too_expensive": 199
+}
