@@ -145,3 +145,49 @@ What this says about the offer, not just the price:
 Next: a third offer that tests those three changes (a free hard dish, a one-time
 pack next to the monthly plan, and the Sunday plan's cost against street food),
 then `/founder-pricing` on the answers and `/founder-cfo` with the content cost.
+
+## Offer v3 and its re-test
+
+Changes from v2, all asked for by the second panel, at the same 99 baht:
+a hard dish free (green curry from paste), a one-time 12-dish pack instead of a
+monthly plan, and Sunday plans that show the week's cost per meal next to a
+50-baht plate. Unlimited questions were dropped. Pitch in `founder/pitch.md`
+(v2 kept as `founder/pitch-v2.md`), answers in `founder/panel-v3/`.
+
+| | v1 monthly, unlimited questions | v2 monthly, new dish every week | v3 one-time pack, free green curry |
+|---|---|---|---|
+| Buy | 0 / 20 | 0 / 20 | 0 / 20 |
+| Reason: need | 20 | 11 | 8 |
+| Reason: habit (free clips, mum, a free AI) | 0 | 7 | 10 |
+| Reason: price / trust | 0 | 2 / 0 | 1 / 1 |
+| Would refuse at 99 baht | 19 | 11 | **2** |
+| Median prices: too cheap / bargain / expensive / too expensive | 10 / 29 / 59 / 99 | 10 / 29 / 59 / 99 | **20 / 49 / 99 / 150** |
+
+What would change their mind under v3, counted by hand:
+
+| What would change their mind | Buyers |
+|---|---:|
+| Try one Sunday cook-ahead plan free and see it cost less than street food | 9 |
+| Cook the free green curry and have it beat a YouTube video: then they would pay 99 | 5 |
+| More free dishes first (five, one of them hard) | 1 |
+| Healthy versions with calories, less oil, salt and sugar | 2 |
+| Someone they trust vouching for it | 2 |
+| Asking the chef out loud instead of typing | 1 |
+
+**What this means.** Price and the subscription are no longer the problem: at
+99 baht once, 18 of 20 are inside their acceptable range, against 1 of 20 for the
+first offer. What is left is likelihood, the part the Offers lens says most offers
+fail on: 14 of 20 now give a concrete "if the free part proves it, I pay 99". Nine
+want to test the Sunday plan's money saving before paying, and five say a free
+green curry that beats a video would make them buy.
+
+A simulated panel cannot cook, so it cannot answer that. It records "I'd pay if
+the free curry works" as a no. The remaining question is empirical and belongs to
+real cooks, not to more pitch versions:
+
+1. Make one Sunday cook-ahead plan free, next to the free green curry, so the
+   money-saving proof comes before the payment.
+2. Put real home cooks through it: cook the free green curry and one Sunday plan,
+   record the taster score and the cost per meal, then offer the 99-baht pack as a
+   pre-sale. That is `/founder-launch`'s cheap real-world test.
+3. Healthy versions (2 buyers) and voice (1) stay parked until real users ask.
