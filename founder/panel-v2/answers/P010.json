@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "When I don't know a dish I call my mum or watch a free YouTube video, and that already works for my Sunday cooking. 99 baht isn't much, but I don't see why I'd pay an app for what mum tells me for nothing.",
+  "objection": "Why pay when free videos and my mum already show me how? And I doubt an app's green curry will taste like the one I grew up with.",
+  "would_change_my_mind": "If my mum or a friend I trust used it and told me the Sunday cook-ahead plan really saved them time and money, I'd try it.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 129,
+  "price_too_expensive": 199
+}
