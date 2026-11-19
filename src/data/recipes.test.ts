@@ -15,7 +15,7 @@ const texts = (v: unknown, out: { th: string; en: string }[] = []) => {
 };
 
 test('every option combination builds complete bilingual steps', () => {
-  for (const id of ['kaprao', 'omelet']) {
+  for (const id of ['kaprao', 'omelet', 'green-curry']) {
     for (const o1 of [0, 1, 2]) for (const o2 of [0, 1, 2]) for (const adapt of [[], ['pork', 'salt', 'basil']]) {
       const r = buildRecipe(id, o1, o2, adapt)!;
       assert.ok(r.steps.length >= 8, `${id} has steps`);

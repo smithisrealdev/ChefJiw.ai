@@ -241,14 +241,16 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
 }
 
 function Taste({ r }: { r: Recipe }) {
-  const { t, pick, colors, set, runs, progress } = useSettings();
+  const { t, pick, colors, set, runs, progress, device } = useSettings();
   const insets = useSafeAreaInsets();
   const [ans, setAns] = useState<(number | null)[]>(r.senses.map(() => null));
   const [score, setScore] = useState<number | null>(null);
   const submit = () => {
     const sc = tasteScore(ans as number[]);
     setScore(sc);
-    set({ runs: [...runs, { recipe: r.id, score: sc, at: Date.now() }], progress: progress?.recipe === r.id ? null : progress });
+    const id = device || Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+    set({ runs: [...runs, { recipe: r.id, score: sc, at: Date.now() }], progress: progress?.recipe === r.id ? null : progress, device: id });
+    void api.logRun(id, r.id, sc);
   };
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: space.lg, paddingTop: insets.top + space.lg, gap: space.md, paddingBottom: insets.bottom + space.xl }}>

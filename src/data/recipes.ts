@@ -10,7 +10,7 @@ export type ImgKey =
 export type Heat = 0 | 1 | 2;
 export type Step = { id: string; phase: number; title: L; do: L; see: L; why: L; heat?: Heat; timer?: number; gather?: L[] };
 export type Option = { label: L; note: L };
-export type Ingredient = { id: ImgKey; name: L; q: number; unit: L; baht: number; why: L };
+export type Ingredient = { id: string; name: L; q: number; unit: L; baht: number; why: L };
 export type Sense = { label: L; options: [L, L, L]; tips: [L, L]; good: L };
 export type QA = [L, L];
 export type Recipe = {
@@ -25,6 +25,7 @@ const fmt = (n: number) => (n === 0.5 ? l('ครึ่ง', 'half a') : l(Strin
 const U = {
   g: l('กรัม', 'g'), egg: l('ฟอง', 'eggs'), clove: l('กลีบ', 'cloves'), chili: l('เม็ด', 'chilies'),
   tbsp: l('ช้อนโต๊ะ', 'tbsp'), tsp: l('ช้อนชา', 'tsp'), plate: l('จาน', 'plate'), handful: l('กำมือ', 'handful'),
+  ml: l('มล.', 'ml'), piece: l('ลูก', 'pieces'), leaf: l('ใบ', 'leaves'), plates: l('จาน', 'plates'),
 };
 
 export const SAFETY: QA[] = [
@@ -69,6 +70,27 @@ const QA_BANK: Record<string, QA[]> = {
   oil: [[l('รู้ได้ยังไงว่าน้ำมันร้อนพอ', 'How do I know the oil is hot?'), l('น้ำมันมีควันบางๆ และสั่นเบาๆ เมื่อเอียงกระทะ หรือหยดไข่ลงไปนิดเดียวแล้วฟูทันที', 'A thin wisp of smoke and the oil shimmers when you tilt the pan. Or drop in a bit of egg: it should puff up at once.')]],
   pour: [[l('ไข่ไม่ฟูเลย', "The egg didn't puff up"), l('น้ำมันยังไม่ร้อนพอหรือน้อยไป ครั้งนี้ทอดต่อได้ จะได้ไข่แบบนุ่ม ครั้งหน้ารอให้น้ำมันร้อนกว่านี้และเทจากที่สูง', 'The oil was not hot enough or too little. Keep frying for a soft omelet. Next time wait for hotter oil and pour from higher up.')]],
   flip: [[l('กลับด้านแล้วแผ่นขาด', 'It broke when I flipped it'), l('ไม่เป็นไร ดันกลับมาต่อกันในกระทะได้ ครั้งหน้ารอให้ด้านล่างเซ็ตตัวก่อน และใช้ตะหลิวสองอันช่วยพลิก', "That's fine, push it back together in the pan. Next time let the bottom set first and use two spatulas.")]],
+  'gc-fridge': [
+    [l('ไม่มีมะเขือเปราะ ใช้อะไรแทนได้', 'No Thai eggplant. What instead?'), l('ใช้มะเขือยาว หน่อไม้ หรือฟักทองหั่นชิ้นแทนได้ ใส่ตอนเดียวกัน ฟักทองต้องเคี่ยวนานขึ้นราว 3 นาที', 'Long eggplant, bamboo shoots or pumpkin chunks all work, added at the same point. Pumpkin needs about 3 minutes longer.')],
+    [l('ใช้อกไก่แทนสะโพกได้ไหม', 'Can I use breast instead of thigh?'), l('ได้ แต่ใส่ทีหลังและเคี่ยวแค่พอสุก อกไก่ที่เคี่ยวนานหรืออุ่นซ้ำจะแห้ง', 'Yes, but add it later and simmer only until done. Breast dries out with long simmering or reheating.')],
+  ],
+  'gc-cream': [[l('หัวกะทิไม่แตกมันเลย', 'The cream will not separate'), l('กะทิกล่องบางยี่ห้อแตกมันยาก เคี่ยวต่ออีก 1 ถึง 2 นาที ถ้ายังไม่แตก ใส่น้ำมันพืช 1 ช้อนโต๊ะแล้วผัดพริกแกงต่อได้เลย', 'Some boxed coconut milk barely separates. Give it 1 to 2 more minutes. Still nothing? Add 1 tbsp oil and go on with the paste.')]],
+  'gc-paste': [
+    [l('พริกแกงติดก้นหม้อ', 'The paste is sticking'), l('หรี่ไฟ เติมกะทิ 1 ถึง 2 ช้อนโต๊ะแล้วคนต่อ อย่าปล่อยจนไหม้ เพราะรสขมจะติดทั้งหม้อ', 'Lower the heat, add 1 to 2 tbsp coconut milk and keep stirring. Do not let it burn or the whole pot turns bitter.')],
+    [l('ควันแสบตาแสบจมูก', 'The fumes sting my eyes'), l('เป็นปกติของพริกแกงที่โดนความร้อน เปิดพัดลมดูดควันหรือหน้าต่าง', 'Normal for curry paste in hot fat. Turn on the hood or open a window.')],
+  ],
+  'gc-simmer': [
+    [l('กะทิแตกเป็นเม็ดแล้ว', 'The coconut milk split'), l('หรี่ไฟลงทันที รสยังเหมือนเดิม แค่หน้าตาไม่เนียน ครั้งหน้าเคี่ยวไฟกลางค่อนอ่อน', 'Turn the heat down at once. It tastes the same, it just looks less smooth. Next time keep it at a gentle simmer.')],
+    [l('รู้ได้ยังไงว่าไก่สุก', 'How do I know the chicken is done?'), l('ผ่าชิ้นที่ใหญ่ที่สุดดู ข้างในขาวทั้งชิ้น ไม่มีสีชมพู', 'Cut the biggest piece open: white all the way through, no pink.')],
+  ],
+  'gc-season': [
+    [l('เค็มไปแล้ว แก้ยังไง', 'Too salty. How do I fix it?'), l('เติมกะทิหรือน้ำเปล่าครึ่งถ้วยแล้วเคี่ยวต่อ หรือเติมน้ำตาลอีกนิด', 'Add half a cup of coconut milk or water and simmer a little longer, or a pinch more sugar.')],
+    [l('เผ็ดเกินไป', 'Too spicy'), l('เติมกะทิอีกครึ่งกล่อง ความมันจะช่วยลดเผ็ด', 'Add another half box of coconut milk. The fat softens the heat.')],
+  ],
+  'gc-store': [
+    [l('อุ่นซ้ำยังไงให้ไม่แตกมัน', 'How do I reheat it without splitting?'), l('อุ่นไฟกลางค่อนอ่อน คนเป็นระยะจนเดือดทั่วหม้อ หรือเข้าไมโครเวฟทีละกล่อง 2 ถึง 3 นาที คนครั้งหนึ่งระหว่างนั้น', 'Reheat on medium-low, stirring now and then, until it bubbles all through. Or microwave one box for 2 to 3 minutes, stirring once.')],
+    [l('แช่แข็งได้ไหม', 'Can I freeze it?'), l('ได้ราว 1 เดือน มะเขือจะนิ่มลง ละลายในตู้เย็นข้ามคืนแล้วอุ่นให้เดือด', 'Yes, for about a month. The eggplant gets softer. Thaw overnight in the fridge and reheat until it boils.')],
+  ],
   lift: [[l('ไข่อมน้ำมัน', 'The omelet is greasy'), l('ตักขึ้นพักบนกระดาษซับน้ำมันหรือตะแกรง ครั้งหน้าให้น้ำมันร้อนกว่านี้ก่อนเทไข่ ไข่จะอมน้ำมันน้อยลง', 'Rest it on paper towel or a rack. Next time heat the oil more before pouring and it soaks up less.')]],
 };
 const STOVE_QA: QA = [l('ใช้เตาไฟฟ้าหรือเตาแม่เหล็กไฟฟ้าได้ไหม', 'Can I use an electric or induction stove?'), l('ได้ ไฟกลางคือระดับกลางของเตา ไฟแรงคือระดับสูงสุดหรือรองลงมา เตาไฟฟ้าร้อนและเย็นช้ากว่าแก๊ส ให้ปรับล่วงหน้าราวครึ่งนาที', 'Yes. Medium heat is the middle setting, high heat is the top or one below. Electric stoves react slower than gas, so adjust about 30 seconds early.')];
@@ -259,12 +281,95 @@ function omelet(o1: number, o2: number, adapt: string[]): Recipe {
   return adapt.includes('pork') ? applySwaps(r, [SWAPS.pork]) : r;
 }
 
+// หม้อละ 4 จาน เก็บตู้เย็นได้ 3 วัน จึงเป็นจานหนึ่งในแผนทำอาหารวันอาทิตย์ด้วย
+function greenCurry(o1: number, o2: number, adapt: string[]): Recipe {
+  const SP = [
+    { label: l('เผ็ดน้อย', 'Mild'), paste: 2, chili: 0, baht: 10, note: l('พริกแกง 2 ช้อนโต๊ะ หอมเครื่องแกงเต็มที่ แต่เผ็ดเบาๆ', '2 tbsp paste. The full curry aroma with gentle heat.') },
+    { label: l('เผ็ดกลาง', 'Medium spicy'), paste: 3, chili: 0, baht: 15, note: l('พริกแกง 3 ช้อนโต๊ะ ราว 1 ซอง 50 กรัม เผ็ดแบบร้านข้าวแกงทั่วไป', '3 tbsp paste, about one 50 g pack. As hot as a typical curry shop.') },
+    { label: l('เผ็ดจัด', 'Very spicy'), paste: 3, chili: 5, baht: 17, note: l('พริกแกง 3 ช้อนโต๊ะ บวกพริกขี้หนูบุบ 5 เม็ด เผ็ดถึงใจ', "3 tbsp paste plus 5 crushed bird's eye chilies. Seriously hot.") },
+  ];
+  const ST = [
+    { label: l('เข้มข้น', 'Rich'), milk: 500, water: 0, baht: 40, kcal: 610, note: l('กะทิ 2 กล่อง (500 มล.) ไม่ผสมน้ำ น้ำแกงข้นมัน หอมกะทิ', '2 boxes of coconut milk (500 ml), no water. A thick, creamy sauce.') },
+    { label: l('น้ำแกงใส', 'Lighter'), milk: 250, water: 250, baht: 20, kcal: 520, note: l('กะทิ 1 กล่อง ผสมน้ำ 1 กล่อง เบาลงราว 90 แคลต่อจาน น้ำแกงใสกว่าแต่ยังหอม', '1 box of coconut milk plus 1 box of water. About 90 kcal lighter a plate, thinner but still fragrant.') },
+  ];
+  const sp = SP[o1] ?? SP[1], st = ST[o2] ?? ST[0], hot = sp.chili > 0;
+  const lowSalt = adapt.includes('salt'), fish = fmt(lowSalt ? 0.5 : 1);
+  const milk = st.water ? l(`กะทิ ${st.milk} มล. กับน้ำ ${st.water} มล.`, `${st.milk} ml coconut milk and ${st.water} ml water`) : l(`กะทิ ${st.milk} มล.`, `${st.milk} ml coconut milk`);
+  const ingredients: Ingredient[] = [
+    { id: 'chicken', name: l('สะโพกไก่ไม่มีกระดูก', 'Boneless chicken thigh'), q: 400, unit: U.g, baht: 60, why: l('สะโพกไม่แห้งเมื่อเคี่ยวและอุ่นซ้ำ เหมาะทำเก็บไว้กินหลายวัน', 'Thigh stays juicy through simmering and reheating, so it keeps for days') },
+    { id: 'paste', name: l('พริกแกงเขียวหวาน', 'Green curry paste'), q: sp.paste, unit: U.tbsp, baht: sp.baht, why: l('พริกแกงสำเร็จรูปให้รสคงที่ทุกครั้ง ผัดกับหัวกะทิก่อนเพื่อปลุกกลิ่น', 'Ready-made paste tastes the same every time. Frying it in coconut cream wakes the aroma') },
+    { id: 'coconut', name: l('กะทิกล่อง', 'Boxed coconut milk'), q: st.milk, unit: U.ml, baht: st.baht, why: l('ตักส่วนข้นด้านบนไว้ผัดพริกแกง ที่เหลือเป็นน้ำแกง', 'The thick top part fries the paste, the rest becomes the sauce') },
+    { id: 'eggplant', name: l('มะเขือเปราะ', 'Thai eggplant'), q: 6, unit: U.piece, baht: 15, why: l('เนื้อมะเขือดูดน้ำแกงไว้ อุ่นวันต่อมาจะยิ่งอร่อย', 'It soaks up the sauce and tastes even better reheated') },
+    { id: 'basil', name: l('ใบโหระพา', 'Thai basil'), q: 1, unit: U.handful, baht: 5, why: l('ใส่ตอนปิดไฟ กลิ่นหอมหวานจะไม่หาย', 'Added with the heat off so its sweet aroma stays') },
+    { id: 'lime-leaf', name: l('ใบมะกรูด', 'Kaffir lime leaves'), q: 4, unit: U.leaf, baht: 3, why: l('ฉีกก่อนใส่ กลิ่นสดชื่นจะตัดความมันของกะทิ', 'Torn before adding, they give a fresh smell that cuts the coconut richness') },
+    ...(hot ? [{ id: 'chili', name: l('พริกขี้หนู', "Bird's eye chili"), q: sp.chili, unit: U.chili, baht: 2, why: l('บุบแล้วผัดพร้อมพริกแกง เผ็ดจะกระจายทั่วหม้อ', 'Crushed and fried with the paste so the heat spreads through the pot') }] : []),
+    { id: 'fish', name: l('น้ำปลา', 'Fish sauce'), q: lowSalt ? 0.5 : 1, unit: U.tbsp, baht: 2, why: lowSalt ? l('ลดลงครึ่งหนึ่งตามที่ขอ ชิมก่อนแล้วค่อยเติม', 'Halved as you asked. Taste before adding more') : l('พริกแกงเค็มอยู่แล้ว ใส่น้อยก่อนแล้วชิม', 'The paste is already salty, so start small and taste') },
+    { id: 'sugar', name: l('น้ำตาลปี๊บหรือน้ำตาลทราย', 'Palm sugar or white sugar'), q: 1, unit: U.tbsp, baht: 2, why: l('หวานนิดๆ คือจุดเด่นของแกงเขียวหวาน ช่วยให้รสกลม', 'A touch of sweetness is what makes it green "sweet" curry, and it rounds out the salt') },
+    { id: 'rice', name: l('ข้าวสวย', 'Cooked rice'), q: 4, unit: U.plates, baht: 28, why: l('แกงหม้อนี้พอดีกับข้าว 4 จาน', 'This pot is right for 4 plates of rice') },
+  ];
+  const steps: Step[] = [
+    { id: 'gc-fridge', phase: 1, title: l('หยิบของออกมาให้ครบ', 'Get everything out'), do: l('หยิบของจริงออกมาวางให้ครบก่อนเปิดไฟ', 'Take everything out before you turn on the heat.'),
+      gather: [l('สะโพกไก่ 400 กรัม', 'Chicken thigh, 400 g'), l(`พริกแกงเขียวหวาน ${sp.paste} ช้อนโต๊ะ`, `Green curry paste, ${sp.paste} tbsp`), milk, l('มะเขือเปราะ 6 ลูก', '6 Thai eggplants'), l('ใบโหระพา 1 กำมือ', '1 handful Thai basil'), l('ใบมะกรูด 4 ใบ', '4 kaffir lime leaves'), ...(hot ? [l(`พริกขี้หนู ${sp.chili} เม็ด`, `${sp.chili} bird's eye chilies`)] : []), l('น้ำปลา น้ำตาล', 'Fish sauce, sugar')],
+      see: l('กล่องกะทิไม่บวม พริกแกงไม่มีกลิ่นหืน', 'Coconut boxes not swollen, paste does not smell stale'),
+      why: l('หม้อนี้ได้ 4 จาน พอเริ่มผัดพริกแกงแล้วต้องคนตลอด จะไม่มีเวลาไปหาของ', 'This pot makes 4 plates. Once the paste is in you have to keep stirring, so there is no time to look for things.') },
+    { id: 'gc-cut', phase: 1, title: l('หั่นไก่', 'Cut the chicken'), do: l('หั่นสะโพกไก่เป็นชิ้นพอคำ หนาราว 1 ข้อนิ้ว แล้วล้างมือกับเขียง', 'Cut the thighs into bite-size pieces about a finger joint thick, then wash your hands and the board.'),
+      see: l('ชิ้นขนาดใกล้เคียงกัน', 'Pieces about the same size'),
+      why: l('ชิ้นเท่ากันสุกพร้อมกัน ไม่มีชิ้นไหนแข็งหรือยังดิบ', 'Even pieces cook at the same pace, so none end up tough or raw.') },
+    { id: 'gc-veg', phase: 1, title: l('เตรียมผัก', 'Prep the vegetables'),
+      do: l(`ผ่ามะเขือเปราะเป็น 4 ส่วน แช่น้ำเกลือ ฉีกใบมะกรูดออกจากก้านกลาง เด็ดใบโหระพา${hot ? ` บุบพริกขี้หนู ${sp.chili} เม็ด` : ''}`, `Quarter the eggplants and drop them into salted water. Tear the lime leaves off the center stem and pick the basil leaves.${hot ? ` Crush ${sp.chili} chilies.` : ''}`),
+      see: l('มะเขือจมน้ำ เนื้อยังขาว', 'Eggplant under water and still white'),
+      why: l('น้ำเกลือกันมะเขือดำ ใบมะกรูดที่ฉีกจะส่งกลิ่นได้ดีกว่าทั้งใบ', 'Salted water stops the eggplant browning. Torn lime leaves give off more smell than whole ones.') },
+    { id: 'gc-cream', phase: 2, heat: 1, timer: 180, title: l('เคี่ยวหัวกะทิ ไฟกลาง', 'Medium heat, simmer the cream'),
+      do: l('เปิดเตาไฟกลาง ตักส่วนข้นด้านบนของกะทิราวครึ่งถ้วย (125 มล.) ใส่หม้อ คนเบาๆ เคี่ยวจนมันแยกตัว ราว 3 นาที', 'Stove on medium. Spoon the thick top of the coconut milk, about half a cup (125 ml), into the pot. Stir gently and simmer until the oil separates, about 3 minutes.'),
+      see: l('มีน้ำมันใสลอยเป็นจุด กะทิเดือดปุดๆ และข้นขึ้น', 'Clear oil beading on top, the cream bubbling and thickening'),
+      why: l('น้ำมันที่แยกออกมาใช้ผัดพริกแกงแทนน้ำมันพืช และทำให้แกงมีน้ำมันเขียวลอยหน้า', 'The separated oil fries the paste instead of cooking oil, and gives the curry its green sheen.') },
+    { id: 'gc-paste', phase: 2, heat: 1, timer: 90, title: l('ผัดพริกแกง', 'Fry the paste'),
+      do: l(`ใส่พริกแกง ${sp.paste} ช้อนโต๊ะ${hot ? 'กับพริกที่บุบไว้' : ''} ผัดกับหัวกะทิ คนตลอดราวนาทีครึ่ง อย่าให้ติดก้นหม้อ`, `Add ${sp.paste} tbsp paste${hot ? ' and the crushed chilies' : ''} and fry it in the cream, stirring all the time for about a minute and a half so it does not stick.`),
+      see: l('หอมฉุนขึ้นจมูก มีน้ำมันสีเขียวลอยขึ้นมา', 'A strong curry smell and green oil rising'),
+      why: l('ผัดให้สุกก่อนจะปลุกกลิ่นเครื่องแกง พริกแกงดิบรสแบน', 'Frying cooks the paste and wakes up the spices. Raw paste tastes flat.') },
+    { id: 'gc-chicken', phase: 3, heat: 1, timer: 120, title: l('ใส่ไก่', 'Add the chicken'),
+      do: l('ใส่ไก่ลงไปคลุกกับพริกแกงให้ทั่ว ผัดจนผิวไก่ขาวขุ่น ราว 2 นาที', 'Add the chicken and toss it in the paste until coated. Cook until the outside turns white, about 2 minutes.'),
+      see: l('ผิวไก่ไม่เหลือสีชมพู', 'No pink left on the outside'),
+      why: l('คลุกพริกแกงก่อนเติมกะทิ รสจะเกาะเนื้อไก่ ไม่ลอยอยู่แค่ในน้ำแกง', 'Coating it before the liquid goes in makes the flavor stick to the chicken, not just float in the sauce.') },
+    { id: 'gc-simmer', phase: 4, heat: 1, timer: 480, title: l('เติมกะทิ ใส่มะเขือ', 'Add the coconut milk and eggplant'),
+      do: l(`เท${st.water ? `กะทิที่เหลือกับน้ำ ${st.water} มล.` : 'กะทิที่เหลือ'} ใส่ใบมะกรูด พอเริ่มเดือดใส่มะเขือที่สะเด็ดน้ำแล้ว เคี่ยวไฟกลางราว 8 นาทีจนมะเขือนิ่ม`, `Pour in the rest of the coconut milk${st.water ? ` and ${st.water} ml water` : ''} and add the lime leaves. When it starts to boil, add the drained eggplant and simmer on medium about 8 minutes until the eggplant is soft.`),
+      see: l('เดือดเบาๆ ไม่เดือดพล่าน จิ้มมะเขือด้วยส้อมแล้วเข้าง่าย', 'Gentle bubbles, not a rolling boil. A fork goes into the eggplant easily'),
+      why: l('กะทิที่เดือดแรงจะแตกเป็นเม็ด เคี่ยวเบาๆ ไก่จะนุ่มและมะเขือดูดน้ำแกง', 'Coconut milk boiled hard splits and turns grainy. A gentle simmer keeps the chicken tender while the eggplant soaks up the sauce.') },
+    { id: 'gc-season', phase: 4, heat: 1, timer: 30, title: l('ปรุงรส', 'Season'),
+      do: l(`ใส่น้ำปลา${fish.th} ช้อนโต๊ะ น้ำตาล 1 ช้อนโต๊ะ คนให้ละลาย แล้วชิม`, `Add ${fish.en} tbsp fish sauce and 1 tbsp sugar, stir until dissolved, then taste.`),
+      see: l('เค็มนำ หวานตาม แล้วเผ็ดปลายลิ้น', 'Salty first, then sweet, then heat at the end'),
+      why: lowSalt ? l('สูตรนี้ลดเค็มไว้ พริกแกงเค็มอยู่แล้ว ชิมก่อนแล้วค่อยเติม', 'This version is less salty. The paste is salty already, so taste before adding more.') : l('พริกแกงเค็มอยู่แล้ว ปรุงตอนท้ายจะได้ไม่เค็มเกิน', 'The paste is already salty, so seasoning last keeps it from getting too salty.'),
+      gather: [l('น้ำปลา', 'Fish sauce'), l('น้ำตาล', 'Sugar')] },
+    { id: 'gc-basil', phase: 5, heat: 0, timer: 10, title: l('ปิดไฟ ใส่โหระพา', 'Heat off, add the basil'),
+      do: l('ปิดเตา ใส่ใบโหระพา คนครั้งเดียวให้จมน้ำแกง', 'Turn off the stove, add the basil and stir once so it sinks into the curry.'),
+      see: l('ใบสลดแต่ยังเขียว', 'Leaves wilted but still green'),
+      why: l('ความร้อนในหม้อพอให้ใบสลด กลิ่นหอมหวานจะยังอยู่', 'The heat in the pot is enough to wilt them while keeping the sweet smell.') },
+    { id: 'gc-store', phase: 5, title: l('ตักกิน แล้วเก็บส่วนที่เหลือ', 'Serve, then store the rest'),
+      do: l('ตักราดข้าวกินได้เลย ส่วนที่เหลือพักให้เย็นภายใน 1 ชั่วโมง แบ่งใส่กล่องปิดฝา แล้วเข้าตู้เย็น', 'Serve over rice. Let the rest cool within an hour, portion it into lidded boxes and refrigerate.'),
+      see: l('แบ่งกล่องละ 1 จาน', 'One plate per box'),
+      why: l('เก็บในตู้เย็นได้ 3 วัน อุ่นให้เดือดทั่วก่อนกินทุกครั้ง พักให้เย็นเร็วและอุ่นให้ร้อนจัดช่วยกันอาหารบูด', 'It keeps 3 days in the fridge. Reheat until it boils every time: cooling fast and reheating hot keeps it safe.') },
+  ];
+  return {
+    id: 'green-curry', name: l('แกงเขียวหวานไก่ (4 จาน)', 'Green curry chicken (serves 4)'), img: 'dish-green-curry', mins: 35, phases: 5, kcal: st.kcal,
+    g1: { title: l('ความเผ็ด', 'Spiciness'), opts: SP }, g2: { title: l('น้ำแกง', 'Sauce'), opts: ST },
+    adapts: [{ id: 'salt', label: l('ลดเค็ม', 'Less salty') }],
+    adaptNotes: lowSalt ? [l('ลดน้ำปลาเหลือครึ่งช้อนโต๊ะ ชิมก่อนแล้วค่อยเติม', 'Fish sauce cut to half a tbsp. Taste, then add more if needed.')] : [],
+    ingredients, steps, qa,
+    senses: [
+      { label: l('รสชาติ', 'Taste'), options: SALT, good: l('เค็มหวานมัน แล้วเผ็ดตาม', 'Salty, sweet and creamy, with heat after'), tips: [l('ครั้งหน้าเติมน้ำปลาอีกครึ่งช้อนโต๊ะตอนปรุง', 'Next time add half a tbsp more fish sauce when seasoning'), l('ครั้งหน้าลดน้ำปลา หรือเติมกะทิช่วยให้เค็มน้อยลง', 'Next time use less fish sauce, or add a splash of coconut milk to soften it')] },
+      { label: l('กลิ่น', 'Aroma'), options: [l('ยังไม่หอมเครื่องแกง', 'No curry aroma yet'), l('หอมพริกแกงกับโหระพา', 'Smells of curry paste and basil'), l('มีกลิ่นไหม้', 'Smells burnt')], good: l('หอมพริกแกงผัดกะทิ', 'Fragrant fried paste and coconut'), tips: [l('ครั้งหน้าผัดพริกแกงกับหัวกะทินานขึ้นจนหอมฉุน', 'Next time fry the paste in the cream longer, until it smells strong'), l('ครั้งหน้าหรี่ไฟตอนผัดพริกแกง และคนตลอด', 'Next time lower the heat while frying the paste and keep stirring')] },
+      { label: l('หน้าตา', 'Look'), options: [l('กะทิแตกเป็นเม็ด', 'Split and grainy'), l('น้ำแกงเนียน มีน้ำมันเขียวลอย', 'Smooth, with green oil on top'), l('ซีด ไม่มีสี', 'Pale, no color')], good: l('น้ำแกงเนียน สีเขียวนวล', 'A smooth, soft green sauce'), tips: [l('ครั้งหน้าเคี่ยวไฟกลางค่อนอ่อน อย่าให้เดือดพล่าน', 'Next time simmer gently, never a rolling boil'), l('ครั้งหน้าเคี่ยวหัวกะทิจนแตกมันก่อนใส่พริกแกง', 'Next time simmer the cream until the oil separates before adding the paste')] },
+    ],
+  };
+}
+
 export function buildRecipe(id: string, o1 = 1, o2 = 0, adapt: string[] = []): Recipe | null {
   if (id === 'kaprao') return kaprao(o1, o2, adapt);
   if (id === 'omelet') return omelet(o1, o2, adapt);
+  if (id === 'green-curry') return greenCurry(o1, o2, adapt);
   return null;
 }
-export const DEFAULT_OPTS: Record<string, [number, number]> = { kaprao: [1, 0], omelet: [0, 0] };
+export const DEFAULT_OPTS: Record<string, [number, number]> = { kaprao: [1, 0], omelet: [0, 0], 'green-curry': [1, 0] };
 
 /** รายการเมนูในหน้าสูตร สองเมนูแรกทำตามได้ทุกขั้น ที่เหลือกำลังจะมา */
 export type MenuItem = { id: string; name: L; img: ImgKey; mins: number; easy: boolean; baht: number; kcal: number; ready: boolean; need: string[] };
@@ -274,7 +379,7 @@ export const MENU: MenuItem[] = [
   { id: 'fried-rice', name: l('ข้าวผัดไข่', 'Egg fried rice'), img: 'dish-fried-rice', mins: 12, easy: true, baht: 35, kcal: 580, ready: false, need: ['rice', 'egg', 'garlic'] },
   { id: 'morning-glory', name: l('ผัดผักบุ้งไฟแดง', 'Stir-fried morning glory'), img: 'dish-morning-glory', mins: 8, easy: true, baht: 25, kcal: 210, ready: false, need: ['morningGlory', 'garlic', 'chili'] },
   { id: 'tom-yum', name: l('ต้มยำกุ้ง', 'Tom yum goong'), img: 'dish-tom-yum', mins: 25, easy: false, baht: 120, kcal: 320, ready: false, need: ['shrimp', 'mushroom', 'chili'] },
-  { id: 'green-curry', name: l('แกงเขียวหวานไก่', 'Green curry chicken'), img: 'dish-green-curry', mins: 35, easy: false, baht: 95, kcal: 610, ready: false, need: ['chicken', 'coconut', 'thaiBasil'] },
+  { id: 'green-curry', name: l('แกงเขียวหวานไก่ (4 จาน)', 'Green curry chicken (serves 4)'), img: 'dish-green-curry', mins: 35, easy: false, baht: 170, kcal: 610, ready: true, need: ['chicken', 'coconut', 'thaiBasil'] },
 ];
 
 export const PANTRY: { id: string; name: L }[] = [

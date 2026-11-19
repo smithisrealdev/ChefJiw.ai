@@ -37,6 +37,11 @@ export const api = {
   suggestMenus: (have: string[], country: string, lang: string) => call<{ ideas: MenuIdea[] }>('menus', { have, country, lang, tzOffset: tzOffset() }),
   prices: (country: string) => call<{ rows: PriceRow[]; updatedAt: string; source: string }>('prices', { country }),
 
+  /** ทำจบจานพร้อมคะแนนหนูชิม ลงบันทึกบนเซิร์ฟเวอร์ ส่งไม่สำเร็จไม่เป็นไร คะแนนยังอยู่ในเครื่อง */
+  async logRun(device: string, recipe: string, score: number) {
+    await supabase?.from('cook_runs').insert({ device, recipe, score });
+  },
+
   /** เข้าสู่ระบบด้วย OAuth ผ่านเบราว์เซอร์ในแอป แล้วคืนสถานะสมาชิกจากตาราง profiles */
   async signIn(provider: Provider): Promise<{ member: boolean }> {
     if (!supabase) throw new ApiError('not_configured');

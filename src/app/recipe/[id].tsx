@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Icon } from '@/components/icon';
 import { Button, Card, Chip, Screen, T, Thumb } from '@/components/ui';
 import { IMG } from '@/data/images';
-import { buildRecipe, DEFAULT_OPTS } from '@/data/recipes';
+import { buildRecipe, DEFAULT_OPTS, MENU, type ImgKey } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
 
@@ -29,7 +29,7 @@ export default function RecipeDetail() {
 
   return (
     <Screen tint={colors.header.cook} title={pick(r.name)} onBack={back} backLabel={t('detail.back')}
-      subtitle={`${t('recipes.minutes', { n: r.mins })} · ${t('detail.easy')} · ${t('detail.kcal', { n: r.kcal })}`}
+      subtitle={`${t('recipes.minutes', { n: r.mins })}${MENU.find((m) => m.id === r.id)?.easy ? ` · ${t('detail.easy')}` : ''} · ${t('detail.kcal', { n: r.kcal })}`}
       right={<Thumb source={IMG[r.img]} size={96} />}
       footer={
         <Card tone="accent" style={s.buy}>
@@ -62,7 +62,7 @@ export default function RecipeDetail() {
             <View style={[s.box, { borderColor: colors.ink, backgroundColor: on ? colors.success : 'transparent' }]}>
               {on && <Icon name="check" color={colors.bg} size={18} />}
             </View>
-            <Thumb source={IMG[g.id]} size={48} />
+            {g.id in IMG ? <Thumb source={IMG[g.id as ImgKey]} size={48} /> : <View style={[s.noImg, { backgroundColor: colors.line }]} />}
             <View style={{ flex: 1 }}>
               <T v="bodyBold">{pick(g.name)}</T>
               <T v="smallBold" tone="muted">{g.q === 0.5 ? '½' : g.q} {pick(g.unit)}</T>
@@ -80,5 +80,6 @@ const s = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   ing: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.lg },
   box: { width: 28, height: 28, borderRadius: 8, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
+  noImg: { width: 48, height: 48, borderRadius: radius.sm },
   buy: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },
 });

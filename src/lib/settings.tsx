@@ -13,8 +13,9 @@ export type Run = { recipe: string; score: number; at: number };
 type Saved = {
   lang: Lang; country: Country; theme: 'system' | 'light' | 'dark'; progress: Progress | null; runs: Run[];
   onboarded: boolean; signedIn: boolean; member: boolean; asked: Asked;
+  device: string; // รหัสสุ่มของเครื่อง ใช้แยกผลการทำอาหารแต่ละเครื่องในบันทึกบนเซิร์ฟเวอร์ สร้างตอนทำจบจานครั้งแรก
 };
-const DEFAULTS: Saved = { lang: 'th', country: 'TH', theme: 'system', progress: null, runs: [], onboarded: false, signedIn: false, member: false, asked: { day: '', n: 0 } };
+const DEFAULTS: Saved = { lang: 'th', country: 'TH', theme: 'system', progress: null, runs: [], onboarded: false, signedIn: false, member: false, asked: { day: '', n: 0 }, device: '' };
 const KEY = 'chefjiw.settings.v1';
 
 type Ctx = Saved & {
