@@ -12,7 +12,6 @@ import { MASCOT } from '@/data/images';
 import { buildRecipe, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
 import { freeLeft, localDay, spendOne } from '@/lib/quota';
-import { getToken } from '@/lib/session';
 import { useSettings } from '@/lib/settings';
 import { Image } from 'expo-image';
 import { fonts, onPastel, radius, space, type } from '@/theme/tokens';
@@ -189,7 +188,7 @@ function AskSheet({ visible, onClose, r, step }: { visible: boolean; onClose: ()
 
 /** พิมพ์ถามเอง: ต้องเข้าสู่ระบบ ฟรีวันละ 3 คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวไม่ถูกนับ */
 function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => void }) {
-  const { t, lang, colors, signedIn, member, asked, set } = useSettings();
+  const { t, lang, colors, signedIn, member, asked, set, pick } = useSettings();
   const [text, setText] = useState('');
   const [state, setState] = useState<{ kind: 'idle' | 'login' | 'quota' | 'loading' | 'answer' | 'error'; q?: string; answer?: string; error?: ApiErrorKind }>({ kind: 'idle' });
   const left = freeLeft(asked, localDay());
@@ -200,11 +199,15 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
     if (!member && left <= 0) return setState({ kind: 'quota' });
     setState({ kind: 'loading', q: question }); setText('');
     try {
-      const res = await api.askChef(question, { recipe: r.id, step: step.id, lang }, (await getToken()) ?? undefined);
+      const res = await api.askChef(question, { recipe: pick(r.name), step: pick(step.title), lang });
       if (!member) set({ asked: spendOne(asked, localDay()) });
       setState({ kind: 'answer', q: question, answer: res.answer });
     } catch (e) {
-      setState({ kind: 'error', q: question, error: e instanceof ApiError ? e.kind : 'failed' });
+      const kind = e instanceof ApiError ? e.kind : 'failed';
+      // เซิร์ฟเวอร์เป็นคนตัดสินโควตาและการเข้าสู่ระบบ ให้หน้าจอตามนั้น
+      if (kind === 'quota') { set({ asked: { day: localDay(), n: 3 } }); setState({ kind: 'quota' }); }
+      else if (kind === 'unauthorized') { set({ signedIn: false }); setState({ kind: 'login' }); }
+      else setState({ kind: 'error', q: question, error: kind });
     }
   };
   const goTo = (path: '/login' | '/paywall') => { onLeave(); router.push(path); };

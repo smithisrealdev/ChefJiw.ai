@@ -7,7 +7,6 @@ import { ApiNotice, Button, Card, Screen, T } from '@/components/ui';
 import { MASCOT } from '@/data/images';
 import { api, ApiError, type ApiErrorKind, type Provider } from '@/lib/api';
 import { freeLeft, localDay } from '@/lib/quota';
-import { saveToken } from '@/lib/session';
 import { useSettings } from '@/lib/settings';
 import { space } from '@/theme/tokens';
 
@@ -22,16 +21,15 @@ export default function Login() {
   const signIn = async (p: Provider) => {
     setBusy(p); setError(null);
     try {
-      const { token } = await api.signIn(p);
-      await saveToken(token);
-      set({ signedIn: true });
+      const { member } = await api.signIn(p);
+      set({ signedIn: true, member });
     } catch (e) {
       setError(e instanceof ApiError ? e.kind : 'failed');
     } finally {
       setBusy(null);
     }
   };
-  const signOut = async () => { await saveToken(null); set({ signedIn: false, member: false }); };
+  const signOut = async () => { await api.signOut(); set({ signedIn: false, member: false }); };
 
   return (
     <Screen tint={isDark ? colors.bg : colors.ai} title={signedIn ? t('login.done') : t('login.title')} mascot={MASCOT.elephant} onBack={close} backLabel={t('login.close')}>

@@ -5,7 +5,6 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { ApiNotice, Button, Card, Screen, T } from '@/components/ui';
 import { MASCOT } from '@/data/images';
 import { api, ApiError, type ApiErrorKind, type Plan } from '@/lib/api';
-import { getToken } from '@/lib/session';
 import { useSettings } from '@/lib/settings';
 import { onPastel, radius, space } from '@/theme/tokens';
 
@@ -20,8 +19,7 @@ export default function Paywall() {
   const run = async (restore: boolean) => {
     setBusy(true); setError(null);
     try {
-      const token = (await getToken()) ?? undefined;
-      const res = restore ? await api.restore(token) : await api.purchase(plan, token);
+      const res = restore ? await api.restore() : await api.purchase(plan);
       set({ member: res.member });
     } catch (e) {
       setError(e instanceof ApiError ? e.kind : 'failed');

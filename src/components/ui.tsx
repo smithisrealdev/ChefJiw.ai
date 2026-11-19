@@ -1,9 +1,11 @@
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextProps, type TextStyle, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
+import type { ApiErrorKind } from '@/lib/api';
 import { useSettings } from '@/lib/settings';
 import { fonts, onPastel, radius, space, touch, type } from '@/theme/tokens';
 
@@ -129,16 +131,22 @@ export function Skeleton({ lines = 2, label }: { lines?: number; label: string }
 }
 
 /** สถานะผิดพลาดของการเรียก backend พร้อมทางแก้ */
-export function ApiNotice({ kind, onRetry }: { kind: 'not_configured' | 'offline' | 'failed'; onRetry?: () => void }) {
+export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () => void }) {
   const { t } = useSettings();
-  const [title, body] = kind === 'offline' ? [t('err.offline'), t('err.offlineBody')] : kind === 'failed' ? [t('err.failed'), t('err.failedBody')] : [t('err.notConfigured'), t('err.notConfiguredBody')];
+  const [title, body] = {
+    offline: [t('err.offline'), t('err.offlineBody')], failed: [t('err.failed'), t('err.failedBody')],
+    not_configured: [t('err.notConfigured'), t('err.notConfiguredBody')],
+    quota: [t('ask.quotaTitle'), t('ask.quotaBody')], unauthorized: [t('ask.loginTitle'), t('ask.loginBody')],
+  }[kind];
   return (
     <Card tone={kind === 'offline' ? 'note' : 'danger'} style={{ gap: space.sm }}>
       <View accessibilityRole="alert" accessibilityLiveRegion="polite">
         <T v="subheading" style={{ color: kind === 'offline' ? onPastel.ink : onPastel.warn }}>{title}</T>
         <T tone="pastel">{body}</T>
       </View>
-      {onRetry && kind !== 'not_configured' && <Button kind="onPastel" label={t('common.retry')} onPress={onRetry} style={{ alignSelf: 'flex-start' }} />}
+      {onRetry && (kind === 'offline' || kind === 'failed') && <Button kind="onPastel" label={t('common.retry')} onPress={onRetry} style={{ alignSelf: 'flex-start' }} />}
+      {kind === 'unauthorized' && <Button kind="onPastel" label={t('me.signIn')} onPress={() => router.push('/login')} style={{ alignSelf: 'flex-start' }} />}
+      {kind === 'quota' && <Button kind="onPastel" label={t('ask.seeMember')} onPress={() => router.push('/paywall')} style={{ alignSelf: 'flex-start' }} />}
     </Card>
   );
 }

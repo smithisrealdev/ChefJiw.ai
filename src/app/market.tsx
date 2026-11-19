@@ -14,7 +14,7 @@ import { radius, space } from '@/theme/tokens';
 type Live = { rows: PriceRow[]; updatedAt: string; source: string };
 
 export default function Market() {
-  const { colors, t, pick, lang, country, set } = useSettings();
+  const { colors, t, pick, country, set } = useSettings();
   const [cat, setCat] = useState<'all' | Cat>('all');
   const [cart, setCart] = useState<string[]>([]);
   const [checking, setChecking] = useState(false);
@@ -32,7 +32,7 @@ export default function Market() {
 
   const check = async () => {
     setChecking(true); setError(null);
-    try { setLive(await api.prices(country, lang)); } catch (e) { setError(e instanceof ApiError ? e.kind : 'failed'); } finally { setChecking(false); }
+    try { setLive(await api.prices(country)); } catch (e) { setError(e instanceof ApiError ? e.kind : 'failed'); } finally { setChecking(false); }
   };
   const changeCountry = (c: typeof country) => { set({ country: c }); setCart([]); setLive(null); setError(null); };
   const back = () => (router.canGoBack() ? router.back() : router.replace('/'));
