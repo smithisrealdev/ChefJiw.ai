@@ -38,7 +38,8 @@ export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recip
   const st = shownStage(r.id, r.steps, i, acts, done);
 
   // เชฟอยู่ที่ไหน: เปิดหน้ามายังอยู่นอกครัว ต้องแตะจุดของขั้นนั้นก่อน เชฟถึงเดินไป
-  const [chefAt, setChefAt] = useState<Station | 'door'>('door');
+  // กลับมาทำต่อกลางจาน เชฟยืนรออยู่ที่จุดของขั้นก่อนหน้า
+  const [chefAt, setChefAt] = useState<Station | 'door'>(() => (i > 0 ? stageAt(r.id, r.steps, i - 1).at : 'door'));
   const arrived = chefAt === base.at;
   const [note, setNote] = useState<{ step: number; text: string } | null>(null);
   const warn = (text: string) => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {}); setNote({ step: i, text }); onMiss(); };
@@ -49,8 +50,8 @@ export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recip
     setTaps((prev) => { const list = prev.step === i ? [...prev.n] : []; list[n] = (list[n] ?? 0) + 1; return { step: i, n: list }; });
   };
 
-  const [x] = useState(() => new Animated.Value(SPOT.door));
-  const [zoom] = useState(() => new Animated.Value(0)); // 0 = เห็นทั้งครัว 1 = ซูมตามเชฟ
+  const [x] = useState(() => new Animated.Value(SPOT[chefAt]));
+  const [zoom] = useState(() => new Animated.Value(arrived ? 1 : 0)); // 0 = ถอยให้เห็นทั้งเชฟและจุดที่ต้องไป 1 = ซูมตามเชฟ
   const [walking, setWalking] = useState<0 | 1 | -1>(0);
   const target = SPOT[chefAt];
   useEffect(() => {
@@ -81,11 +82,16 @@ export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recip
   // กล้องตอนซูม: เชฟอยู่กลางจอค่อนซ้าย (ของที่ทำอยู่ทางขวาของเชฟ) แต่ไม่เลยขอบครัว ตอนเห็นทั้งครัว: ย่อทั้งครัวให้พอดีความกว้างจอ วางชิดล่าง
   const x0 = viewW / (2 * k) - 60, x1 = x0 + WORLD - viewW / k;
   const cam = x1 > x0 ? x.interpolate({ inputRange: [x0, x1], outputRange: [0, viewW - WORLD * k], extrapolate: 'clamp' }) : 0;
+  // ตอนเลือกที่: ถอยกล้องพอให้เห็นเชฟกับจุดที่ต้องไป ไม่ย่อทั้งครัวจนเหลือผนังว่าง วางชิดล่าง
   const fit = viewW ? Math.min(1, viewW / (WORLD * k)) : 1;
+  const [cx, , w] = AREA[base.at], me = SPOT[chefAt];
+  const left = Math.min(me - 70, cx - w / 2) - 30, right = Math.max(me + 90, cx + w / 2) + 30;
+  const out = viewW ? Math.max(fit, Math.min(1, viewW / ((right - left) * k))) : 1;
+  const outX = Math.max(viewW - WORLD * k * out, Math.min(0, viewW / 2 - ((left + right) / 2) * k * out));
   const world = [
-    { translateX: Animated.multiply(zoom, cam) },
-    { translateY: zoom.interpolate({ inputRange: [0, 1], outputRange: [H * (1 - fit), 0] }) },
-    { scale: zoom.interpolate({ inputRange: [0, 1], outputRange: [fit, 1] }) },
+    { translateX: Animated.add(Animated.multiply(zoom, cam), zoom.interpolate({ inputRange: [0, 1], outputRange: [outX, 0] })) },
+    { translateY: zoom.interpolate({ inputRange: [0, 1], outputRange: [H * (1 - out), 0] }) },
+    { scale: zoom.interpolate({ inputRange: [0, 1], outputRange: [out, 1] }) },
   ];
   const pose = walking ? 'walk' : arrived ? st.pose : 'think';
   const tapDone = acts.findIndex((a) => a.kind === 'tap');
@@ -111,7 +117,7 @@ export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recip
         </View>
         {arrived
           ? <Hotspots acts={acts} done={done} st={st} k={k} pics={pics} onTap={tap} onDecoy={(name) => warn(name)} />
-          : <Stations goal={base.at} k={k} scale={k * fit} onGo={(s) => { if (s === base.at) { setNote(null); setChefAt(s); } else warn(''); }} />}
+          : <Stations goal={base.at} k={k} scale={k * out} onGo={(s) => { if (s === base.at) { setNote(null); setChefAt(s); } else warn(''); }} />}
       </Animated.View>
       <Guide acts={arrived ? acts : []} done={done} goal={base.heat} go={arrived ? null : base.at} note={note?.step === i ? note.text : null} />
     </View>
