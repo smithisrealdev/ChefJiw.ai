@@ -53,7 +53,9 @@ npm test
 
 ตั้งโปรเจกต์ใหม่จากศูนย์: รัน migration ตามลำดับ (ก่อนไฟล์ cron ให้เก็บ `project_url` ใน Vault ดูหัวไฟล์) deploy ฟังก์ชันทั้งสี่ (`update-prices` ปิด verify JWT เพราะตรวจ secret จาก Vault เอง) แล้วทำสองข้อบน
 
-แอป: คัดลอก `.env.example` เป็น `.env.local` แล้วใส่ URL กับ publishable key (ค่าทั้งสองเป็นค่าสาธารณะ)
+แอป: URL กับ publishable key ของ Supabase อยู่ใน `.env` แล้ว (ค่าทั้งสองเป็นค่าสาธารณะ) ถ้าจะชี้ไปโปรเจกต์อื่นให้ใส่ทับใน `.env.local`
+
+เว็บสำหรับลองบนมือถือ: โปรเจกต์ `chefjiw` บน Vercel build จาก `vercel.json` (`expo export -p web`) เปิดใน Safari แล้วกด แชร์ > เพิ่มไปยังหน้าจอโฮม จะเปิดเต็มจอ
 
 ยังไม่ได้ทำ: ระบบซื้อในแอป (App Store / Google Play) ปุ่มสมัครสมาชิกจึงยังขึ้นว่ายังไม่ได้เชื่อมระบบ สถานะสมาชิกอ่านจาก `profiles.member` ซึ่งต้องให้ฝั่งเซิร์ฟเวอร์เป็นคนตั้งหลังตรวจใบเสร็จ
 
