@@ -3,8 +3,9 @@ import { Pressable, Switch, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { Card, Screen, T, Thumb } from '@/components/ui';
-import { IMG, SCENE } from '@/data/images';
+import { DISH_TINT, IMG, SCENE } from '@/data/images';
 import { MENU } from '@/data/recipes';
+import { badges, cookedDays, monthGrid } from '@/lib/calendar';
 import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -29,11 +30,49 @@ function Row({ label, sub, value, onPress }: { label: string; sub?: string; valu
 export default function Me() {
   const { colors, t, pick, lang, country, theme, isDark, runs, set, signedIn, member } = useSettings();
   const avg = runs.length ? (runs.reduce((s, r) => s + r.score, 0) / runs.length).toFixed(1) : '–';
+  const now = new Date(), cooked = cookedDays(runs, now.getFullYear(), now.getMonth()), earned = badges(runs);
   return (
     <Screen tint={colors.header.me} title={t('me.title')} scene={SCENE.me}>
       <View style={{ flexDirection: 'row', gap: space.sm }}>
         <Card tone="mint" style={{ flex: 1 }}><T v="hero" tone="pastel">{runs.length}</T><T v="smallBold" tone="pastel">{t('me.cooked')}</T></Card>
         <Card tone="accent" style={{ flex: 1 }}><T v="hero" tone="pastel">{avg}</T><T v="smallBold" tone="pastel">{t('me.avg')}</T></Card>
+      </View>
+
+      {/* ปฏิทินของเดือนนี้: วันที่ทำอาหารจบเป็นสติกเกอร์รูปจานนั้น */}
+      <T v="subheading" accessibilityRole="header">{t('me.calendar')} · {now.toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-US', { month: 'long', year: 'numeric' })}</T>
+      <Card style={{ gap: space.sm }}>
+        <View style={{ flexDirection: 'row' }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          {t('me.week').split(' ').map((d, k) => <T key={k} v="smallBold" tone="muted" style={{ flex: 1, textAlign: 'center' }}>{d}</T>)}
+        </View>
+        {monthGrid(now.getFullYear(), now.getMonth()).map((week, w) => (
+          <View key={w} style={{ flexDirection: 'row' }}>
+            {week.map((d, k) => {
+              const run = d ? cooked.get(d) : undefined, dish = run && MENU.find((m) => m.id === run.recipe);
+              return (
+                <View key={k} style={{ flex: 1, alignItems: 'center' }} accessible={!!d} accessibilityLabel={!d ? undefined : dish ? t('me.dayCooked', { d, name: pick(dish.name), n: run!.score.toFixed(1) }) : t('me.day', { d })}>
+                  {d !== null && (
+                    <View style={{ width: 36, height: 36, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: dish ? DISH_TINT[dish.id] : colors.surface, borderWidth: d === now.getDate() ? 2 : 0, borderColor: colors.ink }}>
+                      {dish ? <Thumb source={IMG[dish.img]} size={32} /> : <T v="small" tone="muted">{d}</T>}
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        ))}
+      </Card>
+
+      <T v="subheading" accessibilityRole="header">{t('me.badges')}</T>
+      <View style={{ flexDirection: 'row', gap: space.sm }}>
+        {(['first', 'five', 'perfect'] as const).map((b) => (
+          <Card key={b} tone={earned[b] ? 'accent' : 'soft'} style={{ flex: 1, alignItems: 'center' }}>
+            <View style={{ width: 40, height: 40, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: earned[b] ? '#FFFFFF' : colors.line }}>
+              {earned[b] && <Icon name="check" color={colors.success} />}
+            </View>
+            <T v="smallBold" tone={earned[b] ? 'pastel' : 'muted'} style={{ textAlign: 'center' }}>{t(`me.badge.${b}`)}</T>
+            <T v="small" tone={earned[b] ? 'pastelMuted' : 'muted'}>{t(earned[b] ? 'me.earned' : 'me.locked')}</T>
+          </Card>
+        ))}
       </View>
 
       <T v="subheading" accessibilityRole="header">{t('me.recent')}</T>

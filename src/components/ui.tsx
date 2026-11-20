@@ -212,18 +212,24 @@ export function Mascot({ name, size }: { name: MascotName; size: number | '100%'
 export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; mascot?: number; scene?: (typeof SCENE)[keyof typeof SCENE]; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   const { colors, isDark } = useSettings();
   const insets = useSafeAreaInsets();
-  return (
-    <View style={{ flex: 1, backgroundColor: tint }}>
-      <View style={[s.header, { paddingTop: insets.top + space.md }]}>
-        <View style={{ flex: 1, gap: space.xs }}>
-          {onBack && <View style={{ marginBottom: space.sm }}><IconButton icon="back" label={backLabel ?? ''} onPress={onBack} onPastelBg /></View>}
-          <T v="title" style={isDark ? undefined : { color: onTint(tint) }} accessibilityRole="header">{title}</T>
-          {subtitle && <T v="smallBold" tone="muted" style={isDark ? undefined : { color: onTint(tint) }}>{subtitle}</T>}
-        </View>
-        {right}
-        {mascot && <Float><Image source={mascot} style={s.mascot} contentFit="contain" accessible={false} /></Float>}
+  const head = (
+    <View style={[s.header, { paddingTop: insets.top + space.md }]}>
+      <View style={{ flex: 1, gap: space.xs }}>
+        {onBack && <View style={{ marginBottom: space.sm }}><IconButton icon="back" label={backLabel ?? ''} onPress={onBack} onPastelBg /></View>}
+        <T v="title" style={isDark ? undefined : { color: onTint(tint) }} accessibilityRole="header">{title}</T>
+        {subtitle && <T v="smallBold" tone="muted" style={isDark ? undefined : { color: onTint(tint) }}>{subtitle}</T>}
       </View>
-      {scene && (
+      {right}
+      {mascot && <Float><Image source={mascot} style={s.mascot} contentFit="contain" accessible={false} /></Float>}
+    </View>
+  );
+  const content = { padding: space.lg, gap: space.md, paddingBottom: footer ? 120 : space.xxl };
+  const foot = footer && <View style={[s.footer, { paddingBottom: Math.max(insets.bottom, space.md) }]}>{footer}</View>;
+  // หน้าที่มีฉาก: เลื่อนทั้งหน้า ฉากจึงเลื่อนขึ้นไปพ้นจอ ไม่กินที่ของเนื้อหา
+  if (scene) return (
+    <View style={{ flex: 1, backgroundColor: tint }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        {head}
         <View style={{ width: '100%', aspectRatio: scene.ratio, marginTop: -space.sm }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
           <Image source={scene.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
           {scene.cast.map((c, k) => (
@@ -232,12 +238,23 @@ export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel
             </View>
           ))}
         </View>
-      )}
+        <View style={[s.sheet, content, { overflow: 'visible', backgroundColor: colors.bg }]}>
+          {children}
+          {/* ปิดสีหัวจอที่จะโผล่ตอนเลื่อนเกินด้านล่าง */}
+          <View style={{ position: 'absolute', left: 0, right: 0, top: '100%', height: 800, backgroundColor: colors.bg }} />
+        </View>
+      </ScrollView>
+      {foot}
+    </View>
+  );
+  return (
+    <View style={{ flex: 1, backgroundColor: tint }}>
+      {head}
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
-        <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: footer ? 120 : space.xxl }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={content} keyboardShouldPersistTaps="handled">
           {children}
         </ScrollView>
-        {footer && <View style={[s.footer, { paddingBottom: Math.max(insets.bottom, space.md) }]}>{footer}</View>}
+        {foot}
       </View>
     </View>
   );

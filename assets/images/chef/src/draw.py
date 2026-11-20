@@ -181,11 +181,17 @@ for n, svg in POSES.items(): open(n + '.svg', 'w').write(svg)
 
 # ฉาก: วาดเฉพาะของในฉาก ตัวละครวางทับในแอปเพื่อให้ขยับได้ (ตำแหน่งอยู่ใน SCENE ที่ src/data/images.ts) พื้นหลังโปร่งใส ใช้สีอ่อนเข้มของสีหัวจอ แล้วแต้มสีสดเฉพาะของชิ้นเล็ก
 scene = lambda w, h, body: f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}">\n{body}\n</svg>'
+floor = lambda y, c, h=360: f'<rect x="0" y="{y}" width="780" height="{h - y}" fill="{c}"/>'
+beam = lambda x1, x2, y, fx1, fx2, h=360: f'<path d="M{x1} {y} L{x2} {y} L{fx2} {h} L{fx1} {h} Z" fill="#FFFFFF" opacity="0.1"/>'
+shade = lambda cx, cy, rx, ry=9: f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="#24212B" opacity="0.13"/>'
+leaves = lambda x, c, h=360: f'<path d="M{x} {h + 6} q-44 -70 -12 -104 q30 34 12 104 z M{x + 8} {h + 6} q16 -92 64 -90 q0 60 -64 90 z M{x - 6} {h + 6} q-70 -26 -72 -70 q52 6 72 70 z" fill="{c}"/>'
 steam = lambda x, y, c='#FFFFFF': f'<path d="M{x} {y} q-10 -12 0 -24 q10 -12 0 -24 M{x+24} {y+4} q-10 -12 0 -24 q10 -12 0 -24" stroke="{c}" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.9"/>'
 
 # ครัวของทีมเชฟ (หัวจอหน้าร้าน สีน้ำเงิน)
 W1, W2, W3, NAVY = '#5E6EF3', '#8493FA', '#B7C0FF', '#2A2F8C'
 home = scene(780, 360, ''.join([
+  floor(296, '#1AAE7B'),
+  floor(292, '#3F4DDC'),
   # หน้าต่าง
   f'<rect x="28" y="30" width="156" height="128" rx="22" fill="{W2}"/><rect x="40" y="42" width="132" height="104" rx="14" fill="{W3}"/>',
   f'<circle cx="132" cy="80" r="20" fill="{YEL}"/><path d="M58 124 a16 16 0 0 1 22 -14 a20 20 0 0 1 36 6 a14 14 0 0 1 2 28 h-52 a12 12 0 0 1 -8 -20 z" fill="#FFFFFF"/>',
@@ -212,6 +218,7 @@ home = scene(780, 360, ''.join([
   f'<path d="M524 168 h12 M624 168 h12" stroke="{CORAL}" stroke-width="10" stroke-linecap="round"/>',
   # หม้อหุงข้าว
   f'<rect x="672" y="140" width="84" height="60" rx="22" fill="#FFFFFF"/><rect x="672" y="156" width="84" height="8" fill="{HAT_D}"/><circle cx="714" cy="182" r="6" fill="{CORAL}"/>',
+  beam(44, 170, 150, 150, 372) + shade(498, 352, 270, 8) + leaves(742, '#3643C9'),
 ]))
 open('scene-home.svg', 'w').write(home)
 
@@ -219,6 +226,7 @@ open('scene-home.svg', 'w').write(home)
 O1, O2 = '#EE7F22', '#FFC98A'
 crate = lambda x, y, w: f'<rect x="{x}" y="{y}" width="{w}" height="78" rx="10" fill="{STRAW}"/><path d="M{x+6} {y+26} h{w-12} M{x+6} {y+52} h{w-12}" stroke="{STRAW_D}" stroke-width="6" stroke-linecap="round"/>'
 market = scene(780, 300, ''.join([
+  floor(250, '#F58A2C', 300),
   # เสากับกันสาดลายทาง
   f'<path d="M292 60 v230 M748 60 v230" stroke="{O1}" stroke-width="12" stroke-linecap="round"/>',
   ''.join(f'<path d="M{262 + i * 86} 22 h86 v52 a43 26 0 0 1 -86 0 z" fill="{"#FFFFFF" if i % 2 else CORAL}"/>' for i in range(6)),
@@ -233,6 +241,7 @@ market = scene(780, 300, ''.join([
   # ป้ายราคา
   ''.join(f'<rect x="{x}" y="238" width="44" height="26" rx="8" fill="#FFFFFF"/><path d="M{x+10} 251 h24" stroke="{O1}" stroke-width="5" stroke-linecap="round"/>' for x in (354, 500, 646)),
   star(248, 120, 13, '#FFFFFF'),
+  shade(520, 292, 240, 7) + leaves(748, '#E0741A', 300),
 ]))
 open('scene-plan.svg', 'w').write(market)
 
@@ -246,6 +255,7 @@ sparkle = lambda x, y, s=10, c='#FFFFFF': star(x, y, s, c)
 P1, P2, P3 = '#EE5075', '#FF93AB', '#FFC6D3'
 book = lambda x, y, w, h, c, tilt=0: f'<rect x="{x}" y="{y - h}" width="{w}" height="{h}" rx="5" fill="{c}" transform="rotate({tilt} {x + w / 2} {y})"/>'
 recipes = scene(780, 360, ''.join([
+  floor(296, '#F0557A'),
   # ธงราว
   f'<path d="M250 26 Q420 70 590 26" stroke="#FFFFFF" stroke-width="4" fill="none"/>',
   ''.join(f'<path d="M{x} {y} l22 4 l-14 26 z" fill="{c}"/>' for x, y, c in [(268, 31, YEL), (312, 40, '#FFFFFF'), (358, 46, '#7BE0B5'), (404, 49, YEL), (450, 47, '#FFFFFF'), (496, 42, '#7BE0B5'), (540, 33, YEL)]),
@@ -267,12 +277,14 @@ recipes = scene(780, 360, ''.join([
   # พรมกับหนังสือสูตรเล่มใหญ่
   f'<ellipse cx="410" cy="338" rx="186" ry="22" fill="{P2}"/>',
   sparkle(586, 190, 10) + sparkle(248, 214, 8) + sparkle(566, 232, 6),
+  shade(122, 352, 100, 7) + shade(684, 352, 76, 7) + leaves(566, '#D94068'),
 ]))
 open('scene-recipes.svg', 'w').write(recipes)
 
 # หน้าเตา (แท็บทำอาหาร สีส้ม): ผนังกระเบื้อง เครื่องดูดควัน เตากับเตาอบ หม้อ กา โหลใส่ตะหลิว นาฬิกา
 O3 = '#FFE1BD'
 stove = scene(780, 360, ''.join([
+  floor(312, '#F58A2C'),
   # กระเบื้องผนัง
   ''.join(f'<rect x="{236 + c * 68}" y="{92 + r * 52}" width="56" height="40" rx="8" fill="{O2}" opacity="{0.55 if (r + c) % 2 else 0.9}"/>' for r in range(2) for c in range(8)),
   # เครื่องดูดควัน
@@ -293,18 +305,20 @@ stove = scene(780, 360, ''.join([
   # โหลใส่ตะหลิว
   f'<path d="M742 150 v-50 M756 152 v-62 M768 150 v-44" stroke="{WOOD}" stroke-width="7" stroke-linecap="round"/><ellipse cx="756" cy="84" rx="11" ry="15" fill="{WOOD}"/><rect x="730" y="150" width="50" height="64" rx="12" fill="#FFFFFF"/><path d="M730 172 h50" stroke="{HAT_D}" stroke-width="5"/>',
   sparkle(208, 120, 9) + sparkle(596, 120, 7),
+  beam(60, 132, 128, 20, 190) + shade(112, 350, 86, 7) + leaves(4, '#E0741A'),
 ]))
 open('scene-cook.svg', 'w').write(stove)
 
-# มุมรางวัล (แท็บฉัน สีเขียว): ชั้นถ้วยรางวัล ปฏิทินสติกเกอร์ ไฟประดับ รูปจานที่เคยทำ เก้าอี้นวม พรม
+# มุมรางวัล (แท็บฉัน สีเขียว): หน้าต่าง ชั้นถ้วยรางวัล ไฟประดับ รูปจานที่เคยทำ เก้าอี้นวม พรม
 G1, G2, G3 = '#14A572', '#63DDB1', '#B8F1DA'
 me = scene(780, 360, ''.join([
   # ไฟประดับ
   f'<path d="M230 20 Q400 74 780 22" stroke="#FFFFFF" stroke-width="4" fill="none"/>',
   ''.join(f'<circle cx="{x}" cy="{y}" r="9" fill="{c}"/>' for x, y, c in [(262, 30, YEL), (322, 42, '#FFFFFF'), (386, 50, CORAL), (452, 53, YEL), (518, 51, '#FFFFFF'), (584, 46, CORAL), (650, 39, YEL), (716, 31, '#FFFFFF')]),
-  # ปฏิทินสติกเกอร์ของจานที่ทำ
-  f'<rect x="32" y="44" width="176" height="150" rx="16" fill="#FFFFFF"/><rect x="32" y="44" width="176" height="34" rx="16" fill="{CORAL}"/><rect x="32" y="62" width="176" height="16" fill="{CORAL}"/>',
-  ''.join(f'<circle cx="{58 + c * 31}" cy="{104 + r * 30}" r="11" fill="{[YEL, "#7BE0B5", PINK, G3, "#A7B0FF"][(r * 2 + c) % 5] if (r, c) not in ((2, 3), (2, 4)) else HAT_D}"/>' for r in range(3) for c in range(5)),
+  # หน้าต่าง
+  f'<rect x="32" y="44" width="176" height="150" rx="22" fill="{G2}"/><rect x="44" y="56" width="152" height="126" rx="14" fill="{G3}"/>',
+  f'<circle cx="150" cy="96" r="20" fill="{YEL}"/><path d="M62 150 a16 16 0 0 1 22 -14 a20 20 0 0 1 36 6 a14 14 0 0 1 2 28 h-52 a12 12 0 0 1 -8 -20 z" fill="#FFFFFF"/>',
+  f'<path d="M120 56 v126 M44 119 h152" stroke="{G2}" stroke-width="7"/>',
   # ชั้นถ้วยรางวัล
   f'<path d="M286 164 h228" stroke="{G3}" stroke-width="10" stroke-linecap="round"/>',
   f'<path d="M312 100 h52 q0 40 -26 44 q-26 -4 -26 -44 z" fill="{YEL}"/><path d="M312 108 q-18 0 -14 18 q4 12 18 12 M364 108 q18 0 14 -18" stroke="{YEL}" stroke-width="7" fill="none"/><rect x="330" y="142" width="16" height="10" fill="{YEL}"/><rect x="318" y="150" width="40" height="12" rx="5" fill="{WOOD}"/>',
@@ -319,6 +333,7 @@ me = scene(780, 360, ''.join([
   # พรม
   f'<ellipse cx="400" cy="340" rx="190" ry="20" fill="{G2}"/>',
   sparkle(536, 208, 9) + sparkle(246, 222, 7) + sparkle(566, 252, 6),
+  beam(44, 196, 190, 110, 420) + shade(682, 348, 86, 7) + leaves(560, '#0F8F62'),
 ]))
 open('scene-me.svg', 'w').write(me)
 
