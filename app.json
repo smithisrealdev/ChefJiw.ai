@@ -8,7 +8,8 @@
     "scheme": "chefjiw",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.smithisreal.chefjiw"
     },
     "android": {
       "adaptiveIcon": {
@@ -35,7 +36,9 @@
       ],
       [
         "expo-notifications",
-        {}
+        {
+          "enableRemoteNotifications": false
+        }
       ]
     ],
     "experiments": {
