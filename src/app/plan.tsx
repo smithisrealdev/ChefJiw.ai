@@ -60,7 +60,7 @@ export default function Plan() {
           <T v="subheading" accessibilityRole="header">{t('plan.shop')}</T>
           <T v="small" tone="muted">{t('detail.haveHint')}</T>
         </View>
-        <Mascot name="list" size={84} />
+        <Mascot name="list" size={84} still />
       </View>
       {SHOP.items.map((g) => {
         const on = have.includes(g.id);

@@ -9,7 +9,7 @@ import { fridgeFit, MENU, PANTRY, type MenuItem } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind, type MenuIdea } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { useSettings } from '@/lib/settings';
-import { fonts, radius, space, type } from '@/theme/tokens';
+import { fonts, radius, space } from '@/theme/tokens';
 
 const DISHES = BETA ? MENU.filter((m) => m.ready) : MENU;
 type Filter = 'all' | 'fast' | 'cheap' | 'light';
@@ -51,7 +51,7 @@ export default function Recipes() {
       <View style={[s.search, { backgroundColor: colors.surfaceSoft }]}>
         <Icon name="search" color={colors.muted} />
         <TextInput value={q} onChangeText={setQ} placeholder={t('recipes.search')} placeholderTextColor={colors.muted} accessibilityLabel={t('recipes.search')}
-          style={{ flex: 1, minHeight: 48, fontFamily: fonts.body, fontSize: type.md, color: colors.ink }} />
+          style={{ flex: 1, minHeight: 48, fontFamily: fonts.body, fontSize: 16, color: colors.ink }} />
       </View>
       {!BETA && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>

@@ -5,7 +5,7 @@ import { View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { ResumeCard } from '@/components/resume-card';
-import { Button, Card, Float, Mascot, Pill, Screen, T, Thumb } from '@/components/ui';
+import { Button, Card, Mascot, Pill, Screen, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT, SCENE } from '@/data/images';
 import { buildRecipe, MENU, planShopping } from '@/data/recipes';
 import { lastAns, reminders } from '@/lib/assistant';
@@ -43,7 +43,7 @@ export default function Home() {
               <Pill label={price(pickToday.baht)} />
             </View>
           </View>
-          <Float><Image source={IMG[pickToday.img]} style={{ width: 116, height: 116 }} contentFit="contain" accessible={false} /></Float>
+          <Image source={IMG[pickToday.img]} style={{ width: 116, height: 116 }} contentFit="contain" accessible={false} />
         </View>
         <View style={{ backgroundColor: '#FFFFFF', borderRadius: radius.sm, padding: space.md }}>
           <T v="smallBold" tone="pastelMuted">{t('home.chef')}</T>
@@ -62,7 +62,7 @@ export default function Home() {
           <T v="hero">{price(PER_MEAL)}</T>
           <T v="small" tone="muted">{t('plan.sub')}</T>
         </View>
-        <Mascot name="shop" size={104} />
+        <Mascot name="shop" size={104} still />
         <Icon name="next" color={colors.ink} />
       </Card>
       {!BETA && (
@@ -79,7 +79,7 @@ export default function Home() {
           <T v="hero" tone="pastel">{runs.length}</T>
           <T v="bodyBold" tone="pastel">{t('home.cooked')}</T>
         </View>
-        {runs.length ? <Float motion="jump"><Mascot name="cheer" size={96} /></Float> : <Mascot name="cook" size={96} />}
+        <Mascot name={runs.length ? 'cheer' : 'cook'} size={96} still />
       </Card>
     </Screen>
   );

@@ -24,7 +24,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: colors.ink,
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.line, height: 76, paddingTop: 6 },
-        tabBarLabelStyle: { fontFamily: fonts.bodySemi, fontSize: 14 },
+        tabBarLabelStyle: { fontFamily: fonts.bodySemi, fontSize: 12 },
       }}>
       {TABS.map((tab) => (
         <Tabs.Screen key={tab.name} name={tab.name}

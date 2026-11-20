@@ -11,7 +11,7 @@ export type Palette = {
 // ทุกคู่ข้อความ/พื้นผ่าน 4.5:1 สีการ์ดตามความหมาย (note ai done danger) สว่างในธีมสว่าง เข้มในธีมมืด ตัวอักษรในการ์ดตามธีม (ดู Card กับ T ใน ui.tsx)
 // พาสเทลของการ์ดเป็นสีอ่อนมาก: จอหนึ่งมีสีสดได้ที่หัวจอกับการ์ดเด่นใบเดียว ที่เหลือนิ่ง
 export const light: Palette = {
-  bg: '#FFFFFF', surface: '#FFFFFF', surfaceSoft: '#F5F3FC', line: '#E4E0F2',
+  bg: '#FFFFFF', surface: '#FFFFFF', surfaceSoft: '#EFEDF7', line: '#DDD9EC',
   ink: '#24212B', muted: '#6B6777', mutedStrong: '#4F4A5C',
   primary: '#24212B', onPrimary: '#FFFFFF',
   accent: '#FFE66D', onAccent: '#24212B', note: '#FFF8D6', ai: '#F1EFFF', done: '#E3F7E6', danger: '#FFEDE4',
@@ -42,7 +42,11 @@ export const onPastel = { ink: '#24212B', muted: '#4F4A5C', success: '#1E7A45', 
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 } as const;
 export const radius = { sm: 14, lg: 20, pill: 999 } as const;
-export const type = { sm: 14, md: 16, lg: 18, xl: 20, xxl: 28, hero: 44 } as const;
+// ขนาดตัวอักษรทั่วไปแน่นแบบแอปผู้ช่วย ส่วนหน้าทำอาหารใช้ชุด typeCook ที่ใหญ่กว่า เพราะต้องอ่านจากระยะแขนตอนมือเปื้อน (ดู BigType ใน ui.tsx)
+export const type = { sm: 13, md: 15, lg: 16, xl: 18, xxl: 24, hero: 36 } as const;
+export const typeCook = { sm: 14, md: 16, lg: 18, xl: 20, xxl: 28, hero: 44 } as const;
+// เนื้อหาไม่ยืดเต็มจอบนแท็บเล็ตหรือจอแนวนอน
+export const wide = { width: '100%', maxWidth: 600, alignSelf: 'center' } as const;
 export const touch = { min: 44, cook: 56 } as const;
 
 // ฟอนต์ชุดเดียวทั้งแอป (Anuphan ไทยไม่มีหัว) ตัว UI เรียบ ความน่ารักอยู่ที่ตัวละครกับฉาก ไม่ใช่ตัวอักษร

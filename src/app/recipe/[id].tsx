@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
-import { Button, Card, Chip, Float, Mascot, Screen, T, Thumb } from '@/components/ui';
+import { Button, Card, Chip, Mascot, Screen, T, Thumb } from '@/components/ui';
 import { IMG } from '@/data/images';
 import { buildRecipe, DEFAULT_OPTS, MENU, type ImgKey } from '@/data/recipes';
 import { lastAns, reminders } from '@/lib/assistant';
@@ -36,7 +36,7 @@ export default function RecipeDetail() {
   return (
     <Screen tint={colors.header.cook} title={pick(r.name)} onBack={back} backLabel={t('detail.back')}
       subtitle={`${t('recipes.minutes', { n: r.mins })}${menu?.easy ? ` · ${t('detail.easy')}` : ''}${menu?.onePan ? ` · ${t(menu.onePan === 'pot' ? 'detail.onePot' : 'detail.onePan')}` : ''} · ${t('detail.kcal', { n: r.kcal })}`}
-      right={<Float><Thumb source={IMG[r.img]} size={104} /></Float>}
+      right={<Thumb source={IMG[r.img]} size={104} />}
       footer={
         <Card tone="accent" style={s.buy}>
           <View style={{ flex: 1 }}>
@@ -57,7 +57,7 @@ export default function RecipeDetail() {
             {last.map((m) => <T key={m.sense.th} v="bodyBold" tone="pastel">• {pick(m.sense)}: {pick(m.said)}</T>)}
             <T v="small" tone="pastel">{t('memory.where')}</T>
           </View>
-          <Mascot name="think" size={64} />
+          <Mascot name="think" size={64} still />
         </Card>
       )}
       {[{ g: r.g1, v: o1, setV: setO1 }, { g: r.g2, v: o2, setV: setO2 }].map(({ g, v, setV }) => (

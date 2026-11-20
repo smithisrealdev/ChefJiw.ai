@@ -9,7 +9,7 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { Icon } from '@/components/icon';
 import { kitchenActs, KitchenStage, type Taps } from '@/components/kitchen-stage';
-import { ApiNotice, Button, Card, Chip, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
+import { ApiNotice, BigType, Button, Card, Chip, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
 import { finalScore, kitchenPenalty, nextAct } from '@/data/kitchen';
 import { buildRecipe, MENU, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
@@ -17,7 +17,7 @@ import { lastAns, reminders, stepContext } from '@/lib/assistant';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY, freeLeft, localDay, spendOne } from '@/lib/quota';
 import { cancelTimer, putProgress, useSettings, type Progress } from '@/lib/settings';
-import { fonts, onPastel, radius, space, type, vivid } from '@/theme/tokens';
+import { fonts, onPastel, radius, space, typeCook, vivid, wide } from '@/theme/tokens';
 
 const RING = 196, RING_R = RING / 2 - 10, RING_C = 2 * Math.PI * RING_R;
 
@@ -33,11 +33,12 @@ export default function Cook() {
   const change = (f: (cur: Progress) => Partial<Progress>) =>
     set((prev) => { const cur = prev.progress.find((x) => x.recipe === id) ?? p; return { progress: putProgress(prev.progress, id, { ...cur, ...f(cur) }) }; });
   const update = (patch: Partial<Progress>) => change(() => patch);
-  return taste ? <Taste key={id} r={r} /> : <Steps key={id} r={r} p={p} start={Math.min(p.step, r.steps.length - 1)} onFinish={() => setTaste(true)}
+  // ทั้งหน้าทำอาหารใช้ตัวอักษรชุดใหญ่ อ่านได้จากระยะแขน
+  return <BigType.Provider value>{taste ? <Taste key={id} r={r} /> : <Steps key={id} r={r} p={p} start={Math.min(p.step, r.steps.length - 1)} onFinish={() => setTaste(true)}
     onStep={(step) => { cancelTimer(p); update({ step, total: r.steps.length, timer: undefined }); }}
     onTimer={(timer) => update({ timer })} t={t} colors={colors}
     onMiss={() => change((cur) => ({ miss: (cur.miss ?? 0) + 1 }))}
-    onSkip={(sid) => change((cur) => ({ skip: [...new Set([...(cur.skip ?? []), sid])] }))} />;
+    onSkip={(sid) => change((cur) => ({ skip: [...new Set([...(cur.skip ?? []), sid])] }))} />}</BigType.Provider>;
 }
 
 function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colors }: { r: Recipe; p: Progress; start: number; onStep: (i: number) => void; onTimer: (timer: Progress['timer']) => void; onFinish: () => void; onMiss: () => void; onSkip: (step: string) => void; t: ReturnType<typeof useSettings>['t']; colors: ReturnType<typeof useSettings>['colors'] }) {
@@ -60,7 +61,7 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.header.cookFlow }}>
-      <View style={[s.top, { paddingTop: insets.top + space.sm }]}>
+      <View style={[s.top, wide, { paddingTop: insets.top + space.sm }]}>
         <IconButton icon="close" label={t('cook.close')} onPress={exit} onPastelBg />
         <T v="subheading" style={{ color: ink, flex: 1, textAlign: 'center' }}>{t('cook.step', { n: step.phase, total: r.phases })}</T>
         {/* ปุ่มถามเชฟอยู่ที่เดิมทุกขั้น */}
@@ -69,7 +70,7 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
           <T v="smallBold" style={{ color: ink }}>{t('cook.ask')}</T>
         </Pressable>
       </View>
-      <View style={s.bar} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <View style={[s.bar, wide]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         {Array.from({ length: r.phases }, (_, k) => <View key={k} style={[s.seg, { backgroundColor: k < step.phase ? ink : isDark ? colors.line : 'rgba(36,33,43,0.18)' }]} />)}
       </View>
       <OtherTimers current={r.id} ink={ink} />
@@ -77,7 +78,7 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
         onStir={() => { if (step.timer && p.timer?.step !== step.id) void beginTimer(step.timer, pick(r.name), t, (endAt, note) => onTimer({ step: step.id, endAt, note })); }} />
 
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
-        <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: space.xl }}>
+        <ScrollView contentContainerStyle={[wide, { padding: space.lg, gap: space.md, paddingBottom: space.xl }]}>
           {prev && (
             <Card tone="done">
               <T v="smallBold" tone="pastelMuted">{t('cook.lesson')} · {pick(prev.title)}</T>
@@ -103,7 +104,7 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
                 <T v="bodyBold" tone="pastel">{t('memory.said', { sense: pick(m.sense), x: pick(m.said) })}</T>
                 <T tone="pastel">{t('memory.tip', { x: pick(m.tip) })}</T>
               </View>
-              <Mascot name="think" size={64} />
+              <Mascot name="think" size={64} still />
             </Card>
           ))}
           <Card tone="note">
@@ -117,6 +118,7 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
         </ScrollView>
         {/* ปุ่มหลักปุ่มเดียวต่อขั้น ครึ่งล่างของจอ ไม่มีการปัดเปลี่ยนขั้น */}
         <View style={[s.foot, { paddingBottom: Math.max(insets.bottom, space.md), borderTopColor: colors.line }]}>
+          <View style={[wide, { gap: space.xs, paddingHorizontal: space.lg }]}>
           <Button size="cook" label={last ? t('cook.finish') : t('cook.done')} onPress={() => {
             Haptics.selectionAsync().catch(() => {});
             // กดผ่านทั้งที่ยังแตะในครัวไม่ครบ นับเป็นข้ามขั้น (หักคะแนนตอนชิม เหมือนต้นแบบ)
@@ -125,6 +127,7 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
             if (last) onFinish(); else go(i + 1);
           }} />
           {i > 0 && <Pressable accessibilityRole="button" onPress={() => go(i - 1)} style={s.link}><T v="bodyBold" tone="muted">{t('cook.back')}</T></Pressable>}
+          </View>
         </View>
       </View>
 
@@ -270,6 +273,7 @@ function AskSheet({ visible, mode, onClose, r, step, knows, context }: { visible
 /** พิมพ์ถามเอง: ต้องเข้าสู่ระบบ ฟรีวันละ FREE_PER_DAY คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวไม่ถูกนับ */
 function TypedAsk({ r, step, onLeave, mode, context }: { r: Recipe; step: Step; onLeave: () => void; mode: 'ask' | 'rescue'; context: string }) {
   const { t, lang, colors, signedIn, member, asked, set, pick } = useSettings();
+  const label = t(mode === 'rescue' ? 'rescue.type' : 'ask.typeLabel');
   const [text, setText] = useState('');
   const [state, setState] = useState<{ kind: 'idle' | 'login' | 'quota' | 'loading' | 'answer' | 'error'; q?: string; answer?: string; error?: ApiErrorKind }>({ kind: 'idle' });
   const left = freeLeft(asked, localDay());
@@ -315,10 +319,12 @@ function TypedAsk({ r, step, onLeave, mode, context }: { r: Recipe; step: Step; 
           <T v="small" tone="pastelMuted">{t('ask.aiNote')}</T></Card>
       )}
       {state.kind === 'error' && state.error && <ApiNotice kind={state.error} onRetry={() => send(state.q)} />}
+      {/* ป้ายอยู่เหนือช่องเสมอ ข้อความในช่องเป็นแค่ตัวอย่าง พิมพ์แล้วป้ายไม่หาย */}
+      <T v="smallBold" tone="muted">{label}</T>
       <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
         <TextInput value={text} onChangeText={setText} onSubmitEditing={() => send()} returnKeyType="send"
-          placeholder={t(mode === 'rescue' ? 'rescue.type' : 'ask.typePlaceholder')} placeholderTextColor={colors.muted} accessibilityLabel={t('ask.typeLabel')}
-          style={{ flex: 1, minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: colors.surfaceSoft, color: colors.ink, fontFamily: fonts.body, fontSize: type.md }} />
+          placeholder={t(mode === 'rescue' ? 'rescue.example' : 'ask.typeExample')} placeholderTextColor={colors.muted} accessibilityLabel={label}
+          style={{ flex: 1, minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: colors.surfaceSoft, color: colors.ink, fontFamily: fonts.body, fontSize: typeCook.md }} />
         <IconButton filled icon="next" label={t('ask.send')} onPress={() => send()} />
       </View>
       <T v="small" tone="muted">{member ? t('ask.member') : t('ask.left', { n: left })}</T>
@@ -345,14 +351,14 @@ function Taste({ r }: { r: Recipe }) {
     void api.logRun(id, r.id, taste); // ผลทดสอบในครัวจริงเก็บคะแนนรสชาติล้วน ไม่รวมการแตะบนจอ
   };
   return (
-    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: space.lg, paddingTop: insets.top + space.lg, gap: space.md, paddingBottom: insets.bottom + space.xl }}>
+    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={[wide, { padding: space.lg, paddingTop: insets.top + space.lg, gap: space.md, paddingBottom: insets.bottom + space.xl }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View style={{ flex: 1, gap: space.xs }}>
           <T v="title" accessibilityRole="header">{score === null ? t('taste.title') : t('taste.result')}</T>
           {score === null && <T tone="muted">{t('taste.intro')}</T>}
         </View>
         {score !== null && score >= 4 ? <Float motion="jump"><Mascot name="yum" size={120} /></Float>
-          : <Mascot name={score === null ? 'sip' : 'hmm'} size={120} />}
+          : <Mascot name={score === null ? 'sip' : 'hmm'} size={120} still />}
       </View>
       {score !== null && (
         <Card tone="accent" style={{ alignItems: 'center' }}>
@@ -402,7 +408,7 @@ const s = StyleSheet.create({
   others: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.md },
   pill: { flexDirection: 'row', alignItems: 'center', gap: space.xs, minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill, maxWidth: '100%' },
   sheet: { flex: 1, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, overflow: 'hidden' },
-  foot: { paddingHorizontal: space.lg, paddingTop: space.md, gap: space.xs, borderTopWidth: StyleSheet.hairlineWidth },
+  foot: { paddingTop: space.md, borderTopWidth: StyleSheet.hairlineWidth },
   link: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   heat: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 36, paddingHorizontal: space.md, borderRadius: radius.pill },
   safetyBtn: { flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'flex-start', minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: '#FFE3D6' },
