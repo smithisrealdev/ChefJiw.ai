@@ -70,7 +70,7 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
         </Pressable>
       </View>
       <View style={s.bar} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        {Array.from({ length: r.phases }, (_, k) => <View key={k} style={[s.seg, { backgroundColor: k < step.phase ? ink : 'rgba(36,33,43,0.18)' }]} />)}
+        {Array.from({ length: r.phases }, (_, k) => <View key={k} style={[s.seg, { backgroundColor: k < step.phase ? ink : isDark ? colors.line : 'rgba(36,33,43,0.18)' }]} />)}
       </View>
       <OtherTimers current={r.id} ink={ink} />
       <KitchenStage r={r} i={i} taps={taps} setTaps={setTaps} onMiss={onMiss}
@@ -171,8 +171,8 @@ function OtherTimers({ current, ink }: { current: string; ink: string }) {
         return (
           <Pressable key={x.recipe} accessibilityRole="button" accessibilityLabel={label} onPress={() => router.replace(`/cook/${x.recipe}`)}
             style={[s.pill, { backgroundColor: left > 0 ? (isDark ? colors.surface : '#FFFFFF') : colors.done }]}>
-            <Icon name="clock" color={left > 0 ? ink : onPastel.ink} size={18} />
-            <T v="smallBold" numberOfLines={1} style={{ color: left > 0 ? ink : onPastel.ink, flexShrink: 1 }}>{label}</T>
+            <Icon name="clock" color={left > 0 ? ink : colors.ink} size={18} />
+            <T v="smallBold" numberOfLines={1} style={{ color: left > 0 ? ink : colors.ink, flexShrink: 1 }}>{label}</T>
           </Pressable>
         );
       })}
@@ -196,6 +196,7 @@ async function beginTimer(seconds: number, name: string, t: ReturnType<typeof us
 
 /** จับเวลาจากเวลาจริงของเครื่อง เวลาจบเก็บไว้กับจาน จึงเดินต่อแม้ล็อกจอ ออกจากหน้านี้ หรือสลับไปทำจานอื่น และตั้งการแจ้งเตือนไว้ล่วงหน้า */
 function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: string; endAt: number | null; onStart: (endAt: number, note: string | null) => void; t: ReturnType<typeof useSettings>['t'] }) {
+  const { colors, isDark } = useSettings();
   const [now, setNow] = useState(() => Date.now());
   const left = endAt ? Math.ceil((endAt - now) / 1000) : seconds;
   const done = endAt !== null && left <= 0;
@@ -215,8 +216,8 @@ function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: st
       {/* วงแหวนหดตามเวลาที่เหลือ มองจากไกลก็รู้ว่าเหลือเท่าไร */}
       <View style={{ width: RING, height: RING, alignItems: 'center', justifyContent: 'center' }}>
         <Svg width={RING} height={RING} style={{ position: 'absolute', transform: [{ rotate: '-90deg' }] }} accessible={false}>
-          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke="rgba(36,33,43,0.14)" strokeWidth={14} fill="none" />
-          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke={done ? onPastel.success : vivid.indigo} strokeWidth={14} strokeLinecap="round" fill="none"
+          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke={colors.line} strokeWidth={14} fill="none" />
+          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke={done ? colors.success : isDark ? colors.ink : vivid.indigo} strokeWidth={14} strokeLinecap="round" fill="none"
             strokeDasharray={RING_C} strokeDashoffset={RING_C * (1 - Math.max(0, Math.min(1, left / seconds)))} />
         </Svg>
         {done ? <Float motion="jump"><Mascot name="cheer" size={120} /></Float> : <>
@@ -249,7 +250,7 @@ function AskSheet({ visible, mode, onClose, r, step, knows, context }: { visible
       </Pressable>
       {safety && SAFETY.map(([q, a]) => (
         <Card key={q.th} tone="danger">
-          <T v="subheading" style={{ color: onPastel.warn }}>{pick(q)}</T>
+          <T v="subheading" tone="warn">{pick(q)}</T>
           <T v="step" tone="pastel" style={{ fontSize: 18 }}>{pick(a)}</T>
         </Card>
       ))}

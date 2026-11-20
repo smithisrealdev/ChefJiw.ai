@@ -8,7 +8,7 @@ export type Palette = {
   header: { home: string; recipes: string; cook: string; me: string; cookFlow: string; market: string };
 };
 
-// ทุกคู่ข้อความ/พื้นผ่าน 4.5:1 ตามที่คำนวณไว้ในแผน พื้นพาสเทล (accent note ai done danger) ใช้ตัวอักษรเข้มเสมอทั้งสองธีม
+// ทุกคู่ข้อความ/พื้นผ่าน 4.5:1 สีการ์ดตามความหมาย (note ai done danger) สว่างในธีมสว่าง เข้มในธีมมืด ตัวอักษรในการ์ดตามธีม (ดู Card กับ T ใน ui.tsx)
 // พาสเทลของการ์ดเป็นสีอ่อนมาก: จอหนึ่งมีสีสดได้ที่หัวจอกับการ์ดเด่นใบเดียว ที่เหลือนิ่ง
 export const light: Palette = {
   bg: '#FFFFFF', surface: '#FFFFFF', surfaceSoft: '#F5F3FC', line: '#E4E0F2',
@@ -23,7 +23,7 @@ export const dark: Palette = {
   bg: '#17151D', surface: '#23212C', surfaceSoft: '#2F2C3B', line: '#3D394B',
   ink: '#F3F1FA', muted: '#B9B4C9', mutedStrong: '#CFCADC',
   primary: '#F3F1FA', onPrimary: '#24212B',
-  accent: '#FFE66D', onAccent: '#24212B', note: '#FFF8D6', ai: '#F1EFFF', done: '#E3F7E6', danger: '#FFEDE4',
+  accent: '#FFE66D', onAccent: '#24212B', note: '#3A3420', ai: '#2D2A45', done: '#1F3527', danger: '#40291F',
   success: '#7FD9A0', warn: '#FFB38A', flame: '#FF9A6B',
   header: { home: '#17151D', recipes: '#17151D', cook: '#17151D', me: '#17151D', cookFlow: '#17151D', market: '#17151D' },
 };

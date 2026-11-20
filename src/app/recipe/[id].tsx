@@ -45,7 +45,7 @@ export default function RecipeDetail() {
           </View>
           <View style={{ alignItems: 'center', gap: space.xs }}>
             <Button kind="onPastel" label={cooking ? t('detail.resume', { n: cooking.step + 1 }) : t('detail.start')} size="cook" onPress={cooking ? () => router.push(`/cook/${r.id}`) : start} />
-            {cooking && <Pressable accessibilityRole="button" onPress={start} hitSlop={8}><T v="smallBold" tone="pastel" style={{ textDecorationLine: 'underline' }}>{t('detail.restart')}</T></Pressable>}
+            {cooking && <Pressable accessibilityRole="button" onPress={start} style={{ minHeight: 44, justifyContent: 'center' }}><T v="smallBold" tone="pastel" style={{ textDecorationLine: 'underline' }}>{t('detail.restart')}</T></Pressable>}
           </View>
         </Card>
       }>

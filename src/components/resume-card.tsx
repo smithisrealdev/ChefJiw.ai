@@ -7,11 +7,11 @@ import { Card, mmss, T, Thumb } from '@/components/ui';
 import { IMG } from '@/data/images';
 import { MENU } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
-import { onPastel, space } from '@/theme/tokens';
+import { space } from '@/theme/tokens';
 
 /** การ์ดทำต่อ หนึ่งใบต่อจานที่ทำค้างไว้ บอกเวลาที่เหลือถ้าเริ่มจับเวลาไว้ */
 export function ResumeCard() {
-  const { progress, t, pick } = useSettings();
+  const { progress, t, pick, colors } = useSettings();
   const timed = progress.some((x) => x.timer);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -32,7 +32,7 @@ export function ResumeCard() {
           <T v="subheading" tone="pastel">{pick(m.name)}</T>
           <T v="small" tone="pastelMuted">{t('home.resumeStep', { n: x.step + 1, total: x.total })}{timer}</T>
         </View>
-        <Icon name="next" color={onPastel.ink} />
+        <Icon name="next" color={colors.ink} />
       </Card>
     );
   });

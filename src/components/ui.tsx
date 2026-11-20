@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextProps, type TextStyle, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,7 +10,10 @@ import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
-import { fonts, light, onPastel, onTint, radius, space, touch, type, vivid } from '@/theme/tokens';
+import { fonts, onPastel, onTint, radius, space, touch, type, vivid } from '@/theme/tokens';
+
+// จริงเมื่ออยู่ในการ์ดสีอ่อนตอนธีมมืด: พื้นการ์ดเข้มตามธีม ตัวอักษรกับปุ่มแบบ "pastel" จึงต้องเปลี่ยนตามธีมด้วย (การ์ดสีสด coral/navy สีคงที่ ไม่เข้าเงื่อนไขนี้)
+const OnThemed = createContext(false);
 
 type TextVariant = 'hero' | 'price' | 'title' | 'heading' | 'subheading' | 'body' | 'bodyBold' | 'small' | 'smallBold' | 'step';
 const VARIANT: Record<TextVariant, TextStyle> = {
@@ -31,15 +34,17 @@ const VARIANT: Record<TextVariant, TextStyle> = {
 /** ข้อความทั้งแอป ขยายตามขนาดตัวอักษรของเครื่องอัตโนมัติ; tone 'pastel' ใช้บนพื้นสีอ่อนที่ไม่เปลี่ยนตามธีม */
 export function T({ v = 'body', tone = 'ink', style, children, ...rest }: { v?: TextVariant; tone?: 'ink' | 'muted' | 'success' | 'warn' | 'pastel' | 'pastelMuted' | 'onPrimary' | 'onNavy' | 'onNavyMuted' | 'yellow'; style?: StyleProp<TextStyle>; children: ReactNode } & Omit<TextProps, 'style' | 'children'>) {
   const { colors } = useSettings();
-  const color = { ink: colors.ink, muted: colors.muted, success: colors.success, warn: colors.warn, pastel: onPastel.ink, pastelMuted: onPastel.muted, onPrimary: colors.onPrimary, onNavy: '#FFFFFF', onNavyMuted: vivid.onNavyMuted, yellow: vivid.yellow }[tone];
+  const themed = useContext(OnThemed);
+  const color = { ink: colors.ink, muted: colors.muted, success: colors.success, warn: colors.warn, pastel: themed ? colors.ink : onPastel.ink, pastelMuted: themed ? colors.muted : onPastel.muted, onPrimary: colors.onPrimary, onNavy: '#FFFFFF', onNavyMuted: vivid.onNavyMuted, yellow: vivid.yellow }[tone];
   return <Text style={[VARIANT[v], { color }, style]} {...rest}>{children}</Text>;
 }
 
 export function Button({ label, onPress, kind = 'primary', icon, size = 'md', disabled, style }: { label: string; onPress: () => void; kind?: 'primary' | 'secondary' | 'accent' | 'onPastel' | 'onPastelLight'; icon?: IconName; size?: 'md' | 'cook'; disabled?: boolean; style?: StyleProp<ViewStyle> }) {
   const { colors } = useSettings();
   // onPastel*: ปุ่มที่วางบนการ์ดพาสเทล สีคงที่ทั้งสองธีมเพื่อให้คอนทราสต์ผ่านเสมอ
-  const bg = { primary: colors.primary, secondary: colors.surfaceSoft, accent: colors.accent, onPastel: onPastel.ink, onPastelLight: '#FFFFFF' }[kind];
-  const fg = { primary: colors.onPrimary, secondary: colors.ink, accent: colors.onAccent, onPastel: '#FFFFFF', onPastelLight: onPastel.ink }[kind];
+  const themed = useContext(OnThemed);
+  const bg = { primary: colors.primary, secondary: colors.surfaceSoft, accent: colors.accent, onPastel: themed ? colors.primary : onPastel.ink, onPastelLight: themed ? colors.surface : '#FFFFFF' }[kind];
+  const fg = { primary: colors.onPrimary, secondary: colors.ink, accent: colors.onAccent, onPastel: themed ? colors.onPrimary : '#FFFFFF', onPastelLight: themed ? colors.ink : onPastel.ink }[kind];
   return (
     <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
       style={({ pressed }) => [s.button, { backgroundColor: bg, minHeight: size === 'cook' ? touch.cook : 48, opacity: disabled ? 0.45 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] }, style]}>
@@ -70,16 +75,19 @@ export function Chip({ label, selected, onPress }: { label: string; selected: bo
   );
 }
 
-/** การ์ด: soft = พื้นรองตามธีม; note/ai/done/danger = สีอ่อนมากตามความหมาย ใช้ตัวอักษรเข้มเสมอ; accent/mint = เทาอ่อนคงที่ (ตัวเลขและสรุป ตัวอักษรเข้มเสมอ);
+/** การ์ด: soft = พื้นรองตามธีม; note/ai/done/danger = สีอ่อนมากตามความหมาย (ธีมมืดเป็นสีเข้มอมสีเดียวกัน); accent/mint = พื้นรองสำหรับตัวเลขและสรุป;
  *  navy/coral = การ์ดเด่นสีสด จอละใบเดียว (navy ใช้ตัวอักษรขาว) */
 export function Card({ tone = 'soft', children, style, onPress, label }: { tone?: 'soft' | 'note' | 'ai' | 'done' | 'danger' | 'accent' | 'surface' | 'navy' | 'coral' | 'mint'; children: ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; label?: string }) {
-  const { colors } = useSettings();
-  const bg = { soft: colors.surfaceSoft, surface: colors.surface, note: colors.note, ai: colors.ai, done: colors.done, danger: colors.danger, accent: light.surfaceSoft, navy: vivid.navy, coral: vivid.coral, mint: light.surfaceSoft }[tone];
-  if (!onPress) return <View style={[s.card, { backgroundColor: bg }, style]}>{children}</View>;
+  const { colors, isDark } = useSettings();
+  const bg = { soft: colors.surfaceSoft, surface: colors.surface, note: colors.note, ai: colors.ai, done: colors.done, danger: colors.danger, accent: colors.surfaceSoft, navy: vivid.navy, coral: vivid.coral, mint: colors.surfaceSoft }[tone];
+  const themed = isDark && tone !== 'navy' && tone !== 'coral';
+  if (!onPress) return <OnThemed.Provider value={themed}><View style={[s.card, { backgroundColor: bg }, style]}>{children}</View></OnThemed.Provider>;
   return (
+    <OnThemed.Provider value={themed}>
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [s.card, { backgroundColor: bg, transform: [{ scale: pressed ? 0.98 : 1 }] }, style]}>
       {children}
     </Pressable>
+    </OnThemed.Provider>
   );
 }
 
@@ -356,7 +364,7 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
     <Card tone={kind === 'offline' ? 'note' : 'danger'} style={{ gap: space.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View accessibilityRole="alert" accessibilityLiveRegion="polite" style={{ flex: 1 }}>
-          <T v="subheading" style={{ color: kind === 'offline' ? onPastel.ink : onPastel.warn }}>{title}</T>
+          <T v="subheading" tone={kind === 'offline' ? 'pastel' : 'warn'}>{title}</T>
           <T tone="pastel">{body}</T>
         </View>
         <Float motion="shake"><Mascot name="oops" size={72} /></Float>
@@ -368,9 +376,11 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
   );
 }
 
-/** ป้ายข้อมูลสั้นๆ พื้นขาว ใช้บนการ์ดสีสด */
-export function Pill({ label }: { label: string }) {
-  return <View style={s.pill}><Text style={{ fontFamily: fonts.bodySemi, fontSize: type.sm, color: onPastel.ink }}>{label}</Text></View>;
+/** ป้ายข้อมูลสั้นๆ พื้นขาว ใช้บนการ์ดสีสด (dark ใช้บนพื้นเทาอ่อน) */
+export function Pill({ label, dark }: { label: string; dark?: boolean }) {
+  const { colors } = useSettings();
+  // dark = ป้ายสีหมึกสำหรับพื้นเทาอ่อน ที่ป้ายขาวจะมองไม่เห็น
+  return <View style={[s.pill, dark && { backgroundColor: colors.primary }]}><Text style={{ fontFamily: fonts.bodySemi, fontSize: type.sm, color: dark ? colors.onPrimary : onPastel.ink }}>{label}</Text></View>;
 }
 
 export const mmss = (s: number) => Math.floor(s / 60) + ':' + String(Math.max(0, s) % 60).padStart(2, '0');

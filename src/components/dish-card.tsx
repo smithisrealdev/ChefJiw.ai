@@ -16,7 +16,7 @@ export function DishCard({ m, sub, subTone = 'muted' }: { m: MenuItem; sub?: str
       style={({ pressed }) => ({ width: '48.3%', borderRadius: radius.lg, overflow: 'hidden', backgroundColor: colors.surfaceSoft, transform: [{ scale: pressed ? 0.97 : 1 }] })}>
       <View style={{ height: 112, alignItems: 'center', justifyContent: 'flex-end' }}>
         <Image source={IMG[m.img]} style={{ width: 96, height: 96 }} contentFit="contain" accessible={false} />
-        <View style={{ position: 'absolute', top: space.sm, right: space.sm }}><Pill label={price(m.baht)} /></View>
+        <View style={{ position: 'absolute', top: space.sm, right: space.sm }}><Pill label={price(m.baht)} dark /></View>
       </View>
       <View style={{ padding: space.md, gap: 2 }}>
         <T v="subheading" numberOfLines={2}>{pick(m.name)}</T>
