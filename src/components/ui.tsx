@@ -10,12 +10,11 @@ import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
-import { fonts, onPastel, onTint, radius, space, touch, type, vivid } from '@/theme/tokens';
+import { fonts, light, onPastel, onTint, radius, space, touch, type, vivid } from '@/theme/tokens';
 
 type TextVariant = 'hero' | 'price' | 'title' | 'heading' | 'subheading' | 'body' | 'bodyBold' | 'small' | 'smallBold' | 'step';
 const VARIANT: Record<TextVariant, TextStyle> = {
   // ตัวเลขเด่นของจอ (ราคาต่อมื้อ เวลาที่เหลือ จำนวนจานที่ทำแล้ว)
-  // ตัวเลขใช้ฟอนต์เนื้อความตัวหนา เพราะเลขศูนย์ของฟอนต์หัวข้อ (Mitr) มีขีดทับ
   hero: { fontFamily: fonts.bodyBold, fontSize: type.hero, lineHeight: type.hero * 1.2, fontVariant: ['tabular-nums'] },
   price: { fontFamily: fonts.bodyBold, fontSize: type.xl, lineHeight: type.xl * 1.35, fontVariant: ['tabular-nums'] },
   title: { fontFamily: fonts.heading, fontSize: type.xxl, lineHeight: type.xxl * 1.3 },
@@ -71,10 +70,11 @@ export function Chip({ label, selected, onPress }: { label: string; selected: bo
   );
 }
 
-/** การ์ดพื้นสี: soft = พื้นรองตามธีม; note/ai/done/danger/accent = พาสเทลที่ใช้ตัวอักษรเข้มเสมอ; navy/coral/mint = การ์ดเด่นสีสด (navy ใช้ตัวอักษรขาว) */
+/** การ์ด: soft = พื้นรองตามธีม; note/ai/done/danger = สีอ่อนมากตามความหมาย ใช้ตัวอักษรเข้มเสมอ; accent/mint = เทาอ่อนคงที่ (ตัวเลขและสรุป ตัวอักษรเข้มเสมอ);
+ *  navy/coral = การ์ดเด่นสีสด จอละใบเดียว (navy ใช้ตัวอักษรขาว) */
 export function Card({ tone = 'soft', children, style, onPress, label }: { tone?: 'soft' | 'note' | 'ai' | 'done' | 'danger' | 'accent' | 'surface' | 'navy' | 'coral' | 'mint'; children: ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; label?: string }) {
   const { colors } = useSettings();
-  const bg = { soft: colors.surfaceSoft, surface: colors.surface, note: colors.note, ai: colors.ai, done: colors.done, danger: colors.danger, accent: colors.accent, navy: vivid.navy, coral: vivid.coral, mint: vivid.mint }[tone];
+  const bg = { soft: colors.surfaceSoft, surface: colors.surface, note: colors.note, ai: colors.ai, done: colors.done, danger: colors.danger, accent: light.surfaceSoft, navy: vivid.navy, coral: vivid.coral, mint: light.surfaceSoft }[tone];
   if (!onPress) return <View style={[s.card, { backgroundColor: bg }, style]}>{children}</View>;
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [s.card, { backgroundColor: bg, transform: [{ scale: pressed ? 0.98 : 1 }] }, style]}>

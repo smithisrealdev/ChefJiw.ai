@@ -394,7 +394,7 @@ function Taste({ r }: { r: Recipe }) {
 
 const s = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg },
-  know: { backgroundColor: '#E9E6FF', borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: 4 },
+  know: { backgroundColor: '#F1EFFF', borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: 4 },
   ask: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill },
   bar: { flexDirection: 'row', gap: 6, paddingHorizontal: space.lg, paddingVertical: space.md },
   seg: { flex: 1, height: 8, borderRadius: radius.pill },

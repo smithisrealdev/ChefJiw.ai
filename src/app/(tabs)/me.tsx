@@ -10,7 +10,7 @@ import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
 import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
-import { radius, space } from '@/theme/tokens';
+import { onPastel, radius, space } from '@/theme/tokens';
 
 function Row({ label, sub, value, onPress }: { label: string; sub?: string; value: string; onPress: () => void }) {
   const { colors } = useSettings();
@@ -65,9 +65,9 @@ export default function Me() {
       <T v="subheading" accessibilityRole="header">{t('me.badges')}</T>
       <View style={{ flexDirection: 'row', gap: space.sm }}>
         {(['first', 'five', 'perfect'] as const).map((b) => (
-          <Card key={b} tone={earned[b] ? 'accent' : 'soft'} style={{ flex: 1, alignItems: 'center' }}>
+          <Card key={b} tone={earned[b] ? 'note' : 'soft'} style={{ flex: 1, alignItems: 'center' }}>
             <View style={{ width: 40, height: 40, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: earned[b] ? '#FFFFFF' : colors.line }}>
-              {earned[b] && <Icon name="check" color={colors.success} />}
+              {earned[b] && <Icon name="check" color={onPastel.success} />}
             </View>
             <T v="smallBold" tone={earned[b] ? 'pastel' : 'muted'} style={{ textAlign: 'center' }}>{t(`me.badge.${b}`)}</T>
             <T v="small" tone={earned[b] ? 'pastelMuted' : 'muted'}>{t(earned[b] ? 'me.earned' : 'me.locked')}</T>

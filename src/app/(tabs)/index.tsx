@@ -55,15 +55,15 @@ export default function Home() {
         </View>
       </Card>
       <ResumeCard />
-      <Card tone="navy" onPress={() => router.push('/plan')} label={`${t('plan.title')}, ${t('plan.perMeal')} ${price(PER_MEAL)}`} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+      <Card onPress={() => router.push('/plan')} label={`${t('plan.title')}, ${t('plan.perMeal')} ${price(PER_MEAL)}`} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View style={{ flex: 1 }}>
-          <T v="subheading" tone="onNavy">{t('plan.title')}</T>
-          <T v="smallBold" tone="onNavyMuted">{t('plan.perMeal')}</T>
-          <T v="hero" tone="yellow">{price(PER_MEAL)}</T>
-          <T v="small" tone="onNavyMuted">{t('plan.sub')}</T>
+          <T v="subheading">{t('plan.title')}</T>
+          <T v="smallBold" tone="muted">{t('plan.perMeal')}</T>
+          <T v="hero">{price(PER_MEAL)}</T>
+          <T v="small" tone="muted">{t('plan.sub')}</T>
         </View>
         <Mascot name="shop" size={104} />
-        <Icon name="next" color="#FFFFFF" />
+        <Icon name="next" color={colors.ink} />
       </Card>
       {!BETA && (
         <Card onPress={() => router.push('/market')} label={t('market.open')} style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>

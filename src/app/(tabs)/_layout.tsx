@@ -31,8 +31,8 @@ export default function TabLayout() {
           options={{
             title: t(tab.key),
             tabBarIcon: ({ focused }) => (
-              <View style={{ width: 52, height: 32, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: focused ? colors.accent : 'transparent' }}>
-                <Icon name={tab.icon} color={focused ? colors.onAccent : colors.muted} />
+              <View style={{ width: 52, height: 32, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: focused ? colors.surfaceSoft : 'transparent' }}>
+                <Icon name={tab.icon} color={focused ? colors.ink : colors.muted} />
               </View>
             ),
           }} />
