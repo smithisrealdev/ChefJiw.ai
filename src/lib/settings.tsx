@@ -20,6 +20,8 @@ type Saved = {
   onboarded: boolean; signedIn: boolean; member: boolean; asked: Asked;
   device: string; // รหัสสุ่มของเครื่อง ใช้แยกผลการทำอาหารแต่ละเครื่องในบันทึกบนเซิร์ฟเวอร์ สร้างตอนทำจบจานครั้งแรก
 };
+/** รหัสสุ่มของเครื่อง ตัวเล็กกับตัวเลข (เซิร์ฟเวอร์รับ 8-64 ตัว) */
+export const newDevice = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 const DEFAULTS: Saved = { lang: 'th', country: 'TH', theme: 'system', progress: [], runs: [], onboarded: false, signedIn: false, member: false, asked: { day: '', n: 0 }, device: '' };
 const KEY = 'chefjiw.settings.v1';
 

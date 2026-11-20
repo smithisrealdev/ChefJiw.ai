@@ -37,7 +37,7 @@ npm test
 | ที่ | มีอะไร |
 |---|---|
 | `supabase/migrations/` | ตาราง `profiles` (สถานะสมาชิก) `ai_usage` (โควตารายวัน) `prices` (ราคารายวัน) และงาน cron อัปเดตราคา |
-| `supabase/functions/ask` | ถามเชฟจิ๋ว: ต้องมี session (ผู้ใช้ทดลองได้ session แบบไม่ระบุตัวตนอัตโนมัติจาก `api.guest()` ต้องเปิด anonymous sign-ins ใน Supabase ก่อน) ฟรีวันละ 3 คำถาม (เบต้า 20) สมาชิกไม่จำกัด ล้มเหลวคืนสิทธิ์ |
+| `supabase/functions/ask` | ถามเชฟจิ๋ว: ฟรีวันละ 3 คำถาม (เบต้า 20) สมาชิกไม่จำกัด ล้มเหลวคืนสิทธิ์ มีบัญชีนับต่อผู้ใช้ ช่วงเบต้าไม่มีบัญชีก็ถามได้ นับต่อรหัสเครื่อง (`ai_usage_device`) และจำกัดรวมทุกเครื่องวันละ 300 คำถาม (`GUEST_TOTAL_PER_DAY`) deploy ด้วย `verify_jwt` = false เพราะผู้ใช้ทดลองไม่มี token ฟังก์ชันตรวจเอง |
 | `supabase/functions/menus` | คิดเมนูจากของที่มี (นับรวมในโควตาเดียวกัน) |
 | `supabase/functions/prices` | อ่านราคาล่าสุดของประเทศ |
 | `supabase/functions/update-prices` | งานรายวัน ค้นราคาจากเว็บผ่านปลั๊กอิน web ของ OpenRouter แล้วบันทึก |

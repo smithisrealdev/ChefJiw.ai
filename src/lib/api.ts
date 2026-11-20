@@ -33,7 +33,7 @@ export type MenuIdea = { name: string; country: string; missing: string[] };
 export type PriceRow = { id: string; price: number; change: number };
 
 export const api = {
-  askChef: (question: string, ctx: { recipe: string; step: string; lang: string; context?: string; mode?: 'ask' | 'rescue' }) => call<{ answer: string }>('ask', { question, ...ctx, tzOffset: tzOffset() }),
+  askChef: (question: string, ctx: { recipe: string; step: string; lang: string; context?: string; mode?: 'ask' | 'rescue'; device?: string }) => call<{ answer: string }>('ask', { question, ...ctx, tzOffset: tzOffset() }),
   suggestMenus: (have: string[], country: string, lang: string) => call<{ ideas: MenuIdea[] }>('menus', { have, country, lang, tzOffset: tzOffset() }),
   prices: (country: string) => call<{ rows: PriceRow[]; updatedAt: string; source: string }>('prices', { country }),
 

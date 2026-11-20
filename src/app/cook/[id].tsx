@@ -15,7 +15,7 @@ import { api, ApiError, type ApiErrorKind } from '@/lib/api';
 import { lastAns, reminders, stepContext } from '@/lib/assistant';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY, freeLeft, localDay, spendOne } from '@/lib/quota';
-import { cancelTimer, putProgress, useSettings, type Progress } from '@/lib/settings';
+import { cancelTimer, newDevice, putProgress, useSettings, type Progress } from '@/lib/settings';
 import { fonts, onPastel, radius, space, typeCook, vivid, wide } from '@/theme/tokens';
 
 const RING = 196, RING_R = RING / 2 - 10, RING_C = 2 * Math.PI * RING_R;
@@ -266,7 +266,7 @@ function AskSheet({ visible, mode, onClose, r, step, knows, context }: { visible
 
 /** พิมพ์ถามเอง: ต้องเข้าสู่ระบบ ฟรีวันละ FREE_PER_DAY คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวไม่ถูกนับ */
 function TypedAsk({ r, step, onLeave, mode, context }: { r: Recipe; step: Step; onLeave: () => void; mode: 'ask' | 'rescue'; context: string }) {
-  const { t, lang, colors, signedIn, member, asked, set, pick } = useSettings();
+  const { t, lang, colors, signedIn, member, asked, set, pick, device } = useSettings();
   const label = t(mode === 'rescue' ? 'rescue.type' : 'ask.typeLabel');
   const [text, setText] = useState('');
   const [state, setState] = useState<{ kind: 'idle' | 'login' | 'quota' | 'loading' | 'answer' | 'error'; q?: string; answer?: string; error?: ApiErrorKind }>({ kind: 'idle' });
@@ -274,11 +274,14 @@ function TypedAsk({ r, step, onLeave, mode, context }: { r: Recipe; step: Step; 
 
   const send = async (question = text.trim()) => {
     if (!question || state.kind === 'loading') return;
-    if (!signedIn && !(await api.guest())) return setState({ kind: 'login' });
+    // เบต้า: ไม่มีบัญชีก็ถามได้ เซิร์ฟเวอร์นับโควตาต่อรหัสเครื่อง
+    if (!signedIn && !BETA && !(await api.guest())) return setState({ kind: 'login' });
+    const id = device || newDevice();
+    if (!device) set({ device: id });
     if (!member && left <= 0) return setState({ kind: 'quota' });
     setState({ kind: 'loading', q: question }); setText('');
     try {
-      const res = await api.askChef(question, { recipe: pick(r.name), step: pick(step.title), lang, context, mode });
+      const res = await api.askChef(question, { recipe: pick(r.name), step: pick(step.title), lang, context, mode, device: id });
       if (!member) set({ asked: spendOne(asked, localDay()) });
       setState({ kind: 'answer', q: question, answer: res.answer });
     } catch (e) {
@@ -334,7 +337,7 @@ function Taste({ r }: { r: Recipe }) {
   const submit = () => {
     const sc = tasteScore(ans as number[]); // คะแนนมาจากคำตอบตอนชิมอย่างเดียว การแตะในครัวจำลองไม่มีผล
     setScore(sc);
-    const id = device || Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+    const id = device || newDevice();
     cancelTimer(progress.find((x) => x.recipe === r.id));
     set((prev) => ({ runs: [...prev.runs, { recipe: r.id, score: sc, at: Date.now(), ans: ans as number[] }], progress: putProgress(prev.progress, r.id, null), device: id }));
     void api.logRun(id, r.id, sc);

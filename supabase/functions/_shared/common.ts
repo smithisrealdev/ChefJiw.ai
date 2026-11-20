@@ -9,6 +9,8 @@ export const MODELS = {
 // เบต้า: ยังไม่มีระบบจ่ายเงิน จึงให้ถามฟรีวันละ 20 ต้องตรงกับแอป (src/lib/beta.ts) ปิดเบต้าแล้วเปลี่ยนเป็น false แล้ว deploy ask กับ menus ใหม่
 export const BETA = true;
 export const FREE_PER_DAY = BETA ? 20 : 3;
+// เบต้า: ผู้ใช้ไม่มีบัญชีถามได้ต่อรหัสเครื่อง รหัสปลอมได้ จึงจำกัดรวมทุกเครื่องต่อวันไว้ด้วย
+export const GUEST_TOTAL_PER_DAY = 300;
 export const COUNTRIES = ['TH', 'JP', 'US'] as const;
 export type Country = (typeof COUNTRIES)[number];
 
@@ -35,6 +37,8 @@ export function localDay(offsetMinutes: unknown, now = Date.now()) {
   return new Date(now + off * 60_000).toISOString().slice(0, 10);
 }
 
+/** รหัสเครื่องที่แอปสุ่มไว้ (ตัวเล็กกับตัวเลข) ตรงกับ check ของตาราง ai_usage_device */
+export const isDevice = (v: unknown): v is string => typeof v === 'string' && /^[a-z0-9]{8,64}$/.test(v);
 export const isText = (v: unknown, max: number): v is string => typeof v === 'string' && v.trim().length > 0 && v.length <= max;
 export const isLang = (v: unknown): v is 'th' | 'en' => v === 'th' || v === 'en';
 export const isCountry = (v: unknown): v is Country => COUNTRIES.includes(v as Country);

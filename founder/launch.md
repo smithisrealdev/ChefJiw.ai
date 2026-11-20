@@ -74,9 +74,8 @@ changes). ★ marks the critical path: if it slips, launch day slips.
   screen. The EAS build (founder's Expo account) moves to the build phase.
 - Founder or Developer: the one-page waitlist. Deadline Sun 29 Nov. **Page built 19 Nov**
   (`waitlist/`); pre-order removed 20 Nov. Still needs a contact and hosting.
-- Founder: turn on anonymous sign-ins in Supabase (Authentication, Sign In /
-  Providers), so typed questions and "It didn't work" answer without an account.
-  Deadline Fri 27 Nov.
+- Developer: typed questions and "It didn't work" answer without an account in
+  the beta, counted per device, at most 300 a day across all guests. **Done 20 Nov**.
 
 **Week 2, Mon 30 Nov - Sun 6 Dec: cook**
 - ★ Founder: 8 green curry sessions (weekday evenings), 8 Sunday plans (Sun 6 Dec).

@@ -1,5 +1,5 @@
 import { assertEquals } from '@std/assert';
-import { isCountry, isText, localDay } from './common.ts';
+import { isCountry, isDevice, isText, localDay } from './common.ts';
 
 Deno.test('local day follows the user offset and clamps bad values', () => {
   const t = Date.UTC(2026, 10, 19, 20, 0); // 20:00 UTC = 03:00 next day in Bangkok
@@ -14,4 +14,7 @@ Deno.test('input validation', () => {
   assertEquals(isText('x'.repeat(11), 10), false);
   assertEquals(isCountry('JP'), true);
   assertEquals(isCountry('XX'), false);
+  assertEquals(isDevice('k3j9x2m1mf0abc'), true);
+  assertEquals(isDevice('short'), false);
+  assertEquals(isDevice('Has-Upper_and-dash'), false);
 });
