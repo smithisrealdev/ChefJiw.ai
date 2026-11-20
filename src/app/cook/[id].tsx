@@ -8,8 +8,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Icon } from '@/components/icon';
-import { KitchenStage } from '@/components/kitchen-stage';
+import { kitchenActs, KitchenStage, type Taps } from '@/components/kitchen-stage';
 import { ApiNotice, Button, Card, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
+import { finalScore, kitchenPenalty, nextAct } from '@/data/kitchen';
 import { buildRecipe, MENU, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
@@ -28,18 +29,22 @@ export default function Cook() {
   const [taste, setTaste] = useState(false);
   if (!r) return null;
   // อ่านค่าล่าสุดจาก state ทุกครั้ง เพราะเปลี่ยนขั้นกับเริ่มจับเวลาอาจเกิดติดกัน
-  const update = (patch: Partial<Progress>) =>
-    set((prev) => ({ progress: putProgress(prev.progress, id, { ...(prev.progress.find((x) => x.recipe === id) ?? p), ...patch }) }));
+  const change = (f: (cur: Progress) => Partial<Progress>) =>
+    set((prev) => { const cur = prev.progress.find((x) => x.recipe === id) ?? p; return { progress: putProgress(prev.progress, id, { ...cur, ...f(cur) }) }; });
+  const update = (patch: Partial<Progress>) => change(() => patch);
   return taste ? <Taste key={id} r={r} /> : <Steps key={id} r={r} p={p} start={Math.min(p.step, r.steps.length - 1)} onFinish={() => setTaste(true)}
     onStep={(step) => { cancelTimer(p); update({ step, total: r.steps.length, timer: undefined }); }}
-    onTimer={(timer) => update({ timer })} t={t} colors={colors} />;
+    onTimer={(timer) => update({ timer })} t={t} colors={colors}
+    onMiss={() => change((cur) => ({ miss: (cur.miss ?? 0) + 1 }))}
+    onSkip={(sid) => change((cur) => ({ skip: [...new Set([...(cur.skip ?? []), sid])] }))} />;
 }
 
-function Steps({ r, p, start, onStep, onTimer, onFinish, t, colors }: { r: Recipe; p: Progress; start: number; onStep: (i: number) => void; onTimer: (timer: Progress['timer']) => void; onFinish: () => void; t: ReturnType<typeof useSettings>['t']; colors: ReturnType<typeof useSettings>['colors'] }) {
+function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colors }: { r: Recipe; p: Progress; start: number; onStep: (i: number) => void; onTimer: (timer: Progress['timer']) => void; onFinish: () => void; onMiss: () => void; onSkip: (step: string) => void; t: ReturnType<typeof useSettings>['t']; colors: ReturnType<typeof useSettings>['colors'] }) {
   const { pick, isDark } = useSettings();
   const insets = useSafeAreaInsets();
   const [i, setI] = useState(start);
   const [askOpen, setAskOpen] = useState(false);
+  const [taps, setTaps] = useState<Taps>({ step: start, n: [] });
   const step = r.steps[i], prev = i > 0 ? r.steps[i - 1] : null, last = i === r.steps.length - 1;
   const heat = currentHeat(r.steps, i);
   const ink = isDark ? colors.ink : onPastel.ink;
@@ -66,7 +71,8 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, t, colors }: { r: Recip
         {Array.from({ length: r.phases }, (_, k) => <View key={k} style={[s.seg, { backgroundColor: k < step.phase ? ink : 'rgba(36,33,43,0.18)' }]} />)}
       </View>
       <OtherTimers current={r.id} ink={ink} />
-      <KitchenStage r={r} i={i} />
+      <KitchenStage r={r} i={i} taps={taps} setTaps={setTaps} onMiss={onMiss}
+        onStir={() => { if (step.timer && p.timer?.step !== step.id) void beginTimer(step.timer, pick(r.name), t, (endAt, note) => onTimer({ step: step.id, endAt, note })); }} />
 
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
         <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: space.xl }}>
@@ -96,7 +102,13 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, t, colors }: { r: Recip
         </ScrollView>
         {/* ปุ่มหลักปุ่มเดียวต่อขั้น ครึ่งล่างของจอ ไม่มีการปัดเปลี่ยนขั้น */}
         <View style={[s.foot, { paddingBottom: Math.max(insets.bottom, space.md), borderTopColor: colors.line }]}>
-          <Button size="cook" label={last ? t('cook.finish') : t('cook.done')} onPress={() => { Haptics.selectionAsync().catch(() => {}); if (last) onFinish(); else go(i + 1); }} />
+          <Button size="cook" label={last ? t('cook.finish') : t('cook.done')} onPress={() => {
+            Haptics.selectionAsync().catch(() => {});
+            // กดผ่านทั้งที่ยังแตะในครัวไม่ครบ นับเป็นข้ามขั้น (หักคะแนนตอนชิม เหมือนต้นแบบ)
+            const acts = kitchenActs(r, i);
+            if (acts.length && nextAct(acts, taps.step === i ? taps.n : []) >= 0) onSkip(step.id);
+            if (last) onFinish(); else go(i + 1);
+          }} />
           {i > 0 && <Pressable accessibilityRole="button" onPress={() => go(i - 1)} style={s.link}><T v="bodyBold" tone="muted">{t('cook.back')}</T></Pressable>}
         </View>
       </View>
@@ -151,6 +163,20 @@ function OtherTimers({ current, ink }: { current: string; ink: string }) {
   );
 }
 
+/** เริ่มจับเวลาแล้วตั้งการแจ้งเตือนล่วงหน้า ใช้ทั้งปุ่มในการ์ดจับเวลาและตอนแตะคนกระทะในครัวจำลอง */
+async function beginTimer(seconds: number, name: string, t: ReturnType<typeof useSettings>['t'], onStart: (endAt: number, note: string | null) => void) {
+  const end = Date.now() + seconds * 1000;
+  onStart(end, null);
+  if (Platform.OS === 'web') return;
+  try {
+    const perm = await Notifications.requestPermissionsAsync();
+    if (perm.granted) onStart(end, await Notifications.scheduleNotificationAsync({
+      content: { title: `${t('cook.timerNotify')}: ${name}`, body: t('cook.timerDone'), sound: true },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds },
+    }));
+  } catch { /* ไม่มีสิทธิ์แจ้งเตือน ตัวจับเวลาในแอปยังทำงาน */ }
+}
+
 /** จับเวลาจากเวลาจริงของเครื่อง เวลาจบเก็บไว้กับจาน จึงเดินต่อแม้ล็อกจอ ออกจากหน้านี้ หรือสลับไปทำจานอื่น และตั้งการแจ้งเตือนไว้ล่วงหน้า */
 function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: string; endAt: number | null; onStart: (endAt: number, note: string | null) => void; t: ReturnType<typeof useSettings>['t'] }) {
   const [now, setNow] = useState(() => Date.now());
@@ -165,18 +191,7 @@ function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: st
   }, [endAt, done]);
   useEffect(() => { if (done) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); }, [done]);
 
-  const startTimer = async () => {
-    const end = Date.now() + seconds * 1000;
-    setNow(Date.now()); onStart(end, null);
-    if (Platform.OS === 'web') return;
-    try {
-      const perm = await Notifications.requestPermissionsAsync();
-      if (perm.granted) onStart(end, await Notifications.scheduleNotificationAsync({
-        content: { title: `${t('cook.timerNotify')}: ${name}`, body: t('cook.timerDone'), sound: true },
-        trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds },
-      }));
-    } catch { /* ไม่มีสิทธิ์แจ้งเตือน ตัวจับเวลาในแอปยังทำงาน */ }
-  };
+  const startTimer = () => { setNow(Date.now()); void beginTimer(seconds, name, t, onStart); };
 
   return (
     <Card tone={done ? 'done' : 'ai'} style={{ alignItems: 'center', gap: space.sm }}>
@@ -286,13 +301,18 @@ function Taste({ r }: { r: Recipe }) {
   const insets = useSafeAreaInsets();
   const [ans, setAns] = useState<(number | null)[]>(r.senses.map(() => null));
   const [score, setScore] = useState<number | null>(null);
+  // หักคะแนนจากในครัวจำลอง อ่านไว้ก่อน เพราะส่งคะแนนแล้วความคืบหน้าของจานนี้ถูกล้าง
+  const [kit] = useState(() => { const cur = progress.find((x) => x.recipe === r.id); return { miss: cur?.miss ?? 0, skip: cur?.skip?.length ?? 0 }; });
+  const [raw, setRaw] = useState(0);
   const submit = () => {
-    const sc = tasteScore(ans as number[]);
+    const taste = tasteScore(ans as number[]);
+    const sc = finalScore(taste, kit.miss, kit.skip);
+    setRaw(taste);
     setScore(sc);
     const id = device || Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
     cancelTimer(progress.find((x) => x.recipe === r.id));
     set((prev) => ({ runs: [...prev.runs, { recipe: r.id, score: sc, at: Date.now() }], progress: putProgress(prev.progress, r.id, null), device: id }));
-    void api.logRun(id, r.id, sc);
+    void api.logRun(id, r.id, taste); // ผลทดสอบในครัวจริงเก็บคะแนนรสชาติล้วน ไม่รวมการแตะบนจอ
   };
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: space.lg, paddingTop: insets.top + space.lg, gap: space.md, paddingBottom: insets.bottom + space.xl }}>
@@ -308,6 +328,10 @@ function Taste({ r }: { r: Recipe }) {
         <Card tone="accent" style={{ alignItems: 'center' }}>
           <T v="hero" tone="pastel">{score.toFixed(1)}</T>
           <T v="bodyBold" tone="pastel">{t('taste.outOf')}</T>
+          {kitchenPenalty(kit.miss, kit.skip) > 0 && <>
+            <T v="small" tone="pastel">{t('taste.tasteOnly', { s: raw.toFixed(1) })}</T>
+            <T v="small" tone="pastel">{t('taste.penalty', { p: kitchenPenalty(kit.miss, kit.skip).toFixed(1), skip: kit.skip, miss: kit.miss })}</T>
+          </>}
         </Card>
       )}
       {r.senses.map((sense, k) => (

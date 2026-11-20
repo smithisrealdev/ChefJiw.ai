@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { actsAt, shownStage, stageAt } from './kitchen.ts';
+import { actsAt, decoysFor, finalScore, kitchenPenalty, nextAct, shownStage, stageAt } from './kitchen.ts';
 import { buildRecipe, MENU } from './recipes.ts';
 
 test('every step of every ready dish has a kitchen spot', () => {
@@ -64,4 +64,22 @@ test('the kitchen changes one tap at a time and ends at the step state', () => {
   const p = r.steps.findIndex((s) => s.id === 'plate'), pa = actsAt('kaprao', r.steps, p, []);
   assert.equal(shownStage('kaprao', r.steps, p, pa, []).side, 'egg'); // ไข่ดาวยังพักอยู่จนกว่าจะแตะจัดจาน
   assert.equal(shownStage('kaprao', r.steps, p, pa, [1]).side, 'dish');
+});
+
+test('picks go in any order, the rest one at a time', () => {
+  const acts = [{ kind: 'pick', taps: 1 }, { kind: 'pick', taps: 1 }, { kind: 'heat', taps: 2 }] as const;
+  assert.equal(nextAct([...acts], []), 0);
+  assert.equal(nextAct([...acts], [0, 1]), 0);
+  assert.equal(nextAct([...acts], [1, 1, 1]), 2);
+  assert.equal(nextAct([...acts], [1, 1, 2]), -1);
+});
+
+test('decoys never match what the recipe needs, and penalties stay above the floor', () => {
+  assert.deepEqual(decoysFor(['pork', 'egg']).map((d) => d.img), ['morning-glory', 'chicken']);
+  assert.deepEqual(decoysFor(['chicken']).map((d) => d.img), ['morning-glory', 'pork']);
+  assert.equal(kitchenPenalty(0, 0), 0);
+  assert.equal(kitchenPenalty(2, 1), 0.7);
+  assert.equal(finalScore(5, 0, 0), 5);
+  assert.equal(finalScore(4.3, 1, 2), 3.5);
+  assert.equal(finalScore(3, 10, 10), 1.5);
 });

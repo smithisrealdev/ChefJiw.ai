@@ -12,6 +12,7 @@ import { dark, light, type Palette } from '@/theme/tokens';
 export type Progress = {
   recipe: string; o1: number; o2: number; adapt: string[]; step: number; total: number;
   timer?: { step: string; endAt: number; note: string | null }; // เก็บไว้กับจาน จึงเดินต่อแม้ออกไปทำจานอื่น
+  miss?: number; skip?: string[]; // แตะผิดในครัวจำลอง และขั้นที่กดผ่านโดยแตะไม่ครบ ใช้หักคะแนนตอนชิม
 };
 export type Run = { recipe: string; score: number; at: number };
 type Saved = {

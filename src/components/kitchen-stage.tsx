@@ -6,43 +6,57 @@ import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 
 import { Actor, T, useMove } from '@/components/ui';
 import { IMG } from '@/data/images';
-import { actsAt, FOOD_NAME, shownStage, stageAt, type Act, type Food, type Side, type Stage, type Station } from '@/data/kitchen';
+import { actsAt, decoysFor, FOOD_NAME, nextAct, shownStage, stageAt, type Act, type Food, type Side, type Stage, type Station } from '@/data/kitchen';
 import type { Heat, Recipe } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
 
-// ครัวยาว 1200 x 320 หน่วย (ตรงกับ kitchen.png ที่วาดใน assets/images/chef/src/draw.py) จอเห็นทีละช่วง กล้องเลื่อนตามเชฟ
+// ครัวยาว 1200 x 320 หน่วย (ตรงกับ kitchen.png ที่วาดใน assets/images/chef/src/draw.py) ตอนเลือกว่าจะไปไหนเห็นทั้งครัว พอเดินถึงกล้องซูมเข้าตามเชฟ
 const WORLD = 1200, HEIGHT = 320, FLOOR = 296;
 const CHEF = 230, FEET = 0.956; // ขนาดภาพเชฟ และตำแหน่งเท้าในภาพ (สัดส่วนจากบน)
-// จุดที่เชฟยืนในแต่ละที่ มือขวาของท่าทำงานยื่นไปทางขวาราวหนึ่งในสี่ของภาพ จึงยืนซ้ายของของที่ทำ
-const SPOT: Record<Station, number> = { fridge: 240, sink: 368, board: 620, stove: 836 };
+// จุดที่เชฟยืนในแต่ละที่ มือขวาของท่าทำงานยื่นไปทางขวาราวหนึ่งในสี่ของภาพ จึงยืนซ้ายของของที่ทำ ประตูอยู่นอกจอทางซ้าย
+const SPOT: Record<Station | 'door', number> = { door: -120, fridge: 240, sink: 368, board: 620, stove: 836 };
+// พื้นที่แตะของแต่ละจุดตอนเลือกว่าจะเดินไปไหน (กลาง กว้าง สูง)
+const AREA: Record<Station, readonly [number, number, number, number]> = { fridge: [106, 170, 140, 256], sink: [418, 230, 200, 90], board: [670, 230, 200, 90], stove: [924, 236, 236, 110] };
 const SPEED = 330; // หน่วยต่อวินาที
 const native = Platform.OS !== 'web';
 
-/** ครัวจำลองของหน้าทำอาหาร: เชฟเดินไปที่ตู้เย็น อ่าง เขียง หรือเตาตามขั้น ไฟเตาตามระดับไฟ ของในกระทะเพิ่มทีละขั้น */
-export function KitchenStage({ r, i }: { r: Recipe; i: number }) {
+/** ของที่ต้องแตะของขั้นนี้ ใช้ทั้งในครัวและตอนกดไปขั้นต่อไป (ข้ามโดยแตะไม่ครบจะถูกหักคะแนน) */
+export const kitchenActs = (r: Recipe, i: number) => actsAt(r.id, r.steps, i, pickables(r).map((g) => g.id));
+export type Taps = { step: number; n: number[] };
+
+/** ครัวจำลองของหน้าทำอาหาร (เหมือนต้นแบบ): แตะจุดในครัวให้เชฟเดินไป แล้วแตะหยิบ หมุนไฟ ใส่ของ คน จัดจาน ทีละอย่าง
+ *  onMiss = แตะผิด (ของหลอก เดินผิดที่) onStir = แตะคนในขั้นที่มีจับเวลา ให้เริ่มจับเวลาของขั้นนั้น */
+export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recipe; i: number; taps: Taps; setTaps: (f: (prev: Taps) => Taps) => void; onMiss: () => void; onStir: () => void }) {
   const { height: screenH } = useWindowDimensions();
   const H = Math.round(Math.min(250, Math.max(170, screenH * 0.27)));
   const k = H / HEIGHT;
   const [viewW, setViewW] = useState(0);
   const base = stageAt(r.id, r.steps, i);
-  const target = SPOT[base.at];
-  // สิ่งที่ต้องแตะของขั้นนี้ จำจำนวนครั้งที่แตะแยกตามขั้น เปลี่ยนขั้นแล้วเริ่มใหม่
   const pics = pickables(r);
-  const acts = actsAt(r.id, r.steps, i, pics.map((g) => g.id));
-  const [taps, setTaps] = useState<{ step: number; n: number[] }>({ step: i, n: [] });
+  const acts = kitchenActs(r, i);
   const done = taps.step === i ? taps.n : [];
   const st = shownStage(r.id, r.steps, i, acts, done);
+
+  // เชฟอยู่ที่ไหน: เปิดหน้ามายังอยู่นอกครัว ต้องแตะจุดของขั้นนั้นก่อน เชฟถึงเดินไป
+  const [chefAt, setChefAt] = useState<Station | 'door'>('door');
+  const arrived = chefAt === base.at;
+  const [note, setNote] = useState<{ step: number; text: string } | null>(null);
+  const warn = (text: string) => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {}); setNote({ step: i, text }); onMiss(); };
   const tap = (n: number) => {
     Haptics.selectionAsync().catch(() => {});
+    setNote(null);
+    if (acts[n].kind === 'stir') onStir();
     setTaps((prev) => { const list = prev.step === i ? [...prev.n] : []; list[n] = (list[n] ?? 0) + 1; return { step: i, n: list }; });
   };
 
-  const [x] = useState(() => new Animated.Value(-120)); // เชฟเดินเข้าครัวจากซ้ายตอนเปิดหน้า
+  const [x] = useState(() => new Animated.Value(SPOT.door));
+  const [zoom] = useState(() => new Animated.Value(0)); // 0 = เห็นทั้งครัว 1 = ซูมตามเชฟ
   const [walking, setWalking] = useState<0 | 1 | -1>(0);
+  const target = SPOT[chefAt];
   useEffect(() => {
     let alive = true;
     let anim: Animated.CompositeAnimation | undefined;
-    // อ่านตำแหน่งปัจจุบันจากค่าที่กำลังเคลื่อนอยู่ ถ้าเปลี่ยนขั้นระหว่างเดิน เชฟเลี้ยวไปที่ใหม่ได้ทันที
+    // อ่านตำแหน่งปัจจุบันจากค่าที่กำลังเคลื่อนอยู่ ถ้าแตะที่ใหม่ระหว่างเดิน เชฟเลี้ยวไปที่ใหม่ได้ทันที
     const from = (x as unknown as { __getValue: () => number }).__getValue();
     AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
       if (!alive) return;
@@ -54,21 +68,36 @@ export function KitchenStage({ r, i }: { r: Recipe; i: number }) {
     }).catch(() => { x.setValue(target); });
     return () => { alive = false; anim?.stop(); };
   }, [x, target]);
+  useEffect(() => {
+    let anim: Animated.CompositeAnimation | undefined;
+    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
+      if (reduce) { zoom.setValue(arrived ? 1 : 0); return; }
+      anim = Animated.timing(zoom, { toValue: arrived ? 1 : 0, duration: arrived ? 900 : 450, easing: Easing.inOut(Easing.quad), useNativeDriver: native });
+      anim.start();
+    }).catch(() => zoom.setValue(arrived ? 1 : 0));
+    return () => anim?.stop();
+  }, [zoom, arrived]);
 
-  // กล้อง: ให้เชฟอยู่กลางจอค่อนซ้าย (ของที่ทำอยู่ทางขวาของเชฟ) แต่ไม่เลยขอบครัว
+  // กล้องตอนซูม: เชฟอยู่กลางจอค่อนซ้าย (ของที่ทำอยู่ทางขวาของเชฟ) แต่ไม่เลยขอบครัว ตอนเห็นทั้งครัว: ย่อทั้งครัวให้พอดีความกว้างจอ วางชิดล่าง
   const x0 = viewW / (2 * k) - 60, x1 = x0 + WORLD - viewW / k;
   const cam = x1 > x0 ? x.interpolate({ inputRange: [x0, x1], outputRange: [0, viewW - WORLD * k], extrapolate: 'clamp' }) : 0;
-  const pose = walking ? 'walk' : st.pose;
+  const fit = viewW ? Math.min(1, viewW / (WORLD * k)) : 1;
+  const world = [
+    { translateX: Animated.multiply(zoom, cam) },
+    { translateY: zoom.interpolate({ inputRange: [0, 1], outputRange: [H * (1 - fit), 0] }) },
+    { scale: zoom.interpolate({ inputRange: [0, 1], outputRange: [fit, 1] }) },
+  ];
+  const pose = walking ? 'walk' : arrived ? st.pose : 'think';
   const tapDone = acts.findIndex((a) => a.kind === 'tap');
 
   return (
     <View style={{ height: H, overflow: 'hidden', backgroundColor: '#FFE9A8' }} onLayout={(e) => setViewW(e.nativeEvent.layout.width)}>
-      <Animated.View style={{ width: WORLD * k, height: H, transform: [{ translateX: cam }] }}>
+      <Animated.View style={{ width: WORLD * k, height: H, transformOrigin: 'left top', transform: world }}>
         {/* ภาพประกอบทั้งหมดไม่รับการแตะและโปรแกรมอ่านจอข้ามไป สิ่งที่แตะได้อยู่ใน Hotspots */}
         <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         <Image source={require('@/assets/images/chef/kitchen.png')} style={StyleSheet.absoluteFill} contentFit="fill" accessible={false} />
-        <Fridge open={st.at === 'fridge'} k={k} />
-        <Sink st={st} k={k} running={tapDone < 0 || (done[tapDone] ?? 0) > 0} />
+        <Fridge open={arrived && st.at === 'fridge'} k={k} />
+        <Sink st={st} k={k} running={arrived && (tapDone < 0 || (done[tapDone] ?? 0) > 0)} />
         <Board items={st.board} k={k} />
         <SidePlate side={st.side} k={k} r={r} />
         {/* เชฟ: ยืนบนพื้น หันตามทางที่เดิน */}
@@ -80,98 +109,124 @@ export function KitchenStage({ r, i }: { r: Recipe; i: number }) {
         {/* กระทะอยู่หน้ามือเชฟ ตะหลิวจึงดูจุ่มลงไปในกระทะ */}
         <Stove st={st} k={k} />
         </View>
-        <Hotspots acts={acts} done={done} st={st} k={k} pics={pics} onTap={tap} />
+        {arrived
+          ? <Hotspots acts={acts} done={done} st={st} k={k} pics={pics} onTap={tap} onDecoy={(name) => warn(name)} />
+          : <Stations goal={base.at} k={k} scale={k * fit} onGo={(s) => { if (s === base.at) { setNote(null); setChefAt(s); } else warn(''); }} />}
       </Animated.View>
-      <Guide acts={acts} done={done} goal={base.heat} />
+      <Guide acts={arrived ? acts : []} done={done} goal={base.heat} go={arrived ? null : base.at} note={note?.step === i ? note.text : null} />
     </View>
   );
 }
 
-/** วัตถุดิบที่มีภาพให้แตะหยิบในตู้เย็น: ใช้ img ของวัตถุดิบ ถ้าไม่มีลองชื่อ id ที่ตรงกับภาพที่มีอยู่ */
+/** วัตถุดิบที่มีภาพให้แตะหยิบในตู้เย็น: ใช้ img ของวัตถุดิบ ถ้าไม่มีลองชื่อ id ที่ตรงกับภาพที่มีอยู่ เว้นสองช่องไว้ให้ของหลอก */
 function pickables(r: Recipe) {
-  return r.ingredients.map((g) => ({ id: g.id, name: g.name, src: g.img ? IMG[g.img] : (IMG as Record<string, number>)[g.id] })).filter((g) => g.src).slice(0, 6);
+  return r.ingredients.map((g) => ({ id: g.id, name: g.name, src: g.img ? IMG[g.img] : (IMG as Record<string, number>)[g.id], img: g.img ?? g.id }))
+    .filter((g) => g.src).slice(0, 4);
 }
 type Pic = ReturnType<typeof pickables>[number];
 
-// ตำแหน่งของที่แตะได้ในครัว (กลางชิ้น กว้าง สูง) ชั้นตู้เย็นมีหกช่อง
+// ตำแหน่งของที่แตะได้ในครัว (กลางชิ้น กว้าง สูง) ชั้นตู้เย็นมีหกช่อง ของจริงกับของหลอกสลับช่องกัน
 const SLOTS: [number, number][] = [[78, 112], [136, 112], [78, 180], [136, 180], [78, 232], [136, 232]];
+const PICK_SLOT = [0, 3, 4, 1], DECOY_SLOT = [2, 5];
 const SPOTS = { knob: [1020, 268, 30, 30], board: [682, 220, 112, 40], tap: [456, 200, 40, 40], source: [1014, 214, 44, 34], side: [772, 216, 56, 40] } as const;
 const panSpot = (pot: boolean) => [930, pot ? 200 : 214, 124, pot ? 76 : 52] as const;
 const FOOD_COLOR: Partial<Record<Food, string>> = { oil: '#FFE07A', egg: '#FFFFFF', beaten: '#FFD34D', bits: '#FF5A4A', mince: '#9A5B3C', sauce: '#6B3A22', leaves: '#2FB383', beans: '#5DBB63',
   cream: '#FFF8E8', paste: '#E8572F', curry: '#F4F1E4', chicken: '#F7D9B5', veg: '#7BC96F', water: '#BFE6FF', eggs: '#F3E6D3', caramel: '#C8782E', stew: '#7A4526', pork: '#B5683F' };
 
-/** ขั้นตอนที่ต้องแตะตอนนี้: หยิบของแตะลำดับไหนก็ได้ ที่เหลือทีละอย่าง (-1 = ครบแล้ว) */
-function current(acts: Act[], done: number[]) {
-  const left = (k: number) => (done[k] ?? 0) < acts[k].taps;
-  const pick = acts.findIndex((a, k) => a.kind === 'pick' && left(k));
-  return pick >= 0 ? pick : acts.findIndex((_, k) => left(k));
-}
-
-/** ข้อความบอกว่าต้องแตะอะไร มุมซ้ายบนของครัว */
-function Guide({ acts, done, goal }: { acts: Act[]; done: number[]; goal: Heat }) {
+/** ป้ายมุมซ้ายบน: ต้องแตะอะไร หรือคำเตือนเมื่อแตะผิด */
+function Guide({ acts, done, goal, go, note }: { acts: Act[]; done: number[]; goal: Heat; go: Station | null; note: string | null }) {
   const { t, pick } = useSettings();
-  if (!acts.length) return null;
-  const c = current(acts, done), a = acts[c], n = done[c] ?? 0;
+  if (!go && !acts.length && note === null) return null;
+  const c = nextAct(acts, done), a = acts[c], n = done[c] ?? 0;
   const food = a?.food && FOOD_NAME[a.food] ? pick(FOOD_NAME[a.food]!) : '';
   const picks = acts.filter((x) => x.kind === 'pick').length;
-  const text = c < 0 ? t('kitchen.done')
-    : a.kind === 'pick' ? t('kitchen.pick', { n: acts.filter((x, k) => x.kind === 'pick' && (done[k] ?? 0) > 0).length, total: picks })
+  const text = note !== null ? (note ? t('kitchen.notNeeded', { x: note }) : t('kitchen.notThere'))
+    : go ? t('kitchen.go', { x: t(`kitchen.at.${go}`) })
+    : c < 0 ? t('kitchen.done')
+    : a.kind === 'pick' ? t('kitchen.pick', { n: acts.filter((x, j) => x.kind === 'pick' && (done[j] ?? 0) > 0).length, total: picks })
     : a.kind === 'heat' ? t('kitchen.heat', { x: t(`cook.heat${goal}`) })
     : a.kind === 'chop' || a.kind === 'mix' ? t(`kitchen.${a.kind}`, { n, total: a.taps })
     : t(`kitchen.${a.kind}`, { x: food });
+  const bg = note !== null ? '#FFD6CC' : !go && c < 0 ? '#C9F2CF' : '#FFFFFF';
   return (
-    <View accessibilityLiveRegion="polite" style={{ position: 'absolute', left: 8, top: 8, maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999,
-      backgroundColor: c < 0 ? '#C9F2CF' : '#FFFFFF' }}>
+    <View accessibilityLiveRegion="polite" style={{ position: 'absolute', left: 8, top: 8, maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: bg }}>
       <T v="smallBold" tone="pastel">{text}</T>
     </View>
   );
 }
 
-/** ของที่แตะได้: วางในพิกัดของครัว เลื่อนไปพร้อมกล้อง ของที่ต้องแตะตอนนี้มีวงสีเหลืองกะพริบ */
-function Hotspots({ acts, done, st, k, pics, onTap }: { acts: Act[]; done: number[]; st: Stage; k: number; pics: Pic[]; onTap: (n: number) => void }) {
+/** วงสีเหลืองกะพริบรอบของที่ต้องแตะ ความหนาเส้นชดเชยการย่อของครัว */
+function Ring({ round, scale = 1, radius }: { round?: boolean; scale?: number; radius: number }) {
+  const glow = useMove('twinkle');
+  return <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { borderRadius: round ? 999 : radius, borderWidth: 3 / scale, borderColor: '#24212B', backgroundColor: 'rgba(255,230,109,0.35)',
+    opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [1, 0.35] }) }]} />;
+}
+
+/** ปุ่มแตะในพิกัดของครัว พื้นที่แตะอย่างน้อย 44 จุดแม้ภาพจะเล็ก (scale = ขนาดที่เห็นจริงต่อหน่วยครัว) */
+function Spot({ box: [cx, cy, w, h], k, scale, label, onPress, ring, round, children }: { box: readonly [number, number, number, number]; k: number; scale: number; label: string; onPress: () => void; ring: boolean; round?: boolean; children?: ReactNode }) {
+  const slopX = Math.max(0, (44 - w * scale) / 2), slopY = Math.max(0, (44 - h * scale) / 2);
+  return (
+    <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} hitSlop={{ left: slopX, right: slopX, top: slopY, bottom: slopY }}
+      style={{ position: 'absolute', left: (cx - w / 2) * k, top: (cy - h / 2) * k, width: w * k, height: h * k, alignItems: 'center', justifyContent: 'center' }}>
+      {ring && <Ring round={round} scale={scale / k} radius={10 * k} />}
+      {children}
+    </Pressable>
+  );
+}
+
+/** ตอนเลือกว่าจะไปไหน: ทุกจุดในครัวแตะได้ จุดของขั้นนี้มีวงกะพริบ แตะผิดที่มีคำเตือน */
+function Stations({ goal, k, scale, onGo }: { goal: Station; k: number; scale: number; onGo: (s: Station) => void }) {
+  const { t } = useSettings();
+  return <>{(Object.keys(AREA) as Station[]).map((s) => (
+    <Spot key={s} box={AREA[s]} k={k} scale={scale} label={t('kitchen.walkTo', { x: t(`kitchen.at.${s}`) })} onPress={() => onGo(s)} ring={s === goal} />
+  ))}</>;
+}
+
+/** ของที่แตะได้หลังเดินถึง: ของที่ต้องแตะตอนนี้มีวงกะพริบ ตู้เย็นมีของหลอกปนอยู่สองอย่าง */
+function Hotspots({ acts, done, st, k, pics, onTap, onDecoy }: { acts: Act[]; done: number[]; st: Stage; k: number; pics: Pic[]; onTap: (n: number) => void; onDecoy: (name: string) => void }) {
   const { t, pick } = useSettings();
-  const glow = useMove('twinkle'), bob = useMove('puff');
-  const c = current(acts, done);
+  const bob = useMove('puff');
+  const [tried, setTried] = useState<string[]>([]);
+  const c = nextAct(acts, done);
   if (c < 0) return null;
   const a = acts[c];
-  const spot = (n: number, [cx, cy, w, h]: readonly [number, number, number, number], label: string, child?: ReactNode, round = false) => {
-    // พื้นที่แตะอย่างน้อย 44 จุด แม้ภาพในครัวจะเล็ก
-    const slopX = Math.max(0, (44 - w * k) / 2), slopY = Math.max(0, (44 - h * k) / 2);
-    return (
-      <Pressable key={n + label} accessibilityRole="button" accessibilityLabel={label} onPress={() => onTap(n)} hitSlop={{ left: slopX, right: slopX, top: slopY, bottom: slopY }}
-        style={{ position: 'absolute', left: (cx - w / 2) * k, top: (cy - h / 2) * k, width: w * k, height: h * k, alignItems: 'center', justifyContent: 'center' }}>
-        <Animated.View style={[StyleSheet.absoluteFill, { borderRadius: round ? 999 : 10 * k, borderWidth: 3, borderColor: '#24212B', backgroundColor: 'rgba(255,230,109,0.35)',
-          opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [1, 0.35] }) }]} />
-        {child}
-      </Pressable>
-    );
-  };
-  if (a.kind === 'pick') return <>{acts.map((x, n) => {
-    if (x.kind !== 'pick' || (done[n] ?? 0) > 0) return null;
-    const g = pics.find((p) => p.id === x.item)!, [cx, cy] = SLOTS[n];
-    return (
-      <Animated.View key={n} style={{ position: 'absolute', left: 0, top: 0, transform: [{ translateY: Animated.multiply(bob, (n % 2 ? 3 : -3) * k) }] }}>
-        {spot(n, [cx, cy, 46, 46], t('kitchen.take', { x: pick(g.name) }),
-          <View style={{ width: 40 * k, height: 40 * k, borderRadius: 999, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
-            <Image source={g.src} style={{ width: 32 * k, height: 32 * k }} contentFit="contain" accessible={false} />
-          </View>, true)}
-      </Animated.View>
-    );
-  })}</>;
-  if (a.kind === 'heat') return spot(c, SPOTS.knob, t('kitchen.knob', { x: t(`cook.heat${st.heat}`) }),
+  const bubble = (src: number) => (
+    <View style={{ width: 40 * k, height: 40 * k, borderRadius: 999, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
+      <Image source={src} style={{ width: 32 * k, height: 32 * k }} contentFit="contain" accessible={false} />
+    </View>
+  );
+  const float = (n: number, child: ReactNode) => <Animated.View key={n} style={{ position: 'absolute', left: 0, top: 0, transform: [{ translateY: Animated.multiply(bob, (n % 2 ? 3 : -3) * k) }] }}>{child}</Animated.View>;
+  if (a.kind === 'pick') {
+    const decoys = decoysFor(pics.map((g) => g.img));
+    return <>
+      {acts.map((x, n) => {
+        if (x.kind !== 'pick' || (done[n] ?? 0) > 0) return null;
+        const g = pics.find((p) => p.id === x.item)!, [cx, cy] = SLOTS[PICK_SLOT[n] ?? n];
+        return float(n, <Spot box={[cx, cy, 46, 46]} k={k} scale={k} label={t('kitchen.take', { x: pick(g.name) })} onPress={() => onTap(n)} ring round>{bubble(g.src)}</Spot>);
+      })}
+      {decoys.map((d, n) => {
+        const [cx, cy] = SLOTS[DECOY_SLOT[n]];
+        return float(n + 7, <Spot box={[cx, cy, 46, 46]} k={k} scale={k} label={t('kitchen.take', { x: pick(d.name) })} ring={!tried.includes(d.img)} round
+          onPress={() => { setTried([...tried, d.img]); onDecoy(pick(d.name)); }}>{bubble(IMG[d.img])}</Spot>);
+      })}
+    </>;
+  }
+  const go = (box: readonly [number, number, number, number], label: string, child?: ReactNode, round?: boolean) =>
+    <Spot box={box} k={k} scale={k} label={label} onPress={() => onTap(c)} ring round={round}>{child}</Spot>;
+  if (a.kind === 'heat') return go(SPOTS.knob, t('kitchen.knob', { x: t(`cook.heat${st.heat}`) }),
     <View style={{ width: 22 * k, height: 22 * k, borderRadius: 999, backgroundColor: '#FFFFFF', alignItems: 'center', transform: [{ rotate: `${-90 + st.heat * 60}deg` }] }}>
       <View style={{ width: 3, height: 9 * k, backgroundColor: '#24212B', borderRadius: 2 }} />
     </View>, true);
-  if (a.kind === 'chop' || a.kind === 'mix') return spot(c, SPOTS.board, t(`kitchen.${a.kind}`, { n: done[c] ?? 0, total: a.taps }));
-  if (a.kind === 'tap') return spot(c, SPOTS.tap, t('kitchen.tap'), undefined, true);
-  if (a.kind === 'plate' || a.kind === 'box') return spot(c, SPOTS.side, t(`kitchen.${a.kind}`));
-  if (a.kind === 'add') return spot(c, SPOTS.source, t('kitchen.add', { x: a.food && FOOD_NAME[a.food] ? pick(FOOD_NAME[a.food]!) : '' }),
+  if (a.kind === 'chop' || a.kind === 'mix') return go(SPOTS.board, t(`kitchen.${a.kind}`, { n: done[c] ?? 0, total: a.taps }));
+  if (a.kind === 'tap') return go(SPOTS.tap, t('kitchen.tap'), undefined, true);
+  if (a.kind === 'plate' || a.kind === 'box') return go(SPOTS.side, t(`kitchen.${a.kind}`));
+  if (a.kind === 'add') return go(SPOTS.source, t('kitchen.add', { x: a.food && FOOD_NAME[a.food] ? pick(FOOD_NAME[a.food]!) : '' }),
     <Svg width={40 * k} height={30 * k} viewBox="0 0 40 30">
       <Ellipse cx={20} cy={13} rx={14} ry={7} fill={FOOD_COLOR[a.food!] ?? '#FFFFFF'} />
       {a.food === 'egg' && <Circle cx={20} cy={11} r={4} fill="#FFB020" />}
       <Path d="M3 12 H37 Q35 28 20 28 Q5 28 3 12 Z" fill="#FFFFFF" stroke="#D8D1F0" strokeWidth={2} />
     </Svg>);
-  return spot(c, panSpot(st.pot), t(`kitchen.${a.kind}`, { x: '' }));
+  return go(panSpot(st.pot), t(`kitchen.${a.kind}`, { x: '' }));
 }
 
 /** วางภาพ SVG ชิ้นหนึ่งในครัวตามพิกัดของครัว */
