@@ -78,7 +78,7 @@ export default function RecipeDetail() {
         const on = have.includes(g.id);
         return (
           <Pressable key={g.id} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${pick(g.name)} ${g.q} ${pick(g.unit)}`}
-            onPress={() => setHave(toggle(have, g.id))} style={[s.ing, { backgroundColor: colors.surfaceSoft }]}>
+            onPress={() => setHave(toggle(have, g.id))} style={[s.ing, { borderBottomColor: colors.line }]}>
             <View style={[s.box, { borderColor: colors.ink, backgroundColor: on ? colors.success : 'transparent' }]}>
               {on && <Icon name="check" color={colors.bg} size={18} />}
             </View>
@@ -98,7 +98,8 @@ export default function RecipeDetail() {
 
 const s = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  ing: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.lg },
+  // แถวรายการแบบเรียบ คั่นด้วยเส้นบาง ไม่ใส่กล่องให้ทุกแถว
+  ing: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingBottom: space.md, borderBottomWidth: StyleSheet.hairlineWidth },
   box: { width: 28, height: 28, borderRadius: 8, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   noImg: { width: 48, height: 48, borderRadius: radius.sm },
   buy: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },

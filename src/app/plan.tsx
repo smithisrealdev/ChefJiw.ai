@@ -7,7 +7,7 @@ import { Button, Card, Mascot, Screen, T, Thumb } from '@/components/ui';
 import { DISH_TINT, IMG } from '@/data/images';
 import { MENU, planShopping, SUNDAY_PLAN } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
-import { radius, space } from '@/theme/tokens';
+import { space } from '@/theme/tokens';
 
 // shortcut: เทียบกับข้าวจานละ 50 บาทแบบร้านในไทย ถ้าเปิดประเทศอื่นอีกให้ใช้ราคาอาหารนอกบ้านของประเทศนั้น
 const PLATE = 50;
@@ -66,7 +66,7 @@ export default function Plan() {
         const on = have.includes(g.id);
         return (
           <Pressable key={g.id + g.unit.th} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${pick(g.name)} ${g.q} ${pick(g.unit)}`}
-            onPress={() => setHave(on ? have.filter((x) => x !== g.id) : [...have, g.id])} style={[s.row, { backgroundColor: colors.surfaceSoft }]}>
+            onPress={() => setHave(on ? have.filter((x) => x !== g.id) : [...have, g.id])} style={[s.row, { borderBottomColor: colors.line }]}>
             <View style={[s.box, { borderColor: colors.ink, backgroundColor: on ? colors.success : 'transparent' }]}>
               {on && <Icon name="check" color={colors.bg} size={18} />}
             </View>
@@ -90,6 +90,6 @@ export default function Plan() {
 const s = StyleSheet.create({
   foot: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },
   dish: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.lg },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingBottom: space.md, borderBottomWidth: StyleSheet.hairlineWidth },
   box: { width: 28, height: 28, borderRadius: 8, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
 });

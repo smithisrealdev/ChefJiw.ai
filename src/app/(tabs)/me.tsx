@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Pressable, Switch, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { Card, Screen, T, Thumb } from '@/components/ui';
@@ -16,7 +16,7 @@ function Row({ label, sub, value, onPress }: { label: string; sub?: string; valu
   const { colors } = useSettings();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`${label}: ${value}`} onPress={onPress}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 60, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.surfaceSoft }}>
+      style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 56, paddingBottom: space.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line }}>
       <View style={{ flex: 1 }}>
         <T v="bodyBold">{label}</T>
         {sub && <T v="small" tone="muted">{sub}</T>}
@@ -98,7 +98,7 @@ export default function Me() {
         <Row label={t('me.country')} sub={t('me.countryHint')} value={t(`country.${country}`)}
           onPress={() => set({ country: COUNTRIES[(COUNTRIES.indexOf(country) + 1) % COUNTRIES.length] })} />
       )}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 60, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.surfaceSoft }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 56, paddingBottom: space.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line }}>
         <View style={{ flex: 1 }}>
           <T v="bodyBold">{t('me.dark')}</T>
           {theme === 'system' && <T v="small" tone="muted">{t('me.darkSystem')}</T>}

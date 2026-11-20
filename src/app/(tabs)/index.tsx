@@ -62,7 +62,7 @@ export default function Home() {
         <Icon name="next" color={fg} size={20} />
       </Pressable>
       <Button kind={isDark ? 'primary' : 'onPastelLight'} size="cook" label={t('detail.start')} onPress={() => router.push(`/recipe/${pickToday.id}`)} />
-      <ResumeCard />
+      <ResumeCard on={{ bg: panel, fg }} />
       <View style={{ flexDirection: 'row', paddingVertical: space.md }}>
         {stats.map(([n, label], k) => (
           <View key={label} style={{ flex: 1, alignItems: 'center', borderLeftWidth: k ? 1 : 0, borderLeftColor: rule }} accessible accessibilityLabel={`${label} ${n}`}>

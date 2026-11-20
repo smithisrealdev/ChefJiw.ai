@@ -279,7 +279,7 @@ export function Screen({ tint, title, subtitle, lead, onBack, backLabel, right, 
     </View>
   );
   const content = { padding: space.lg, gap: space.md, paddingBottom: footer ? 120 : space.xxl };
-  const foot = footer && <View style={[s.footer, { paddingBottom: Math.max(insets.bottom, space.md) }]}><View style={[wide, { paddingHorizontal: space.lg }]}>{footer}</View></View>;
+  const foot = footer && <View style={[s.footer, { paddingBottom: Math.max(insets.bottom, space.md), backgroundColor: colors.bg }]}><View style={[wide, { paddingHorizontal: space.lg }]}>{footer}</View></View>;
   // หน้าแท็บ (มีตัวละคร): หัวจอเลื่อนขึ้นไปพร้อมเนื้อหา ไม่กินที่ของรายการ
   if (lead && !onBack) return (
     <View style={{ flex: 1, backgroundColor: tint }}>
