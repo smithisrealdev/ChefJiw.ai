@@ -1,0 +1,13 @@
+{
+  "id": "P003",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I'd try the free dishes because it costs me nothing, but I already learn from YouTube, TikTok and the recipes my mum sends on LINE, all free. I won't pay ahead for dishes that don't exist yet when five free ones will last me a while.",
+  "objection": "Five dishes is not much, and I can find tom yum and pad see ew on YouTube today for free. Paying by PromptPay now for something I get later feels like a gamble, even if it's only 99 baht.",
+  "would_change_my_mind": "If I cook the free dishes and the 'it didn't work' button actually saves a dinner that a video couldn't, then 99 baht for 12 more dishes ready right now, not pre-ordered, would be easy.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 129,
+  "price_too_expensive": 199
+}

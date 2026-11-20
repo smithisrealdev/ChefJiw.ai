@@ -1,0 +1,13 @@
+{
+  "id": "P014",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I would try the free dishes and maybe the Sunday plan, since 40 baht a meal is interesting, but I already cook green curry and basil pork without an app. I will not pay 99 baht ahead for a pack that does not exist yet when the free part might be enough for me.",
+  "objection": "Will the dish really come out right in my kitchen with my pan and my market's ingredients? I have to see it work with my own cooking before I pay anything, and paying now for something delivered later feels risky.",
+  "would_change_my_mind": "If I cooked two or three of the free dishes and my family said they tasted better than usual, and the Sunday plan really kept my spending near 40 baht a meal, I would pay 99 baht once the pack is ready, not before.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 99,
+  "price_too_expensive": 159
+}

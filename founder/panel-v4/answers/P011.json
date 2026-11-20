@@ -1,0 +1,13 @@
+{
+  "id": "P011",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "timing",
+  "reason": "I'd open the free version if a friend sent me the link and try basil pork, but I'm not paying for a pack that doesn't exist yet. Five free dishes is already enough to keep me busy for a month, if I even keep using it.",
+  "objection": "Pre-ordering something that isn't out yet from an app I just found. I delete most apps after a week, so why pay before I know I'll still be cooking with it.",
+  "would_change_my_mind": "If I actually cook the free dishes and they come out good, and the 12 dishes are ready to use right away, I'd pay 99 baht since it's one time and not a subscription.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 149,
+  "price_too_expensive": 250
+}

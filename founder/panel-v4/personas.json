@@ -1,0 +1,222 @@
+[
+ {
+  "id": "P001",
+  "name": "Selin",
+  "age": 45,
+  "segment": "Parent cooking for a family in a city outside Bangkok (about 15,000-35,000 baht a month)",
+  "income": 7000,
+  "behaviour": "Street-food regular",
+  "behaviour_how": "Eats out or orders delivery most days because a plate costs 50-60 baht; cooks only when there is time.",
+  "objection": "Only two dishes? I would run out after two dinners",
+  "habit": "you live in a condo with a small kitchen corner"
+ },
+ {
+  "id": "P002",
+  "name": "Arjun",
+  "age": 26,
+  "segment": "Parent cooking for a family in a city outside Bangkok (about 15,000-35,000 baht a month)",
+  "income": 7000,
+  "behaviour": "App tryer",
+  "behaviour_how": "Downloads new apps when friends share them and deletes them fast if they do not help.",
+  "objection": "Will the dish actually come out right?",
+  "habit": "you cook on Sunday for the week ahead"
+ },
+ {
+  "id": "P003",
+  "name": "Aria",
+  "age": 43,
+  "segment": "Young worker in Bangkok learning to cook (about 18,000-40,000 baht a month)",
+  "income": 7000,
+  "behaviour": "Learns from free videos",
+  "behaviour_how": "Watches YouTube or TikTok cooking clips and follows along on the phone.",
+  "objection": "Only two dishes? I would run out after two dinners",
+  "habit": "your mum sends you recipes on LINE"
+ },
+ {
+  "id": "P004",
+  "name": "Kira",
+  "age": 34,
+  "segment": "University student living alone (about 4,000-10,000 baht a month, mostly allowance)",
+  "income": 3000,
+  "behaviour": "Street-food regular",
+  "behaviour_how": "Eats out or orders delivery most days because a plate costs 50-60 baht; cooks only when there is time.",
+  "objection": "Typing on my phone with messy hands is annoying",
+  "habit": "your mum sends you recipes on LINE"
+ },
+ {
+  "id": "P005",
+  "name": "Dev",
+  "age": 39,
+  "segment": "Young worker in Bangkok learning to cook (about 18,000-40,000 baht a month)",
+  "income": 9000,
+  "behaviour": "Learns from free videos",
+  "behaviour_how": "Watches YouTube or TikTok cooking clips and follows along on the phone.",
+  "objection": "My kitchen is tiny and I only have one pan",
+  "habit": "you scroll cooking clips before bed"
+ },
+ {
+  "id": "P006",
+  "name": "Sofia",
+  "age": 34,
+  "segment": "Parent cooking for a family in a city outside Bangkok (about 15,000-35,000 baht a month)",
+  "income": 11000,
+  "behaviour": "Street-food regular",
+  "behaviour_how": "Eats out or orders delivery most days because a plate costs 50-60 baht; cooks only when there is time.",
+  "objection": "My kitchen is tiny and I only have one pan",
+  "habit": "you scroll cooking clips before bed"
+ },
+ {
+  "id": "P007",
+  "name": "Elle",
+  "age": 44,
+  "segment": "Young worker in Bangkok learning to cook (about 18,000-40,000 baht a month)",
+  "income": 11000,
+  "behaviour": "Cooks to save money",
+  "behaviour_how": "Cooks at home to spend less, compares prices, avoids subscriptions.",
+  "objection": "My kitchen is tiny and I only have one pan",
+  "habit": "you scroll cooking clips before bed"
+ },
+ {
+  "id": "P008",
+  "name": "Liam",
+  "age": 41,
+  "segment": "University student living alone (about 4,000-10,000 baht a month, mostly allowance)",
+  "income": 3000,
+  "behaviour": "Cooks to save money",
+  "behaviour_how": "Cooks at home to spend less, compares prices, avoids subscriptions.",
+  "objection": "Will the dish actually come out right?",
+  "habit": "you order from a delivery app three or four times a week"
+ },
+ {
+  "id": "P009",
+  "name": "Noor",
+  "age": 27,
+  "segment": "Parent cooking for a family in a city outside Bangkok (about 15,000-35,000 baht a month)",
+  "income": 7000,
+  "behaviour": "Uses a free AI chat app",
+  "behaviour_how": "Already asks a general AI assistant for recipes and cooking help, for free.",
+  "objection": "Typing on my phone with messy hands is annoying",
+  "habit": "you live in a condo with a small kitchen corner"
+ },
+ {
+  "id": "P010",
+  "name": "Ivy",
+  "age": 29,
+  "segment": "Mid-career professional who cooks on weekends (about 45,000-90,000 baht a month)",
+  "income": 22000,
+  "behaviour": "Asks family",
+  "behaviour_how": "Calls mum or follows family recipes; trusts people more than apps.",
+  "objection": "I can watch a free video for this",
+  "habit": "you cook on Sunday for the week ahead"
+ },
+ {
+  "id": "P011",
+  "name": "June",
+  "age": 22,
+  "segment": "Young worker in Bangkok learning to cook (about 18,000-40,000 baht a month)",
+  "income": 9000,
+  "behaviour": "App tryer",
+  "behaviour_how": "Downloads new apps when friends share them and deletes them fast if they do not help.",
+  "objection": "I do not want another monthly subscription",
+  "habit": "you live in a condo with a small kitchen corner"
+ },
+ {
+  "id": "P012",
+  "name": "Tariq",
+  "age": 35,
+  "segment": "Young worker in Bangkok learning to cook (about 18,000-40,000 baht a month)",
+  "income": 10000,
+  "behaviour": "Learns from free videos",
+  "behaviour_how": "Watches YouTube or TikTok cooking clips and follows along on the phone.",
+  "objection": "I can watch a free video for this",
+  "habit": "you scroll cooking clips before bed"
+ },
+ {
+  "id": "P013",
+  "name": "Anya",
+  "age": 22,
+  "segment": "Young worker in Bangkok learning to cook (about 18,000-40,000 baht a month)",
+  "income": 9000,
+  "behaviour": "Health-focused cook",
+  "behaviour_how": "Cooks at home to control oil, salt and calories.",
+  "objection": "My kitchen is tiny and I only have one pan",
+  "habit": "you scroll cooking clips before bed"
+ },
+ {
+  "id": "P014",
+  "name": "Olivia",
+  "age": 42,
+  "segment": "Parent cooking for a family in a city outside Bangkok (about 15,000-35,000 baht a month)",
+  "income": 8000,
+  "behaviour": "Cooks to save money",
+  "behaviour_how": "Cooks at home to spend less, compares prices, avoids subscriptions.",
+  "objection": "Will the dish actually come out right?",
+  "habit": "you cook on Sunday for the week ahead"
+ },
+ {
+  "id": "P015",
+  "name": "Raj",
+  "age": 27,
+  "segment": "Mid-career professional who cooks on weekends (about 45,000-90,000 baht a month)",
+  "income": 28000,
+  "behaviour": "Learns from free videos",
+  "behaviour_how": "Watches YouTube or TikTok cooking clips and follows along on the phone.",
+  "objection": "I can watch a free video for this",
+  "habit": "you cook on Sunday for the week ahead"
+ },
+ {
+  "id": "P016",
+  "name": "Marco",
+  "age": 41,
+  "segment": "Mid-career professional who cooks on weekends (about 45,000-90,000 baht a month)",
+  "income": 26000,
+  "behaviour": "Uses a free AI chat app",
+  "behaviour_how": "Already asks a general AI assistant for recipes and cooking help, for free.",
+  "objection": "Only two dishes? I would run out after two dinners",
+  "habit": "you order from a delivery app three or four times a week"
+ },
+ {
+  "id": "P017",
+  "name": "Sara",
+  "age": 25,
+  "segment": "Young worker in Bangkok learning to cook (about 18,000-40,000 baht a month)",
+  "income": 10000,
+  "behaviour": "Health-focused cook",
+  "behaviour_how": "Cooks at home to control oil, salt and calories.",
+  "objection": "A free AI chat app already answers cooking questions",
+  "habit": "you scroll cooking clips before bed"
+ },
+ {
+  "id": "P018",
+  "name": "Jasper",
+  "age": 24,
+  "segment": "University student living alone (about 4,000-10,000 baht a month, mostly allowance)",
+  "income": 3000,
+  "behaviour": "Asks family",
+  "behaviour_how": "Calls mum or follows family recipes; trusts people more than apps.",
+  "objection": "A free AI chat app already answers cooking questions",
+  "habit": "you scroll cooking clips before bed"
+ },
+ {
+  "id": "P019",
+  "name": "Cole",
+  "age": 37,
+  "segment": "Parent cooking for a family in a city outside Bangkok (about 15,000-35,000 baht a month)",
+  "income": 11000,
+  "behaviour": "Street-food regular",
+  "behaviour_how": "Eats out or orders delivery most days because a plate costs 50-60 baht; cooks only when there is time.",
+  "objection": "I do not want another monthly subscription",
+  "habit": "you scroll cooking clips before bed"
+ },
+ {
+  "id": "P020",
+  "name": "Emil",
+  "age": 29,
+  "segment": "Young worker in Bangkok learning to cook (about 18,000-40,000 baht a month)",
+  "income": 12000,
+  "behaviour": "Street-food regular",
+  "behaviour_how": "Eats out or orders delivery most days because a plate costs 50-60 baht; cooks only when there is time.",
+  "objection": "I can watch a free video for this",
+  "habit": "your mum sends you recipes on LINE"
+ }
+]

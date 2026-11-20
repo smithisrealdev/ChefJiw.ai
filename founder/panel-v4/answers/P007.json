@@ -1,0 +1,13 @@
+{
+  "id": "P007",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I'd try the free dishes since they cost nothing, but I already learn from free cooking clips every night, so I don't need to pay 99 baht for more recipes. Pre-ordering something that isn't even out yet is money I'd rather spend at the market.",
+  "objection": "My kitchen is tiny and I only have one pan. Green curry and braised pork are fine, but I don't know if the paid dishes like massaman work with what I have, and YouTube shows me all of these for free.",
+  "would_change_my_mind": "If after cooking the free dishes the Sunday plan really kept my meals around 40 baht and worked with one pan, then 99 baht once might pay for itself, but I'd only pay after it is released, not before.",
+  "price_too_cheap": 9,
+  "price_cheap": 29,
+  "price_expensive": 79,
+  "price_too_expensive": 149
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P002",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "I'd open the free version and try the Sunday cook-ahead plan, because that fits how I cook. But I won't pay 99 baht up front for a pack that doesn't exist yet when I don't even know if the free dishes come out right in my kitchen.",
+  "objection": "Will the dish actually come out right with my stove, my pans and the ingredients at my market? YouTube is free and my mother is a phone call away, so an app has to prove itself before I pay.",
+  "would_change_my_mind": "Cooking two or three of the free dishes on a Sunday and having them come out right for my family, with the 40-baht-a-meal plan holding true at my market. Then I'd buy the 12-dish pack once it's actually out.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 129,
+  "price_too_expensive": 199
+}

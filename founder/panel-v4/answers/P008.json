@@ -1,0 +1,13 @@
+{
+  "id": "P008",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "The 5 free dishes are already more than I'd get through in a month, especially since I still order delivery most nights. I'm not paying 99 baht up front for dishes that don't exist yet when I haven't even seen if the free ones come out right.",
+  "objection": "Will my basil pork actually taste like the shop's when I follow it? If the free dishes flop I'm not paying for twelve more.",
+  "would_change_my_mind": "If I cook the free dishes a few times, they come out right, and the 40-baht-a-meal plan really beats my delivery bill, I'd pay 99 baht once the pack is actually out, not as a pre-order.",
+  "price_too_cheap": 9,
+  "price_cheap": 39,
+  "price_expensive": 79,
+  "price_too_expensive": 149
+}

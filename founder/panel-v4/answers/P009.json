@@ -1,0 +1,13 @@
+{
+  "id": "P009",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I'd try the free 5 dishes, big buttons are nice when my hands are dirty. But I already ask my free AI app for recipes, and I cook the simple dishes I know, so I don't see why I should pay 99 baht now for dishes I can ask about for free.",
+  "objection": "Paying by PromptPay ahead of time to a new app I've never heard of, for dishes that don't exist yet. 99 baht is groceries for two meals for my family, and the free AI already answers my questions.",
+  "would_change_my_mind": "If I use the free 5 dishes for a few weeks and the chef really fixes my mistakes better than my free AI, then I'd pay once the 12 dishes are actually there, not as a pre-order.",
+  "price_too_cheap": 19,
+  "price_cheap": 39,
+  "price_expensive": 79,
+  "price_too_expensive": 149
+}

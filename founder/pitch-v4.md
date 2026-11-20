@@ -1,0 +1,6 @@
+ChefJiw, a Thai cooking app that opens in your phone's web browser today (iPhone and Android apps later), in Thai or English. All prices are in Thai baht.
+Chef Jiw walks you through a dish one step at a time: what to do now, how high the heat should be, a timer, what to look for, and a picture of the kitchen that changes with each step. Big buttons for messy hands, and the screen stays on.
+Free during the beta: 5 dishes (basil pork with fried egg, pork omelet, green curry, braised pork with eggs, stir-fried red curry pork with long beans), ready answers to the common questions at every step, and after you sign in with Google, 20 typed questions a day to the AI chef plus an "It didn't work" button that goes through the failed step with you.
+When you finish, you answer three questions (taste, smell, look) and get a score out of 5 with one fix for next time. The next time you cook that dish, the chef reminds you at the step that went wrong.
+A Sunday cook-ahead plan: three dishes that keep all week, one shopping list, about 40 baht a meal at sample market prices.
+Coming next: the 12-dish pack (such as tom yum, pad see ew and massaman), 99 baht once, no subscription. Pre-order now by PromptPay, with a full refund if it is not delivered by the stated date.

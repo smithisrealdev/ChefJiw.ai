@@ -1,0 +1,13 @@
+{
+  "id": "P019",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "A plate of basil pork from the stall is 50-60 baht and takes no time, so I only cook when I have a free evening. I might try the free dishes, but I'm not paying in advance for twelve more recipes I can already watch in clips before bed.",
+  "objection": "I barely have time to cook, and free cooking videos already show me tom yum and pad see ew, so why pay 99 baht up front by PromptPay for something not even delivered yet from an app I've never used.",
+  "would_change_my_mind": "If the free dishes and the Sunday cook-ahead plan actually saved my family money for a few weeks compared with buying street food, I'd pay for the pack after it's out, not as a pre-order.",
+  "price_too_cheap": 9,
+  "price_cheap": 39,
+  "price_expensive": 79,
+  "price_too_expensive": 149
+}

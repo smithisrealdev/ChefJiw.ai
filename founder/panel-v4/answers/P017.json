@@ -1,0 +1,13 @@
+{
+  "id": "P017",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I'd try the free 5 dishes, but I wouldn't pre-order the 99 baht pack. Tom yum, pad see ew and massaman are all on YouTube and I can ask a free AI chat for less oil or salt, so paying for more dishes doesn't feel needed yet.",
+  "objection": "Nothing here says it helps me cook healthier, like cutting oil, sugar or salt or showing calories, and a free AI chat already answers my cooking questions. Paying ahead by PromptPay for dishes that don't exist yet also feels like a risk.",
+  "would_change_my_mind": "A healthy mode in the pack: lighter versions of each dish with calories and how much oil, salt and sugar it uses, and I'd want to see it working in the free dishes first.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 129,
+  "price_too_expensive": 199
+}

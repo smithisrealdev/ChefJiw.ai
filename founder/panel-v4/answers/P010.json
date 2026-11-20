@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I might open the free version once on a Sunday out of curiosity, but I'm not paying for the 12-dish pack. When a dish goes wrong I call my mum, and tom yum or massaman I can learn from a free YouTube video.",
+  "objection": "Why pay an app for recipes my family already knows, when there are free videos for every one of these dishes? And pre-ordering something that doesn't exist yet feels odd.",
+  "would_change_my_mind": "If the free dishes actually saved my Sunday meal prep a few weeks in a row and the cook-ahead plan really came out around 40 baht a meal, I'd pay 99 once for more.",
+  "price_too_cheap": 19,
+  "price_cheap": 49,
+  "price_expensive": 99,
+  "price_too_expensive": 199
+}

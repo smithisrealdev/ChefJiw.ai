@@ -1,0 +1,13 @@
+{
+  "id": "P006",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "A plate of basil pork from the stall downstairs is 50 baht and nobody has to wash up, so I only cook when I have time. I might open the free dishes in my browser one evening, but I won't pay 99 baht up front for a pack I can't use yet.",
+  "objection": "My kitchen is tiny and I have one pan. Green curry and braised pork with eggs sound like they need a pot and a long time, and I already watch free cooking clips every night, so why pay for recipes?",
+  "would_change_my_mind": "If I cooked the free dishes a few times in my one pan and they came out better than my usual, and the 12-dish pack said which dishes work with one pan and finish in about 20 minutes.",
+  "price_too_cheap": 9,
+  "price_cheap": 29,
+  "price_expensive": 59,
+  "price_too_expensive": 99
+}

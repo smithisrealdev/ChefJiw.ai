@@ -1,0 +1,13 @@
+{
+  "id": "P004",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I eat out most days because a plate is 50-60 baht, and when I do cook my mum already sends me recipes on LINE for free. I might try the free beta dishes, but paying 99 baht for 12 more dishes I probably won't cook is two street-food meals gone.",
+  "objection": "I barely cook, so I'd use the free 5 dishes once or twice and forget it. Pre-ordering by PromptPay for something not out yet feels like paying for nothing.",
+  "would_change_my_mind": "If the free dishes actually got me cooking cheaper than street food every week, like the 40 baht a meal plan really working for a student alone, then 99 baht for more dishes would make sense.",
+  "price_too_cheap": 9,
+  "price_cheap": 29,
+  "price_expensive": 59,
+  "price_too_expensive": 99
+}

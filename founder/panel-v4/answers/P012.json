@@ -1,0 +1,13 @@
+{
+  "id": "P012",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I might open the free 5 dishes once out of curiosity, but tom yum and pad see ew are all over YouTube and TikTok for free, so I'm not paying 99 baht up front for a pack that doesn't even exist yet.",
+  "objection": "I can watch a free video for this, and paying by PromptPay to pre-order from an app I've never heard of feels like a risk even with a refund promise.",
+  "would_change_my_mind": "If I cook the free dishes and the 'It didn't work' button actually saves a dish a video couldn't, then I'd pay once the pack is out, not before.",
+  "price_too_cheap": 9,
+  "price_cheap": 29,
+  "price_expensive": 79,
+  "price_too_expensive": 149
+}
