@@ -1,0 +1,35 @@
+{
+  "business": "ChefJiw.ai (Chef Jiw, an AI Thai cooking coach for people abroad)",
+  "target": "Adults 25 to 45 living outside Thailand who love Thai food, order it often, and want to cook it at home",
+  "where": "Online, mainly US, UK, Australia and Europe",
+  "age": [25, 45],
+  "segments": [
+    {"name": "Young professional who cooks to save money", "share": 0.40, "income": [40000, 80000]},
+    {"name": "Established home cook / food hobbyist", "share": 0.35, "income": [70000, 140000]},
+    {"name": "Thai diaspora or partner of a Thai person", "share": 0.25, "income": [45000, 110000]}
+  ],
+  "behaviours": [
+    {"name": "Free-content user", "share": 0.25, "how": "Learns from YouTube, TikTok and recipe blogs and never pays for recipes."},
+    {"name": "Already pays for a cooking or meal app", "share": 0.15, "how": "Has a subscription like a recipe app or meal kit and is open to another if it earns its place."},
+    {"name": "Asks a general AI chatbot", "share": 0.15, "how": "Already asks a free AI chatbot for recipes and substitutions."},
+    {"name": "Authenticity seeker", "share": 0.15, "how": "Wants the real version, cares where the recipe comes from and who teaches it."},
+    {"name": "Busy weeknight cook", "share": 0.15, "how": "Cooks fast dinners after work and gives up if a recipe needs hard-to-find ingredients."},
+    {"name": "Tries apps then churns", "share": 0.15, "how": "Downloads new apps eagerly, uses them for a week, then forgets them."}
+  ],
+  "objections": [
+    "I can find Thai recipes free on YouTube",
+    "A free AI chatbot already does this",
+    "I can't find the Thai ingredients where I live",
+    "Will an AI actually know authentic Thai cooking?",
+    "Talking to an app while cooking feels awkward",
+    "I don't cook Thai often enough to subscribe",
+    "Another monthly subscription"
+  ],
+  "habits": [
+    "you order Thai takeaway at least twice a month",
+    "your nearest Asian grocery is a 30-minute drive away",
+    "you cook dinner most weeknights with your phone propped on the counter",
+    "you visited Thailand once and still talk about the food",
+    "you save recipe videos you never actually make"
+  ]
+}

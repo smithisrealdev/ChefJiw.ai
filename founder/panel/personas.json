@@ -1,0 +1,222 @@
+[
+ {
+  "id": "P001",
+  "name": "Nora",
+  "age": 45,
+  "segment": "Established home cook / food hobbyist",
+  "income": 105000,
+  "behaviour": "Free-content user",
+  "behaviour_how": "Learns from YouTube, TikTok and recipe blogs and never pays for recipes.",
+  "objection": "Talking to an app while cooking feels awkward",
+  "habit": "you visited Thailand once and still talk about the food"
+ },
+ {
+  "id": "P002",
+  "name": "Ravi",
+  "age": 43,
+  "segment": "Young professional who cooks to save money",
+  "income": 78000,
+  "behaviour": "Free-content user",
+  "behaviour_how": "Learns from YouTube, TikTok and recipe blogs and never pays for recipes.",
+  "objection": "Talking to an app while cooking feels awkward",
+  "habit": "you order Thai takeaway at least twice a month"
+ },
+ {
+  "id": "P003",
+  "name": "Marcus",
+  "age": 25,
+  "segment": "Thai diaspora or partner of a Thai person",
+  "income": 59000,
+  "behaviour": "Asks a general AI chatbot",
+  "behaviour_how": "Already asks a free AI chatbot for recipes and substitutions.",
+  "objection": "Talking to an app while cooking feels awkward",
+  "habit": "you order Thai takeaway at least twice a month"
+ },
+ {
+  "id": "P004",
+  "name": "Sara",
+  "age": 30,
+  "segment": "Established home cook / food hobbyist",
+  "income": 130000,
+  "behaviour": "Busy weeknight cook",
+  "behaviour_how": "Cooks fast dinners after work and gives up if a recipe needs hard-to-find ingredients.",
+  "objection": "I can't find the Thai ingredients where I live",
+  "habit": "you visited Thailand once and still talk about the food"
+ },
+ {
+  "id": "P005",
+  "name": "Kofi",
+  "age": 38,
+  "segment": "Young professional who cooks to save money",
+  "income": 54000,
+  "behaviour": "Asks a general AI chatbot",
+  "behaviour_how": "Already asks a free AI chatbot for recipes and substitutions.",
+  "objection": "Another monthly subscription",
+  "habit": "your nearest Asian grocery is a 30-minute drive away"
+ },
+ {
+  "id": "P006",
+  "name": "Elena",
+  "age": 27,
+  "segment": "Thai diaspora or partner of a Thai person",
+  "income": 68000,
+  "behaviour": "Tries apps then churns",
+  "behaviour_how": "Downloads new apps eagerly, uses them for a week, then forgets them.",
+  "objection": "Talking to an app while cooking feels awkward",
+  "habit": "you save recipe videos you never actually make"
+ },
+ {
+  "id": "P007",
+  "name": "Adrian",
+  "age": 34,
+  "segment": "Thai diaspora or partner of a Thai person",
+  "income": 105000,
+  "behaviour": "Busy weeknight cook",
+  "behaviour_how": "Cooks fast dinners after work and gives up if a recipe needs hard-to-find ingredients.",
+  "objection": "A free AI chatbot already does this",
+  "habit": "you order Thai takeaway at least twice a month"
+ },
+ {
+  "id": "P008",
+  "name": "Hamza",
+  "age": 33,
+  "segment": "Young professional who cooks to save money",
+  "income": 53000,
+  "behaviour": "Authenticity seeker",
+  "behaviour_how": "Wants the real version, cares where the recipe comes from and who teaches it.",
+  "objection": "Talking to an app while cooking feels awkward",
+  "habit": "you order Thai takeaway at least twice a month"
+ },
+ {
+  "id": "P009",
+  "name": "Lucia",
+  "age": 26,
+  "segment": "Thai diaspora or partner of a Thai person",
+  "income": 59000,
+  "behaviour": "Tries apps then churns",
+  "behaviour_how": "Downloads new apps eagerly, uses them for a week, then forgets them.",
+  "objection": "Will an AI actually know authentic Thai cooking?",
+  "habit": "you save recipe videos you never actually make"
+ },
+ {
+  "id": "P010",
+  "name": "Jade",
+  "age": 25,
+  "segment": "Established home cook / food hobbyist",
+  "income": 104000,
+  "behaviour": "Authenticity seeker",
+  "behaviour_how": "Wants the real version, cares where the recipe comes from and who teaches it.",
+  "objection": "I can't find the Thai ingredients where I live",
+  "habit": "you order Thai takeaway at least twice a month"
+ },
+ {
+  "id": "P011",
+  "name": "Idris",
+  "age": 27,
+  "segment": "Established home cook / food hobbyist",
+  "income": 118000,
+  "behaviour": "Free-content user",
+  "behaviour_how": "Learns from YouTube, TikTok and recipe blogs and never pays for recipes.",
+  "objection": "I can't find the Thai ingredients where I live",
+  "habit": "you visited Thailand once and still talk about the food"
+ },
+ {
+  "id": "P012",
+  "name": "Eli",
+  "age": 25,
+  "segment": "Thai diaspora or partner of a Thai person",
+  "income": 80000,
+  "behaviour": "Already pays for a cooking or meal app",
+  "behaviour_how": "Has a subscription like a recipe app or meal kit and is open to another if it earns its place.",
+  "objection": "A free AI chatbot already does this",
+  "habit": "you order Thai takeaway at least twice a month"
+ },
+ {
+  "id": "P013",
+  "name": "Marco",
+  "age": 33,
+  "segment": "Young professional who cooks to save money",
+  "income": 68000,
+  "behaviour": "Already pays for a cooking or meal app",
+  "behaviour_how": "Has a subscription like a recipe app or meal kit and is open to another if it earns its place.",
+  "objection": "A free AI chatbot already does this",
+  "habit": "your nearest Asian grocery is a 30-minute drive away"
+ },
+ {
+  "id": "P014",
+  "name": "Yara",
+  "age": 40,
+  "segment": "Young professional who cooks to save money",
+  "income": 79000,
+  "behaviour": "Authenticity seeker",
+  "behaviour_how": "Wants the real version, cares where the recipe comes from and who teaches it.",
+  "objection": "Another monthly subscription",
+  "habit": "you order Thai takeaway at least twice a month"
+ },
+ {
+  "id": "P015",
+  "name": "Liam",
+  "age": 34,
+  "segment": "Young professional who cooks to save money",
+  "income": 69000,
+  "behaviour": "Free-content user",
+  "behaviour_how": "Learns from YouTube, TikTok and recipe blogs and never pays for recipes.",
+  "objection": "Will an AI actually know authentic Thai cooking?",
+  "habit": "you visited Thailand once and still talk about the food"
+ },
+ {
+  "id": "P016",
+  "name": "Iris",
+  "age": 32,
+  "segment": "Young professional who cooks to save money",
+  "income": 41000,
+  "behaviour": "Asks a general AI chatbot",
+  "behaviour_how": "Already asks a free AI chatbot for recipes and substitutions.",
+  "objection": "A free AI chatbot already does this",
+  "habit": "you cook dinner most weeknights with your phone propped on the counter"
+ },
+ {
+  "id": "P017",
+  "name": "Arjun",
+  "age": 40,
+  "segment": "Established home cook / food hobbyist",
+  "income": 99000,
+  "behaviour": "Tries apps then churns",
+  "behaviour_how": "Downloads new apps eagerly, uses them for a week, then forgets them.",
+  "objection": "Will an AI actually know authentic Thai cooking?",
+  "habit": "you cook dinner most weeknights with your phone propped on the counter"
+ },
+ {
+  "id": "P018",
+  "name": "Talia",
+  "age": 25,
+  "segment": "Young professional who cooks to save money",
+  "income": 49000,
+  "behaviour": "Already pays for a cooking or meal app",
+  "behaviour_how": "Has a subscription like a recipe app or meal kit and is open to another if it earns its place.",
+  "objection": "I can't find the Thai ingredients where I live",
+  "habit": "you save recipe videos you never actually make"
+ },
+ {
+  "id": "P019",
+  "name": "Rafael",
+  "age": 36,
+  "segment": "Established home cook / food hobbyist",
+  "income": 135000,
+  "behaviour": "Free-content user",
+  "behaviour_how": "Learns from YouTube, TikTok and recipe blogs and never pays for recipes.",
+  "objection": "Another monthly subscription",
+  "habit": "you visited Thailand once and still talk about the food"
+ },
+ {
+  "id": "P020",
+  "name": "Keisha",
+  "age": 37,
+  "segment": "Established home cook / food hobbyist",
+  "income": 103000,
+  "behaviour": "Busy weeknight cook",
+  "behaviour_how": "Cooks fast dinners after work and gives up if a recipe needs hard-to-find ingredients.",
+  "objection": "I can't find the Thai ingredients where I live",
+  "habit": "you save recipe videos you never actually make"
+ }
+]

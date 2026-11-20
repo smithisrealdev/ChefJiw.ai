@@ -1,0 +1,13 @@
+{
+  "id": "P002",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I already learn Thai dishes free from YouTube and blogs, and I can pause a video with greasy hands just fine. I might try the 3 free dishes, but I'd never get past that to paying for recipes.",
+  "objection": "Talking out loud to an app while I'm stir-frying feels awkward, and three free dishes a month is about as often as I'd cook Thai anyway.",
+  "would_change_my_mind": "If the free dishes showed me it fixes something YouTube can't, like actually telling me what to swap when my store has no holy basil and the dish still tasting like my takeaway.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 1.99,
+  "price_expensive": 3.99,
+  "price_too_expensive": 5.99
+}

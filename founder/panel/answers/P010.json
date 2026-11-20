@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "I care who's actually teaching me, and 'an AI Thai chef' tells me nothing about where these recipes come from. I'd try the 3 free dishes, but that's about all I'd cook from it in a month anyway, so I wouldn't pay yet.",
+  "objection": "Is Chef Jiw a real Thai cook whose family recipes these are, or an AI remixing the internet? And if the substitutes it suggests aren't good, the dish isn't the real version anymore.",
+  "would_change_my_mind": "Knowing there's a real, named Thai home cook behind the recipes, and the free dishes actually tasting like the takeaway I love even with the substitutes.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 2.99,
+  "price_expensive": 7.99,
+  "price_too_expensive": 12.99
+}

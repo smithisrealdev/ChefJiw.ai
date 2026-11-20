@@ -1,0 +1,13 @@
+{
+  "id": "P006",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I'd probably sign up for the free tier, maybe make one dish, and then forget about it like every other cooking app on my phone. Three free dishes a month is already more than I actually cook, so I'd never hit the point where I need to pay.",
+  "objection": "Talking out loud to an AI while I'm cooking feels awkward, especially if my partner is in the kitchen, and I don't trust a brand-new app with no reviews to really get Thai home cooking right.",
+  "would_change_my_mind": "If my partner or their family tried it and said the recipes actually taste like home, I'd probably cook more and upgrade.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 1.99,
+  "price_expensive": 4.99,
+  "price_too_expensive": 7.99
+}

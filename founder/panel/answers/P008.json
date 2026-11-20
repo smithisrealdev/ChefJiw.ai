@@ -1,0 +1,13 @@
+{
+  "id": "P008",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "I want to learn Thai food from a real person whose grandmother cooked it, not from an AI that says it's authentic. I might poke at the free 3 dishes, but I wouldn't pay for Plus when free YouTube channels from actual Thai cooks already exist.",
+  "objection": "Who actually wrote these recipes? 'Written in the style of Thai home cooking' by an AI with no reviews and no named Thai cook behind it doesn't tell me it's the real thing. And talking out loud to my phone while I cook feels awkward.",
+  "would_change_my_mind": "Knowing the recipes come from a named Thai home cook or chef I can check out, with a few real Thai users saying the dishes taste like home.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 1.99,
+  "price_expensive": 4.99,
+  "price_too_expensive": 7.99
+}

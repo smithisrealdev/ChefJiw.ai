@@ -1,0 +1,13 @@
+{
+  "id": "P009",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason": "I'd totally try the free version, but realistically I'd cook maybe one or two dishes before forgetting it exists, so 3 free dishes is more than I'd ever use. Paying would be for a version of me who actually cooks every week, and that's not me yet.",
+  "reason_code": "habit",
+  "objection": "Will an AI actually know authentic Thai cooking, or will it tell me to swap fish sauce for soy sauce like every other app? If the first dish doesn't taste like home, I'm out.",
+  "would_change_my_mind": "If my first free dish genuinely tasted like my partner's family's cooking and it nudged me to cook again the next week, I'd pay the $2.99 without thinking.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 1.99,
+  "price_expensive": 5.99,
+  "price_too_expensive": 9.99
+}
