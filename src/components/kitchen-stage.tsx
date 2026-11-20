@@ -1,12 +1,14 @@
 import { Image } from 'expo-image';
+import * as Haptics from 'expo-haptics';
 import { useEffect, useState, type ReactNode } from 'react';
-import { AccessibilityInfo, Animated, Easing, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Platform, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 
-import { Actor, useMove } from '@/components/ui';
+import { Actor, T, useMove } from '@/components/ui';
 import { IMG } from '@/data/images';
-import { stageAt, type Food, type Side, type Stage, type Station } from '@/data/kitchen';
-import type { Recipe } from '@/data/recipes';
+import { actsAt, FOOD_NAME, shownStage, stageAt, type Act, type Food, type Side, type Stage, type Station } from '@/data/kitchen';
+import type { Heat, Recipe } from '@/data/recipes';
+import { useSettings } from '@/lib/settings';
 
 // ครัวยาว 1200 x 320 หน่วย (ตรงกับ kitchen.png ที่วาดใน assets/images/chef/src/draw.py) จอเห็นทีละช่วง กล้องเลื่อนตามเชฟ
 const WORLD = 1200, HEIGHT = 320, FLOOR = 296;
@@ -22,8 +24,18 @@ export function KitchenStage({ r, i }: { r: Recipe; i: number }) {
   const H = Math.round(Math.min(250, Math.max(170, screenH * 0.27)));
   const k = H / HEIGHT;
   const [viewW, setViewW] = useState(0);
-  const st = stageAt(r.id, r.steps, i);
-  const target = SPOT[st.at];
+  const base = stageAt(r.id, r.steps, i);
+  const target = SPOT[base.at];
+  // สิ่งที่ต้องแตะของขั้นนี้ จำจำนวนครั้งที่แตะแยกตามขั้น เปลี่ยนขั้นแล้วเริ่มใหม่
+  const pics = pickables(r);
+  const acts = actsAt(r.id, r.steps, i, pics.map((g) => g.id));
+  const [taps, setTaps] = useState<{ step: number; n: number[] }>({ step: i, n: [] });
+  const done = taps.step === i ? taps.n : [];
+  const st = shownStage(r.id, r.steps, i, acts, done);
+  const tap = (n: number) => {
+    Haptics.selectionAsync().catch(() => {});
+    setTaps((prev) => { const list = prev.step === i ? [...prev.n] : []; list[n] = (list[n] ?? 0) + 1; return { step: i, n: list }; });
+  };
 
   const [x] = useState(() => new Animated.Value(-120)); // เชฟเดินเข้าครัวจากซ้ายตอนเปิดหน้า
   const [walking, setWalking] = useState<0 | 1 | -1>(0);
@@ -47,14 +59,16 @@ export function KitchenStage({ r, i }: { r: Recipe; i: number }) {
   const x0 = viewW / (2 * k) - 60, x1 = x0 + WORLD - viewW / k;
   const cam = x1 > x0 ? x.interpolate({ inputRange: [x0, x1], outputRange: [0, viewW - WORLD * k], extrapolate: 'clamp' }) : 0;
   const pose = walking ? 'walk' : st.pose;
+  const tapDone = acts.findIndex((a) => a.kind === 'tap');
 
   return (
-    <View style={{ height: H, overflow: 'hidden', backgroundColor: '#FFE9A8' }} onLayout={(e) => setViewW(e.nativeEvent.layout.width)}
-      accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+    <View style={{ height: H, overflow: 'hidden', backgroundColor: '#FFE9A8' }} onLayout={(e) => setViewW(e.nativeEvent.layout.width)}>
       <Animated.View style={{ width: WORLD * k, height: H, transform: [{ translateX: cam }] }}>
+        {/* ภาพประกอบทั้งหมดไม่รับการแตะและโปรแกรมอ่านจอข้ามไป สิ่งที่แตะได้อยู่ใน Hotspots */}
+        <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         <Image source={require('@/assets/images/chef/kitchen.png')} style={StyleSheet.absoluteFill} contentFit="fill" accessible={false} />
-        <Fridge open={st.at === 'fridge'} k={k} r={r} />
-        <Sink st={st} k={k} />
+        <Fridge open={st.at === 'fridge'} k={k} />
+        <Sink st={st} k={k} running={tapDone < 0 || (done[tapDone] ?? 0) > 0} />
         <Board items={st.board} k={k} />
         <SidePlate side={st.side} k={k} r={r} />
         {/* เชฟ: ยืนบนพื้น หันตามทางที่เดิน */}
@@ -65,9 +79,99 @@ export function KitchenStage({ r, i }: { r: Recipe; i: number }) {
         </Animated.View>
         {/* กระทะอยู่หน้ามือเชฟ ตะหลิวจึงดูจุ่มลงไปในกระทะ */}
         <Stove st={st} k={k} />
+        </View>
+        <Hotspots acts={acts} done={done} st={st} k={k} pics={pics} onTap={tap} />
       </Animated.View>
+      <Guide acts={acts} done={done} goal={base.heat} />
     </View>
   );
+}
+
+/** วัตถุดิบที่มีภาพให้แตะหยิบในตู้เย็น: ใช้ img ของวัตถุดิบ ถ้าไม่มีลองชื่อ id ที่ตรงกับภาพที่มีอยู่ */
+function pickables(r: Recipe) {
+  return r.ingredients.map((g) => ({ id: g.id, name: g.name, src: g.img ? IMG[g.img] : (IMG as Record<string, number>)[g.id] })).filter((g) => g.src).slice(0, 6);
+}
+type Pic = ReturnType<typeof pickables>[number];
+
+// ตำแหน่งของที่แตะได้ในครัว (กลางชิ้น กว้าง สูง) ชั้นตู้เย็นมีหกช่อง
+const SLOTS: [number, number][] = [[78, 112], [136, 112], [78, 180], [136, 180], [78, 232], [136, 232]];
+const SPOTS = { knob: [1020, 268, 30, 30], board: [682, 220, 112, 40], tap: [456, 200, 40, 40], source: [1014, 214, 44, 34], side: [772, 216, 56, 40] } as const;
+const panSpot = (pot: boolean) => [930, pot ? 200 : 214, 124, pot ? 76 : 52] as const;
+const FOOD_COLOR: Partial<Record<Food, string>> = { oil: '#FFE07A', egg: '#FFFFFF', beaten: '#FFD34D', bits: '#FF5A4A', mince: '#9A5B3C', sauce: '#6B3A22', leaves: '#2FB383', beans: '#5DBB63',
+  cream: '#FFF8E8', paste: '#E8572F', curry: '#F4F1E4', chicken: '#F7D9B5', veg: '#7BC96F', water: '#BFE6FF', eggs: '#F3E6D3', caramel: '#C8782E', stew: '#7A4526', pork: '#B5683F' };
+
+/** ขั้นตอนที่ต้องแตะตอนนี้: หยิบของแตะลำดับไหนก็ได้ ที่เหลือทีละอย่าง (-1 = ครบแล้ว) */
+function current(acts: Act[], done: number[]) {
+  const left = (k: number) => (done[k] ?? 0) < acts[k].taps;
+  const pick = acts.findIndex((a, k) => a.kind === 'pick' && left(k));
+  return pick >= 0 ? pick : acts.findIndex((_, k) => left(k));
+}
+
+/** ข้อความบอกว่าต้องแตะอะไร มุมซ้ายบนของครัว */
+function Guide({ acts, done, goal }: { acts: Act[]; done: number[]; goal: Heat }) {
+  const { t, pick } = useSettings();
+  if (!acts.length) return null;
+  const c = current(acts, done), a = acts[c], n = done[c] ?? 0;
+  const food = a?.food && FOOD_NAME[a.food] ? pick(FOOD_NAME[a.food]!) : '';
+  const picks = acts.filter((x) => x.kind === 'pick').length;
+  const text = c < 0 ? t('kitchen.done')
+    : a.kind === 'pick' ? t('kitchen.pick', { n: acts.filter((x, k) => x.kind === 'pick' && (done[k] ?? 0) > 0).length, total: picks })
+    : a.kind === 'heat' ? t('kitchen.heat', { x: t(`cook.heat${goal}`) })
+    : a.kind === 'chop' || a.kind === 'mix' ? t(`kitchen.${a.kind}`, { n, total: a.taps })
+    : t(`kitchen.${a.kind}`, { x: food });
+  return (
+    <View accessibilityLiveRegion="polite" style={{ position: 'absolute', left: 8, top: 8, maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999,
+      backgroundColor: c < 0 ? '#C9F2CF' : '#FFFFFF' }}>
+      <T v="smallBold" tone="pastel">{text}</T>
+    </View>
+  );
+}
+
+/** ของที่แตะได้: วางในพิกัดของครัว เลื่อนไปพร้อมกล้อง ของที่ต้องแตะตอนนี้มีวงสีเหลืองกะพริบ */
+function Hotspots({ acts, done, st, k, pics, onTap }: { acts: Act[]; done: number[]; st: Stage; k: number; pics: Pic[]; onTap: (n: number) => void }) {
+  const { t, pick } = useSettings();
+  const glow = useMove('twinkle'), bob = useMove('puff');
+  const c = current(acts, done);
+  if (c < 0) return null;
+  const a = acts[c];
+  const spot = (n: number, [cx, cy, w, h]: readonly [number, number, number, number], label: string, child?: ReactNode, round = false) => {
+    // พื้นที่แตะอย่างน้อย 44 จุด แม้ภาพในครัวจะเล็ก
+    const slopX = Math.max(0, (44 - w * k) / 2), slopY = Math.max(0, (44 - h * k) / 2);
+    return (
+      <Pressable key={n + label} accessibilityRole="button" accessibilityLabel={label} onPress={() => onTap(n)} hitSlop={{ left: slopX, right: slopX, top: slopY, bottom: slopY }}
+        style={{ position: 'absolute', left: (cx - w / 2) * k, top: (cy - h / 2) * k, width: w * k, height: h * k, alignItems: 'center', justifyContent: 'center' }}>
+        <Animated.View style={[StyleSheet.absoluteFill, { borderRadius: round ? 999 : 10 * k, borderWidth: 3, borderColor: '#24212B', backgroundColor: 'rgba(255,230,109,0.35)',
+          opacity: glow.interpolate({ inputRange: [0, 1], outputRange: [1, 0.35] }) }]} />
+        {child}
+      </Pressable>
+    );
+  };
+  if (a.kind === 'pick') return <>{acts.map((x, n) => {
+    if (x.kind !== 'pick' || (done[n] ?? 0) > 0) return null;
+    const g = pics.find((p) => p.id === x.item)!, [cx, cy] = SLOTS[n];
+    return (
+      <Animated.View key={n} style={{ position: 'absolute', left: 0, top: 0, transform: [{ translateY: Animated.multiply(bob, (n % 2 ? 3 : -3) * k) }] }}>
+        {spot(n, [cx, cy, 46, 46], t('kitchen.take', { x: pick(g.name) }),
+          <View style={{ width: 40 * k, height: 40 * k, borderRadius: 999, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center' }}>
+            <Image source={g.src} style={{ width: 32 * k, height: 32 * k }} contentFit="contain" accessible={false} />
+          </View>, true)}
+      </Animated.View>
+    );
+  })}</>;
+  if (a.kind === 'heat') return spot(c, SPOTS.knob, t('kitchen.knob', { x: t(`cook.heat${st.heat}`) }),
+    <View style={{ width: 22 * k, height: 22 * k, borderRadius: 999, backgroundColor: '#FFFFFF', alignItems: 'center', transform: [{ rotate: `${-90 + st.heat * 60}deg` }] }}>
+      <View style={{ width: 3, height: 9 * k, backgroundColor: '#24212B', borderRadius: 2 }} />
+    </View>, true);
+  if (a.kind === 'chop' || a.kind === 'mix') return spot(c, SPOTS.board, t(`kitchen.${a.kind}`, { n: done[c] ?? 0, total: a.taps }));
+  if (a.kind === 'tap') return spot(c, SPOTS.tap, t('kitchen.tap'), undefined, true);
+  if (a.kind === 'plate' || a.kind === 'box') return spot(c, SPOTS.side, t(`kitchen.${a.kind}`));
+  if (a.kind === 'add') return spot(c, SPOTS.source, t('kitchen.add', { x: a.food && FOOD_NAME[a.food] ? pick(FOOD_NAME[a.food]!) : '' }),
+    <Svg width={40 * k} height={30 * k} viewBox="0 0 40 30">
+      <Ellipse cx={20} cy={13} rx={14} ry={7} fill={FOOD_COLOR[a.food!] ?? '#FFFFFF'} />
+      {a.food === 'egg' && <Circle cx={20} cy={11} r={4} fill="#FFB020" />}
+      <Path d="M3 12 H37 Q35 28 20 28 Q5 28 3 12 Z" fill="#FFFFFF" stroke="#D8D1F0" strokeWidth={2} />
+    </Svg>);
+  return spot(c, panSpot(st.pot), t(`kitchen.${a.kind}`, { x: '' }));
 }
 
 /** วางภาพ SVG ชิ้นหนึ่งในครัวตามพิกัดของครัว */
@@ -79,41 +183,28 @@ function Piece({ x, y, w, h, k, children, style }: { x: number; y: number; w: nu
   );
 }
 
-/** ตู้เย็นเปิดตอนหยิบของ ของจริงของสูตรนี้ลอยขึ้นมาให้เห็นว่าต้องหยิบอะไร */
-function Fridge({ open, k, r }: { open: boolean; k: number; r: Recipe }) {
-  const bob = useMove('puff');
+/** ตู้เย็นเปิดตอนหยิบของ ของที่ต้องหยิบอยู่ในชั้น (แตะได้ใน Hotspots) */
+function Fridge({ open, k }: { open: boolean; k: number }) {
   if (!open) return null;
-  // ภาพวัตถุดิบ: ใช้ img ของวัตถุดิบ ถ้าไม่มีลองชื่อ id ที่ตรงกับภาพที่มีอยู่
-  const items = r.ingredients.map((g) => ({ id: g.id, src: g.img ? IMG[g.img] : (IMG as Record<string, number>)[g.id] })).filter((g) => g.src).slice(0, 4);
   return (
-    <>
-      <Piece x={10} y={40} w={168} h={258} k={k}>
-        <Rect x={34} y={6} width={130} height={248} rx={16} fill="#EEF4FF" />
-        <Path d="M36 90 H162 M36 160 H162 M36 210 H162" stroke="#D8D1F0" strokeWidth={5} />
-        <Circle cx={70} cy={76} r={12} fill="#FF7A59" /><Rect x={100} y={60} width={34} height={28} rx={6} fill="#7BE0B5" />
-        <Ellipse cx={80} cy={148} rx={20} ry={11} fill="#FFFFFF" /><Rect x={112} y={132} width={30} height={26} rx={6} fill="#FFD84D" />
-        {/* ประตูเปิดออกไปทางซ้าย */}
-        <Path d="M2 2 L32 10 V252 L2 258 Z" fill="#FFFFFF" stroke="#D8D1F0" strokeWidth={4} />
-      </Piece>
-      {items.map((g, n) => (
-        <Animated.View key={g.id} style={{ position: 'absolute', left: (30 + n * 44) * k, top: (6 + (n % 2) * 18) * k, width: 46 * k, height: 46 * k, borderRadius: 999, backgroundColor: '#FFFFFF',
-          alignItems: 'center', justifyContent: 'center', transform: [{ translateY: Animated.multiply(bob, 6 * k * (n % 2 ? 1 : -1)) }] }}>
-          <Image source={g.src} style={{ width: 36 * k, height: 36 * k }} contentFit="contain" accessible={false} />
-        </Animated.View>
-      ))}
-    </>
+    <Piece x={10} y={40} w={168} h={258} k={k}>
+      <Rect x={34} y={6} width={130} height={248} rx={16} fill="#EEF4FF" />
+      <Path d="M36 98 H162 M36 166 H162 M36 218 H162" stroke="#D8D1F0" strokeWidth={5} />
+      {/* ประตูเปิดออกไปทางซ้าย */}
+      <Path d="M2 2 L32 10 V252 L2 258 Z" fill="#FFFFFF" stroke="#D8D1F0" strokeWidth={4} />
+    </Piece>
   );
 }
 
 /** น้ำไหลจากก๊อกตอนล้าง พร้อมของที่ล้างอยู่ในอ่าง */
-function Sink({ st, k }: { st: Stage; k: number }) {
+function Sink({ st, k, running }: { st: Stage; k: number; running: boolean }) {
   const flow = useMove('twinkle');
   if (st.at !== 'sink') return null;
   return (
     <>
-      <Piece x={430} y={200} w={20} h={42} k={k} style={{ opacity: flow.interpolate({ inputRange: [0, 1], outputRange: [0.95, 0.6] }) }}>
+      {running && <Piece x={430} y={200} w={20} h={42} k={k} style={{ opacity: flow.interpolate({ inputRange: [0, 1], outputRange: [0.95, 0.6] }) }}>
         <Rect x={6} y={0} width={8} height={42} rx={4} fill="#8FD3FF" />
-      </Piece>
+      </Piece>}
       <Piece x={396} y={222} w={72} h={22} k={k}>
         {st.sink === 'leaves' && <Leaves cx={36} cy={14} />}
         <Ellipse cx={20} cy={18} rx={6} ry={3} fill="#FFFFFF" opacity={0.8} /><Ellipse cx={56} cy={16} rx={5} ry={2.5} fill="#FFFFFF" opacity={0.8} />

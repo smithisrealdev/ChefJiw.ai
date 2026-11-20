@@ -2,6 +2,7 @@
 // ของในกระทะกับของข้างเตาค้างอยู่จนกว่าขั้นหลังจะเปลี่ยน (เช่น ไข่ดาวที่ตักขึ้นพักอยู่ข้างเตาจนจัดจาน) ของบนเขียงมีเฉพาะขั้นที่ทำบนเขียง
 import type { MascotName } from '@/data/images';
 import type { Heat, Step } from '@/data/recipes';
+import type { L } from '@/lib/i18n';
 
 export type Station = 'fridge' | 'sink' | 'board' | 'stove';
 export type Food =
@@ -86,3 +87,48 @@ export function stageAt(recipe: string, steps: Step[], i: number): Stage {
     heat: spec.pose === 'cheer' ? 0 : heat ?? 0,
   };
 }
+
+// ---------- สิ่งที่ผู้ใช้แตะในครัวต่อขั้น (เหมือนต้นแบบ): คิดจากสิ่งที่เปลี่ยนไประหว่างขั้นก่อนกับขั้นนี้ ----------
+// หยิบของในตู้เย็นแตะลำดับไหนก็ได้ ที่เหลือแตะตามลำดับ: หมุนไฟ หั่นหรือคน เปิดน้ำ ใส่ของ กลับด้าน ตักขึ้นหรือจัดจาน แล้วคน
+export type ActKind = 'pick' | 'heat' | 'chop' | 'mix' | 'tap' | 'add' | 'flip' | 'scoop' | 'plate' | 'box' | 'stir';
+export type Act = { kind: ActKind; taps: number; food?: Food; item?: string };
+const EMPTY: Stage = { at: 'fridge', pose: 'think', pot: false, pan: [], board: [], side: null, sink: null, heat: 0 };
+
+/** pickable = id ของวัตถุดิบที่มีภาพให้แตะในตู้เย็น */
+export function actsAt(recipe: string, steps: Step[], i: number, pickable: string[]): Act[] {
+  const st = stageAt(recipe, steps, i), prev = i > 0 ? stageAt(recipe, steps, i - 1) : EMPTY;
+  if (st.at === 'fridge') return pickable.slice(0, 6).map((item) => ({ kind: 'pick', taps: 1, item }));
+  const acts: Act[] = [];
+  // จัดจานแล้วไฟดับเอง ไม่ต้องเดินกลับไปหมุนลูกบิด
+  if (st.heat !== prev.heat && st.pose !== 'cheer') acts.push({ kind: 'heat', taps: Math.abs(st.heat - prev.heat) });
+  if (st.at === 'board' && st.board.length) acts.push({ kind: st.pose === 'wash' ? 'mix' : 'chop', taps: 3 });
+  if (st.at === 'sink') acts.push({ kind: 'tap', taps: 1 });
+  for (const f of st.pan.filter((x) => !prev.pan.includes(x))) acts.push(f === 'omelet' ? { kind: 'flip', taps: 1 } : { kind: 'add', taps: 1, food: f });
+  if (st.side && st.side !== prev.side) acts.push({ kind: st.side === 'dish' ? 'plate' : st.side === 'box' ? 'box' : 'scoop', taps: 1 });
+  if (st.at === 'stove' && steps[i].timer && !acts.some((a) => a.kind === 'flip')) acts.push({ kind: 'stir', taps: 1 });
+  return acts;
+}
+
+/** ครัวที่เห็นระหว่างแตะ: เริ่มจากสภาพของขั้นก่อน ของที่แตะแล้วเปลี่ยนตาม ครบทุกอย่างแล้วเท่ากับสภาพของขั้นนี้ */
+export function shownStage(recipe: string, steps: Step[], i: number, acts: Act[], done: number[]): Stage {
+  const st = stageAt(recipe, steps, i), prev = i > 0 ? stageAt(recipe, steps, i - 1) : EMPTY;
+  const isDone = (k: number) => (done[k] ?? 0) >= acts[k].taps;
+  const of = (kinds: ActKind[]) => acts.map((a, k) => (kinds.includes(a.kind) ? k : -1)).filter((k) => k >= 0);
+  const panActs = of(['add', 'flip', 'scoop', 'plate', 'box']), sideActs = of(['scoop', 'plate', 'box']), heatAct = of(['heat'])[0];
+  const added = acts.filter((a, k) => isDone(k) && a.kind === 'add').map((a) => a.food);
+  const pan = !panActs.length || panActs.every(isDone) ? st.pan
+    : !panActs.some(isDone) ? prev.pan
+    : st.pan.filter((f) => prev.pan.includes(f) || added.includes(f));
+  const step = st.heat > prev.heat ? 1 : -1;
+  const heat = heatAct === undefined ? st.heat : (prev.heat + step * Math.min(done[heatAct] ?? 0, acts[heatAct].taps)) as Heat;
+  return { ...st, pan, heat, side: sideActs.length && !sideActs.every(isDone) ? prev.side : st.side };
+}
+
+export const FOOD_NAME: Partial<Record<Food, L>> = {
+  oil: { th: 'น้ำมัน', en: 'oil' }, egg: { th: 'ไข่', en: 'egg' }, beaten: { th: 'ไข่ที่ตีแล้ว', en: 'beaten egg' },
+  bits: { th: 'เครื่องที่สับไว้', en: 'chopped aromatics' }, mince: { th: 'หมูสับ', en: 'minced pork' }, sauce: { th: 'เครื่องปรุง', en: 'seasoning' },
+  leaves: { th: 'ใบสมุนไพร', en: 'herb leaves' }, beans: { th: 'ถั่วฝักยาว', en: 'long beans' }, cream: { th: 'หัวกะทิ', en: 'coconut cream' },
+  paste: { th: 'พริกแกง', en: 'curry paste' }, curry: { th: 'กะทิ', en: 'coconut milk' }, chicken: { th: 'ไก่', en: 'chicken' },
+  veg: { th: 'มะเขือ', en: 'eggplant' }, water: { th: 'น้ำ', en: 'water' }, eggs: { th: 'ไข่', en: 'eggs' },
+  caramel: { th: 'น้ำตาลปี๊บ', en: 'palm sugar' }, stew: { th: 'น้ำกับซีอิ๊ว', en: 'water and soy sauce' }, pork: { th: 'หมู', en: 'pork' },
+};
