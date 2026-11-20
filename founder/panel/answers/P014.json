@@ -1,0 +1,13 @@
+{
+  "id": "P014",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "I'd try the 3 free dishes, but I wouldn't pay yet. An AI 'chef' isn't a real Thai cook, and nothing tells me whose recipes these actually are, so the free tier is enough to see if it's legit.",
+  "objection": "Who actually wrote these recipes? 'Thai home cooking style' from an AI with no named Thai cook behind it and no reviews feels like it could be generic internet recipes in a Thai accent.",
+  "would_change_my_mind": "Knowing a real, named Thai cook (ideally Jiw herself, with her background) created and checked the recipes, and the free dishes actually tasting like my favourite takeaway.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 2.99,
+  "price_expensive": 7,
+  "price_too_expensive": 12
+}

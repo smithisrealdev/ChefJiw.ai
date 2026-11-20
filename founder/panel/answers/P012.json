@@ -1,0 +1,13 @@
+{
+  "id": "P012",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I'd probably try the free 3 dishes out of curiosity, but I won't cook Thai more than 3 times in a month when I'm still ordering takeaway, so I'd never hit the paywall. And if I wanted more I'd just ask ChatGPT, which I already have.",
+  "objection": "A free AI chatbot already does this. I can ask it for a pad kra pao recipe and substitutes right now, so I don't see what I'm paying for besides the voice thing.",
+  "would_change_my_mind": "If the free dishes actually tasted like what my partner's family makes, clearly better than a chatbot recipe, and the hands-free voice coaching really worked with messy hands at the stove.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 1.99,
+  "price_expensive": 4.99,
+  "price_too_expensive": 8
+}

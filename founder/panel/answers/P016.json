@@ -1,0 +1,13 @@
+{
+  "id": "P016",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I already ask a free chatbot for Thai recipes and swaps while my phone sits on the counter, and it works fine. I'd maybe try the 3 free dishes, but I cook Thai a couple of times a month at most, so the free tier covers me and I wouldn't pay.",
+  "objection": "A free AI chatbot already does this. Hands-free voice is nice, but I'm not paying a monthly fee for something I get for free, from a brand-new app with no reviews.",
+  "would_change_my_mind": "If the free dishes showed the voice coaching is clearly better than my chatbot, like it actually catches me mid-step and the dishes taste noticeably more authentic, I might pay for a month or two.",
+  "price_too_cheap": 0.5,
+  "price_cheap": 1.5,
+  "price_expensive": 3.5,
+  "price_too_expensive": 6
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P004",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "The substitutes part speaks right to my problem, so I'd try the free version. But on weeknights I'd cook Thai maybe two or three times a month, so the free 3 dishes probably cover me and I wouldn't pay until I'd run out.",
+  "objection": "I don't trust that an AI with no reviews knows what to swap for holy basil or galangal that still tastes like what I ate in Thailand. If the substitutes come out bland, the whole point is gone.",
+  "would_change_my_mind": "If my free dishes actually turned out tasting authentic using only what my normal supermarket has, I'd pay the $2.99 without thinking about it.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 2.99,
+  "price_expensive": 7.99,
+  "price_too_expensive": 14.99
+}

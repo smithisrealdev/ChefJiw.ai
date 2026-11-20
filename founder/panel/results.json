@@ -1,0 +1,139 @@
+{
+ "business": "ChefJiw.ai (Chef Jiw, an AI Thai cooking coach for people abroad)",
+ "seed": 672393,
+ "dealt": 20,
+ "answered": 20,
+ "skipped": [],
+ "buys": 0,
+ "passes": 20,
+ "buy_rate": 0.0,
+ "by_segment": [
+  [
+   "Established home cook / food hobbyist",
+   7,
+   0.0
+  ],
+  [
+   "Young professional who cooks to save money",
+   8,
+   0.0
+  ],
+  [
+   "Thai diaspora or partner of a Thai person",
+   5,
+   0.0
+  ]
+ ],
+ "by_behaviour": [
+  [
+   "Free-content user",
+   5,
+   0.0
+  ],
+  [
+   "Asks a general AI chatbot",
+   3,
+   0.0
+  ],
+  [
+   "Busy weeknight cook",
+   3,
+   0.0
+  ],
+  [
+   "Tries apps then churns",
+   3,
+   0.0
+  ],
+  [
+   "Authenticity seeker",
+   3,
+   0.0
+  ],
+  [
+   "Already pays for a cooking or meal app",
+   3,
+   0.0
+  ]
+ ],
+ "by_income": [
+  [
+   "$103,000 and up",
+   7,
+   0.0
+  ],
+  [
+   "$68,000 to $103,000",
+   7,
+   0.0
+  ],
+  [
+   "under $68,000",
+   6,
+   0.0
+  ]
+ ],
+ "why_not": [
+  [
+   "habit",
+   12,
+   [
+    "I already learn Thai dishes for free from YouTube and blogs, and three free dishes a month is more than I'd actually cook from a new app. Even at $2.99 I don't pay for recipes, and talking out loud to my phone with greasy hands while the wok's going feels silly.",
+    "I already learn Thai dishes free from YouTube and blogs, and I can pause a video with greasy hands just fine. I might try the 3 free dishes, but I'd never get past that to paying for recipes."
+   ],
+   [
+    "P001",
+    "P002"
+   ]
+  ],
+  [
+   "need",
+   5,
+   [
+    "The substitutes part speaks right to my problem, so I'd try the free version. But on weeknights I'd cook Thai maybe two or three times a month, so the free 3 dishes probably cover me and I wouldn't pay until I'd run out.",
+    "I'd try the free tier, but three dishes a month is about all I'd actually cook on weeknights, and ChatGPT already gives me a pad kra pao recipe with substitutes for nothing. I don't see why I'd pay on top of the takeaway I'm still going to order."
+   ],
+   [
+    "P004",
+    "P007"
+   ]
+  ],
+  [
+   "trust",
+   3,
+   [
+    "I want to learn Thai food from a real person whose grandmother cooked it, not from an AI that says it's authentic. I might poke at the free 3 dishes, but I wouldn't pay for Plus when free YouTube channels from actual Thai cooks already exist.",
+    "I care who's actually teaching me, and 'an AI Thai chef' tells me nothing about where these recipes come from. I'd try the 3 free dishes, but that's about all I'd cook from it in a month anyway, so I wouldn't pay yet."
+   ],
+   [
+    "P008",
+    "P010"
+   ]
+  ]
+ ],
+ "why_yes": [],
+ "flip": [
+  "If after the free dishes it clearly beat my YouTube routine, say the substitutes for ingredients I can't get here actually worked and tasted like what I ate in Thailand, I might pay for a month.",
+  "If the free dishes showed me it fixes something YouTube can't, like actually telling me what to swap when my store has no holy basil and the dish still tasting like my takeaway.",
+  "If a free dish actually tasted like my partner's family's cooking or the takeaway I love, clearly better than what ChatGPT gives me, I'd pay $2.99.",
+  "If my free dishes actually turned out tasting authentic using only what my normal supermarket has, I'd pay the $2.99 without thinking about it.",
+  "If the free dishes showed the voice coaching and substitutions for stuff I can't get without driving 30 minutes were clearly better than my chatbot, I'd pay the $2.99.",
+  "If my partner or their family tried it and said the recipes actually taste like home, I'd probably cook more and upgrade.",
+  "If after the free dishes the hands-free voice coaching actually got a real Thai dinner on the table in 20-25 minutes using what my normal supermarket stocks, noticeably better than a chatbot, I'd pay the $2.99.",
+  "Knowing the recipes come from a named Thai home cook or chef I can check out, with a few real Thai users saying the dishes taste like home.",
+  "If my first free dish genuinely tasted like my partner's family's cooking and it nudged me to cook again the next week, I'd pay the $2.99 without thinking.",
+  "Knowing there's a real, named Thai home cook behind the recipes, and the free dishes actually tasting like the takeaway I love even with the substitutes.",
+  "If the free dishes showed me the substitutes actually get close to what I ate in Thailand, and voice coaching felt like a real cook in my kitchen, I might pay the $2.99.",
+  "If the free dishes actually tasted like what my partner's family makes, clearly better than a chatbot recipe, and the hands-free voice coaching really worked with messy hands at the stove.",
+  "If the free dishes showed me substitutes that actually work with what my regular supermarket carries and the result tasted clearly more authentic than a chatbot recipe, $2.99 is cheap enough that I'd upgrade.",
+  "Knowing a real, named Thai cook (ideally Jiw herself, with her background) created and checked the recipes, and the free dishes actually tasting like my favourite takeaway.",
+  "If I tried the free dishes and my pad kra pao actually tasted like what I ate in Bangkok, better than following a YouTube video, I might pay the $2.99.",
+  "If the free dishes showed the voice coaching is clearly better than my chatbot, like it actually catches me mid-step and the dishes taste noticeably more authentic, I might pay for a month or two.",
+  "If the free dishes showed it knew things my usual sources don't, like the right swap for holy basil or palm sugar where I live, and the voice coaching saved me from wiping my phone with greasy hands, I'd pay the $2.99 without thinking.",
+  "If I cook all 3 free dishes in the first couple of weeks and the substitutes actually work with what my grocery store has, I'd upgrade.",
+  "If the free dishes genuinely tasted like what I ate in Thailand and the voice coaching saved me from screwing up a curry paste mid-cook, I might pay, especially as a one-time or yearly price instead of monthly.",
+  "If the free dishes actually got me cooking Thai on weeknights with stuff from my regular grocery store and I kept wanting more than 3 a month."
+ ],
+ "purchases_first_month_per_buyer": null,
+ "price_answers": 20
+}

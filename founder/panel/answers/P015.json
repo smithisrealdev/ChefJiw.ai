@@ -1,0 +1,13 @@
+{
+  "id": "P015",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I'd probably try the free 3 dishes out of curiosity, but I already learn Thai dishes from YouTube for nothing, and 3 a month is about as often as I'd cook something new anyway. I don't pay for recipes, even at $2.99.",
+  "objection": "Will an AI actually know authentic Thai cooking, or is it just going to make stuff up? With no reviews, I'd trust a Thai grandma on YouTube over a chatbot.",
+  "would_change_my_mind": "If I tried the free dishes and my pad kra pao actually tasted like what I ate in Bangkok, better than following a YouTube video, I might pay the $2.99.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 1.99,
+  "price_expensive": 3.99,
+  "price_too_expensive": 6.99
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P013",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "I'd try the free 3 dishes, but I cook Thai maybe once or twice a week and ChatGPT already talks me through recipes and swaps for free. I don't see what Plus gives me that I'd pay for in the first month.",
+  "objection": "A free AI chatbot already does this. Voice coaching and substitutes are things I can get from ChatGPT without another subscription, and with no reviews I don't know if Chef Jiw's recipes are actually better.",
+  "would_change_my_mind": "If the free dishes showed me substitutes that actually work with what my regular supermarket carries and the result tasted clearly more authentic than a chatbot recipe, $2.99 is cheap enough that I'd upgrade.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 1.99,
+  "price_expensive": 4.99,
+  "price_too_expensive": 7.99
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P011",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "I'd probably try the free 3 dishes out of curiosity, but I've never paid for recipes. YouTube and Thai cooking channels already walk me through pad kra pao for free, so I don't see myself upgrading.",
+  "objection": "My real problem is that I can't get holy basil or proper shrimp paste here. If the AI's substitutes make it taste like generic stir-fry, then it's no better than the free videos I already watch.",
+  "would_change_my_mind": "If the free dishes showed me the substitutes actually get close to what I ate in Thailand, and voice coaching felt like a real cook in my kitchen, I might pay the $2.99.",
+  "price_too_cheap": 0.99,
+  "price_cheap": 1.99,
+  "price_expensive": 4.99,
+  "price_too_expensive": 8
+}
