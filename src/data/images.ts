@@ -181,45 +181,4 @@ export const LAYERS: Record<MascotName, Layers> = {
 };
 /** ฉากเต็มความกว้างใต้ชื่อหน้าจอ: ภาพพื้นหลังโปร่งใสที่วาดให้เข้ากับสีหัวจอ แล้ววางตัวละครทับทีละตัวเพื่อให้ขยับได้
  *  ตำแหน่งเป็นสัดส่วนของฉาก (ซ้าย บน กว้าง) ตัวละครเป็นภาพจัตุรัส */
-/** ท่าหนึ่งในลำดับของตัวละครในฉาก: ms = นานเท่าไรก่อนเปลี่ยนท่าถัดไป (สุ่มสั้นยาวขึ้นลงนิดหน่อยทุกรอบ) */
-export type Beat = { name: MascotName; ms: number; motion?: Motion };
-export const SCENE = {
-  // ครัวของทีมเชฟ (หัวจอสีน้ำเงิน): ใบเตยเดินกลับจากตลาด เชฟจิ๋วผัดกระทะ หยุดคิด แล้วดีใจ น้องชิมกระโดดรอ สลับกับเอียงคอสงสัย
-  home: {
-    source: require('@/assets/images/chef/scene-home.png'), ratio: 780 / 360,
-    cast: [
-      { left: 0.008, top: 0.46, width: 0.246, seq: [{ name: 'shop', ms: 0 }] },
-      { left: 0.344, top: 0.278, width: 0.326, seq: [{ name: 'cook', ms: 7000 }, { name: 'think', ms: 2600 }, { name: 'cook', ms: 5000 }, { name: 'cheer', ms: 1800, motion: 'jump' }] },
-      { left: 0.759, top: 0.528, width: 0.215, seq: [{ name: 'yum', ms: 4500, motion: 'jump' }, { name: 'hmm', ms: 3200 }] },
-    ],
-  },
-  // ห้องอ่านสูตร (หัวจอสีชมพู): เชฟจิ๋วคิดเมนูแล้วนึกออก น้องชิมสงสัยแล้วกระโดดดีใจ
-  recipes: {
-    source: require('@/assets/images/chef/scene-recipes.png'), ratio: 780 / 360,
-    cast: [
-      { left: 0.3, top: 0.31, width: 0.3, seq: [{ name: 'think', ms: 5000 }, { name: 'cheer', ms: 1700, motion: 'jump' }] },
-      { left: 0.52, top: 0.36, width: 0.28, seq: [{ name: 'hmm', ms: 4200 }, { name: 'yum', ms: 2200, motion: 'jump' }] },
-    ],
-  },
-  // หน้าเตา (หัวจอสีส้ม): เชฟจิ๋วผัดกระทะ คนหม้อ หยุดคิด น้องชิมนั่งชิมแล้วลุกขึ้นกระโดด
-  cook: {
-    source: require('@/assets/images/chef/scene-cook.png'), ratio: 780 / 360,
-    cast: [
-      { left: 0.02, top: 0.44, width: 0.26, seq: [{ name: 'sip', ms: 6000 }, { name: 'yum', ms: 2000, motion: 'jump' }] },
-      { left: 0.33, top: 0.25, width: 0.34, seq: [{ name: 'cook', ms: 6000 }, { name: 'stir', ms: 4000 }, { name: 'think', ms: 2200 }] },
-    ],
-  },
-  // มุมรางวัล (หัวจอสีเขียว): ใบเตยนั่งดูรายการ เชฟจิ๋วกระโดดดีใจแล้วหยุดคิดว่าจะทำอะไรต่อ
-  me: {
-    source: require('@/assets/images/chef/scene-me.png'), ratio: 780 / 360,
-    cast: [
-      { left: 0.24, top: 0.4, width: 0.26, seq: [{ name: 'list', ms: 0 }] },
-      { left: 0.47, top: 0.36, width: 0.27, seq: [{ name: 'cheer', ms: 3500, motion: 'jump' }, { name: 'think', ms: 2600 }] },
-    ],
-  },
-  // แผงตลาด (หัวจอสีส้ม): ใบเตยเดินเลือกของ
-  plan: {
-    source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300,
-    cast: [{ left: 0.038, top: 0.233, width: 0.295, seq: [{ name: 'shop', ms: 0 }] }],
-  },
-} satisfies Record<string, { source: number; ratio: number; cast: { left: number; top: number; width: number; seq: Beat[] }[] }>;
+

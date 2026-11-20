@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { ApiNotice, Button, Card, Chip, Screen, Skeleton, T, Thumb } from '@/components/ui';
-import { IMG, MASCOT } from '@/data/images';
+import { IMG } from '@/data/images';
 import { local, MARKET, type Cat } from '@/data/market';
 import { api, ApiError, type ApiErrorKind, type PriceRow } from '@/lib/api';
 import { COUNTRIES } from '@/lib/money';
@@ -38,7 +38,7 @@ export default function Market() {
   const back = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   return (
-    <Screen tint={colors.header.market} title={t('market.title')} subtitle={t('market.sample')} mascot={MASCOT.shop} onBack={back} backLabel={t('tab.home')}
+    <Screen tint={colors.header.market} title={t('market.title')} subtitle={t('market.sample')} lead="shop" onBack={back} backLabel={t('tab.home')}
       footer={
         <Card tone="accent" style={s.foot}>
           <View style={{ flex: 1 }}>
@@ -65,9 +65,9 @@ export default function Market() {
           <Pressable key={it.id} accessibilityRole="checkbox" accessibilityState={{ checked: on }}
             accessibilityLabel={`${on ? t('market.remove', { name: pick(it.name) }) : t('market.add', { name: pick(it.name) })}, ${local(it.price, country)} ${pick(it.unit)}, ${ch}`}
             onPress={() => setCart(on ? cart.filter((x) => x !== it.id) : [...cart, it.id])}
-            style={({ pressed }) => [s.row, { backgroundColor: colors.surfaceSoft, transform: [{ scale: pressed ? 0.98 : 1 }] }]}>
+            style={({ pressed }) => [s.row, { borderBottomColor: colors.line, opacity: pressed ? 0.7 : 1 }]}>
             <View>
-              {it.img ? <Thumb source={IMG[it.img]} tint="#FFFFFF" size={56} />
+              {it.img ? <Thumb source={IMG[it.img]} tint={colors.surfaceSoft} size={56} />
                 : <View style={[s.noImg, { backgroundColor: colors.line }]}><T v="small" tone="muted" style={{ textAlign: 'center' }}>{t('market.photo')}</T></View>}
               <View style={[s.tick, { backgroundColor: on ? colors.success : colors.accent }]}><Icon name={on ? 'check' : 'plus'} color={on ? colors.bg : '#24212B'} size={16} /></View>
             </View>
@@ -88,7 +88,7 @@ export default function Market() {
 }
 
 const s = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.sm, paddingRight: space.lg, borderRadius: radius.lg, minHeight: 72 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 72, paddingBottom: space.md, borderBottomWidth: StyleSheet.hairlineWidth },
   noImg: { width: 56, height: 56, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', padding: 4 },
   tick: { position: 'absolute', right: -6, bottom: -6, width: 26, height: 26, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   foot: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },

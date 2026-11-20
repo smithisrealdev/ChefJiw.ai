@@ -8,15 +8,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Icon } from '@/components/icon';
-import { kitchenActs, KitchenStage, type Taps } from '@/components/kitchen-stage';
-import { ApiNotice, Button, Card, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
-import { finalScore, kitchenPenalty, nextAct } from '@/data/kitchen';
+import { KitchenStage, type Taps } from '@/components/kitchen-stage';
+import { ApiNotice, BigType, Button, Card, Chip, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
 import { buildRecipe, MENU, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
+import { lastAns, reminders, stepContext } from '@/lib/assistant';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY, freeLeft, localDay, spendOne } from '@/lib/quota';
 import { cancelTimer, putProgress, useSettings, type Progress } from '@/lib/settings';
-import { fonts, onPastel, radius, space, type, vivid } from '@/theme/tokens';
+import { fonts, onPastel, radius, space, typeCook, vivid, wide } from '@/theme/tokens';
 
 const RING = 196, RING_R = RING / 2 - 10, RING_C = 2 * Math.PI * RING_R;
 
@@ -32,22 +32,22 @@ export default function Cook() {
   const change = (f: (cur: Progress) => Partial<Progress>) =>
     set((prev) => { const cur = prev.progress.find((x) => x.recipe === id) ?? p; return { progress: putProgress(prev.progress, id, { ...cur, ...f(cur) }) }; });
   const update = (patch: Partial<Progress>) => change(() => patch);
-  return taste ? <Taste key={id} r={r} /> : <Steps key={id} r={r} p={p} start={Math.min(p.step, r.steps.length - 1)} onFinish={() => setTaste(true)}
+  // ทั้งหน้าทำอาหารใช้ตัวอักษรชุดใหญ่ อ่านได้จากระยะแขน
+  return <BigType.Provider value>{taste ? <Taste key={id} r={r} /> : <Steps key={id} r={r} p={p} start={Math.min(p.step, r.steps.length - 1)} onFinish={() => setTaste(true)}
     onStep={(step) => { cancelTimer(p); update({ step, total: r.steps.length, timer: undefined }); }}
-    onTimer={(timer) => update({ timer })} t={t} colors={colors}
-    onMiss={() => change((cur) => ({ miss: (cur.miss ?? 0) + 1 }))}
-    onSkip={(sid) => change((cur) => ({ skip: [...new Set([...(cur.skip ?? []), sid])] }))} />;
+    onTimer={(timer) => update({ timer })} t={t} colors={colors} />}</BigType.Provider>;
 }
 
-function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colors }: { r: Recipe; p: Progress; start: number; onStep: (i: number) => void; onTimer: (timer: Progress['timer']) => void; onFinish: () => void; onMiss: () => void; onSkip: (step: string) => void; t: ReturnType<typeof useSettings>['t']; colors: ReturnType<typeof useSettings>['colors'] }) {
-  const { pick, isDark } = useSettings();
+function Steps({ r, p, start, onStep, onTimer, onFinish, t, colors }: { r: Recipe; p: Progress; start: number; onStep: (i: number) => void; onTimer: (timer: Progress['timer']) => void; onFinish: () => void; t: ReturnType<typeof useSettings>['t']; colors: ReturnType<typeof useSettings>['colors'] }) {
+  const { pick, isDark, runs } = useSettings();
   const insets = useSafeAreaInsets();
   const [i, setI] = useState(start);
-  const [askOpen, setAskOpen] = useState(false);
+  const [askOpen, setAskOpen] = useState<false | 'ask' | 'rescue'>(false);
   const [taps, setTaps] = useState<Taps>({ step: start, n: [] });
   const step = r.steps[i], prev = i > 0 ? r.steps[i - 1] : null, last = i === r.steps.length - 1;
   const heat = currentHeat(r.steps, i);
   const ink = isDark ? colors.ink : onPastel.ink;
+  const ans = lastAns(runs, r.id);
 
   const go = (n: number) => { setI(n); onStep(n); };
   const exit = () => {
@@ -58,24 +58,24 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.header.cookFlow }}>
-      <View style={[s.top, { paddingTop: insets.top + space.sm }]}>
+      <View style={[s.top, wide, { paddingTop: insets.top + space.sm }]}>
         <IconButton icon="close" label={t('cook.close')} onPress={exit} onPastelBg />
         <T v="subheading" style={{ color: ink, flex: 1, textAlign: 'center' }}>{t('cook.step', { n: step.phase, total: r.phases })}</T>
         {/* ปุ่มถามเชฟอยู่ที่เดิมทุกขั้น */}
-        <Pressable accessibilityRole="button" onPress={() => setAskOpen(true)} style={[s.ask, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+        <Pressable accessibilityRole="button" onPress={() => setAskOpen('ask')} style={[s.ask, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
           <Icon name="chat" color={ink} size={20} />
           <T v="smallBold" style={{ color: ink }}>{t('cook.ask')}</T>
         </Pressable>
       </View>
-      <View style={s.bar} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-        {Array.from({ length: r.phases }, (_, k) => <View key={k} style={[s.seg, { backgroundColor: k < step.phase ? ink : 'rgba(36,33,43,0.18)' }]} />)}
+      <View style={[s.bar, wide]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        {Array.from({ length: r.phases }, (_, k) => <View key={k} style={[s.seg, { backgroundColor: k < step.phase ? ink : isDark ? colors.line : 'rgba(36,33,43,0.18)' }]} />)}
       </View>
       <OtherTimers current={r.id} ink={ink} />
-      <KitchenStage r={r} i={i} taps={taps} setTaps={setTaps} onMiss={onMiss}
+      <KitchenStage r={r} i={i} taps={taps} setTaps={setTaps}
         onStir={() => { if (step.timer && p.timer?.step !== step.id) void beginTimer(step.timer, pick(r.name), t, (endAt, note) => onTimer({ step: step.id, endAt, note })); }} />
 
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
-        <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: space.xl }}>
+        <ScrollView contentContainerStyle={[wide, { padding: space.lg, gap: space.md, paddingBottom: space.xl }]}>
           {prev && (
             <Card tone="done">
               <T v="smallBold" tone="pastelMuted">{t('cook.lesson')} · {pick(prev.title)}</T>
@@ -93,27 +93,41 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
               {step.gather.map((g) => <T key={g.th} v="bodyBold">• {pick(g)}</T>)}
             </Card>
           )}
+          {/* เชฟจำคำตอบตอนชิมครั้งก่อน แล้วเตือนตรงขั้นที่คำแนะนำนั้นใช้ */}
+          {reminders(r, ans, step.id).map((m) => (
+            <Card key={m.sense.th} tone="ai" style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+              <View style={{ flex: 1 }}>
+                <T v="smallBold" tone="pastelMuted">{t('memory.title')}</T>
+                <T v="bodyBold" tone="pastel">{t('memory.said', { sense: pick(m.sense), x: pick(m.said) })}</T>
+                <T tone="pastel">{t('memory.tip', { x: pick(m.tip) })}</T>
+              </View>
+              <Mascot name="think" size={64} still />
+            </Card>
+          ))}
           <Card tone="note">
             <T v="smallBold" tone="pastelMuted">{t('cook.see')}</T>
             <T v="bodyBold" tone="pastel">{pick(step.see)}</T>
           </Card>
+          {/* ทำแล้วไม่เป็นอย่างที่บอก: ให้เชฟไล่ดูขั้นนี้ด้วยกัน */}
+          <Button kind="secondary" icon="alert" label={t('rescue.button')} onPress={() => setAskOpen('rescue')} style={{ alignSelf: 'flex-start' }} />
           {step.timer && <Timer key={step.id} seconds={step.timer} name={pick(r.name)} endAt={p.timer?.step === step.id ? p.timer.endAt : null}
             onStart={(endAt, note) => onTimer({ step: step.id, endAt, note })} t={t} />}
         </ScrollView>
         {/* ปุ่มหลักปุ่มเดียวต่อขั้น ครึ่งล่างของจอ ไม่มีการปัดเปลี่ยนขั้น */}
         <View style={[s.foot, { paddingBottom: Math.max(insets.bottom, space.md), borderTopColor: colors.line }]}>
+          <View style={[wide, { gap: space.xs, paddingHorizontal: space.lg }]}>
           <Button size="cook" label={last ? t('cook.finish') : t('cook.done')} onPress={() => {
             Haptics.selectionAsync().catch(() => {});
-            // กดผ่านทั้งที่ยังแตะในครัวไม่ครบ นับเป็นข้ามขั้น (หักคะแนนตอนชิม เหมือนต้นแบบ)
-            const acts = kitchenActs(r, i);
-            if (acts.length && nextAct(acts, taps.step === i ? taps.n : []) >= 0) onSkip(step.id);
             if (last) onFinish(); else go(i + 1);
           }} />
           {i > 0 && <Pressable accessibilityRole="button" onPress={() => go(i - 1)} style={s.link}><T v="bodyBold" tone="muted">{t('cook.back')}</T></Pressable>}
+          </View>
         </View>
       </View>
 
-      <AskSheet key={step.id} visible={askOpen} onClose={() => setAskOpen(false)} r={r} step={step} />
+      <AskSheet key={step.id + askOpen} visible={askOpen !== false} mode={askOpen || 'ask'} onClose={() => setAskOpen(false)} r={r} step={step}
+        knows={[pick(step.title), heat !== null ? t(`cook.heat${heat}`) : '', r.g1.opts[p.o1] ? pick(r.g1.opts[p.o1].label) : '', r.g2.opts[p.o2] ? pick(r.g2.opts[p.o2].label) : ''].filter(Boolean)}
+        context={stepContext(r, i, { o1: p.o1, o2: p.o2, heat: heat !== null ? t(`cook.heat${heat}`) : null, ans, pick })} />
     </View>
   );
 }
@@ -154,8 +168,8 @@ function OtherTimers({ current, ink }: { current: string; ink: string }) {
         return (
           <Pressable key={x.recipe} accessibilityRole="button" accessibilityLabel={label} onPress={() => router.replace(`/cook/${x.recipe}`)}
             style={[s.pill, { backgroundColor: left > 0 ? (isDark ? colors.surface : '#FFFFFF') : colors.done }]}>
-            <Icon name="clock" color={left > 0 ? ink : onPastel.ink} size={18} />
-            <T v="smallBold" numberOfLines={1} style={{ color: left > 0 ? ink : onPastel.ink, flexShrink: 1 }}>{label}</T>
+            <Icon name="clock" color={left > 0 ? ink : colors.ink} size={18} />
+            <T v="smallBold" numberOfLines={1} style={{ color: left > 0 ? ink : colors.ink, flexShrink: 1 }}>{label}</T>
           </Pressable>
         );
       })}
@@ -179,6 +193,7 @@ async function beginTimer(seconds: number, name: string, t: ReturnType<typeof us
 
 /** จับเวลาจากเวลาจริงของเครื่อง เวลาจบเก็บไว้กับจาน จึงเดินต่อแม้ล็อกจอ ออกจากหน้านี้ หรือสลับไปทำจานอื่น และตั้งการแจ้งเตือนไว้ล่วงหน้า */
 function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: string; endAt: number | null; onStart: (endAt: number, note: string | null) => void; t: ReturnType<typeof useSettings>['t'] }) {
+  const { colors, isDark } = useSettings();
   const [now, setNow] = useState(() => Date.now());
   const left = endAt ? Math.ceil((endAt - now) / 1000) : seconds;
   const done = endAt !== null && left <= 0;
@@ -198,8 +213,8 @@ function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: st
       {/* วงแหวนหดตามเวลาที่เหลือ มองจากไกลก็รู้ว่าเหลือเท่าไร */}
       <View style={{ width: RING, height: RING, alignItems: 'center', justifyContent: 'center' }}>
         <Svg width={RING} height={RING} style={{ position: 'absolute', transform: [{ rotate: '-90deg' }] }} accessible={false}>
-          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke="rgba(36,33,43,0.14)" strokeWidth={14} fill="none" />
-          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke={done ? onPastel.success : vivid.indigo} strokeWidth={14} strokeLinecap="round" fill="none"
+          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke={colors.line} strokeWidth={14} fill="none" />
+          <Circle cx={RING / 2} cy={RING / 2} r={RING_R} stroke={done ? colors.success : isDark ? colors.ink : vivid.indigo} strokeWidth={14} strokeLinecap="round" fill="none"
             strokeDasharray={RING_C} strokeDashoffset={RING_C * (1 - Math.max(0, Math.min(1, left / seconds)))} />
         </Svg>
         {done ? <Float motion="jump"><Mascot name="cheer" size={120} /></Float> : <>
@@ -215,22 +230,28 @@ function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: st
 }
 
 /** คำตอบที่เตรียมไว้ขึ้นทันทีโดยไม่ต้องใช้เน็ต และเหตุฉุกเฉินเข้าถึงได้ในสองแตะ */
-function AskSheet({ visible, onClose, r, step }: { visible: boolean; onClose: () => void; r: Recipe; step: Step }) {
+function AskSheet({ visible, mode, onClose, r, step, knows, context }: { visible: boolean; mode: 'ask' | 'rescue'; onClose: () => void; r: Recipe; step: Step; knows: string[]; context: string }) {
   const { t, pick } = useSettings();
   const [open, setOpen] = useState<number | null>(null);
   const [safety, setSafety] = useState(false);
   return (
-    <Sheet visible={visible} onClose={onClose} title={t('ask.title')} closeLabel={t('ask.back')}>
+    <Sheet visible={visible} onClose={onClose} title={t(mode === 'rescue' ? 'rescue.title' : 'ask.title')} closeLabel={t('ask.back')}>
+      {/* สิ่งที่แชตทั่วไปไม่รู้: ตอนนี้ทำถึงขั้นไหน ไฟระดับไหน เลือกสูตรแบบไหน */}
+      <View style={{ gap: space.xs }}>
+        <T v="smallBold" tone="muted">{t('ask.knows')}</T>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.xs }}>{knows.map((x) => <View key={x} style={s.know}><T v="smallBold" tone="pastel">{x}</T></View>)}</View>
+      </View>
       <Pressable accessibilityRole="button" accessibilityState={{ expanded: safety }} onPress={() => setSafety(!safety)} style={s.safetyBtn}>
         <Icon name="alert" color={onPastel.warn} />
         <T v="bodyBold" style={{ color: onPastel.warn }}>{t('ask.emergency')}</T>
       </Pressable>
       {safety && SAFETY.map(([q, a]) => (
         <Card key={q.th} tone="danger">
-          <T v="subheading" style={{ color: onPastel.warn }}>{pick(q)}</T>
+          <T v="subheading" tone="warn">{pick(q)}</T>
           <T v="step" tone="pastel" style={{ fontSize: 18 }}>{pick(a)}</T>
         </Card>
       ))}
+      {mode === 'rescue' && <TypedAsk r={r} step={step} onLeave={onClose} mode={mode} context={context} />}
       <T v="smallBold" tone="muted" style={{ marginTop: space.sm }}>{t('ask.often')}</T>
       {r.qa(step).map(([q, a], k) => (
         <Card key={q.th} tone={open === k ? 'note' : 'soft'} onPress={() => setOpen(open === k ? null : k)} label={pick(q)}>
@@ -238,14 +259,15 @@ function AskSheet({ visible, onClose, r, step }: { visible: boolean; onClose: ()
           {open === k && <T tone="pastel">{pick(a)}</T>}
         </Card>
       ))}
-      <TypedAsk r={r} step={step} onLeave={onClose} />
+      {mode === 'ask' && <TypedAsk r={r} step={step} onLeave={onClose} mode={mode} context={context} />}
     </Sheet>
   );
 }
 
 /** พิมพ์ถามเอง: ต้องเข้าสู่ระบบ ฟรีวันละ FREE_PER_DAY คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวไม่ถูกนับ */
-function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => void }) {
+function TypedAsk({ r, step, onLeave, mode, context }: { r: Recipe; step: Step; onLeave: () => void; mode: 'ask' | 'rescue'; context: string }) {
   const { t, lang, colors, signedIn, member, asked, set, pick } = useSettings();
+  const label = t(mode === 'rescue' ? 'rescue.type' : 'ask.typeLabel');
   const [text, setText] = useState('');
   const [state, setState] = useState<{ kind: 'idle' | 'login' | 'quota' | 'loading' | 'answer' | 'error'; q?: string; answer?: string; error?: ApiErrorKind }>({ kind: 'idle' });
   const left = freeLeft(asked, localDay());
@@ -256,7 +278,7 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
     if (!member && left <= 0) return setState({ kind: 'quota' });
     setState({ kind: 'loading', q: question }); setText('');
     try {
-      const res = await api.askChef(question, { recipe: pick(r.name), step: pick(step.title), lang });
+      const res = await api.askChef(question, { recipe: pick(r.name), step: pick(step.title), lang, context, mode });
       if (!member) set({ asked: spendOne(asked, localDay()) });
       setState({ kind: 'answer', q: question, answer: res.answer });
     } catch (e) {
@@ -271,6 +293,12 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
 
   return (
     <View style={{ gap: space.sm, marginTop: space.sm }}>
+      {mode === 'rescue' && <>
+        <T v="bodyBold">{t('rescue.pick')}</T>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+          {(['s1', 's2', 's3', 's4'] as const).map((k) => <Chip key={k} label={t(`rescue.${k}`)} selected={false} onPress={() => send(t('rescue.said', { x: t(`rescue.${k}`) }))} />)}
+        </View>
+      </>}
       {state.kind === 'login' && (
         <Card tone="ai"><T v="subheading" tone="pastel">{t('ask.loginTitle')}</T><T tone="pastel">{t('ask.loginBody')}</T>
           <Button kind="onPastel" label={t('me.signIn')} onPress={() => goTo('/login')} style={{ alignSelf: 'flex-start', marginTop: space.sm }} /></Card>
@@ -285,10 +313,12 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
           <T v="small" tone="pastelMuted">{t('ask.aiNote')}</T></Card>
       )}
       {state.kind === 'error' && state.error && <ApiNotice kind={state.error} onRetry={() => send(state.q)} />}
+      {/* ป้ายอยู่เหนือช่องเสมอ ข้อความในช่องเป็นแค่ตัวอย่าง พิมพ์แล้วป้ายไม่หาย */}
+      <T v="smallBold" tone="muted">{label}</T>
       <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
         <TextInput value={text} onChangeText={setText} onSubmitEditing={() => send()} returnKeyType="send"
-          placeholder={t('ask.typePlaceholder')} placeholderTextColor={colors.muted} accessibilityLabel={t('ask.typeLabel')}
-          style={{ flex: 1, minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: colors.surfaceSoft, color: colors.ink, fontFamily: fonts.body, fontSize: type.md }} />
+          placeholder={t(mode === 'rescue' ? 'rescue.example' : 'ask.typeExample')} placeholderTextColor={colors.muted} accessibilityLabel={label}
+          style={{ flex: 1, minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: colors.surfaceSoft, color: colors.ink, fontFamily: fonts.body, fontSize: typeCook.md }} />
         <IconButton filled icon="next" label={t('ask.send')} onPress={() => send()} />
       </View>
       <T v="small" tone="muted">{member ? t('ask.member') : t('ask.left', { n: left })}</T>
@@ -301,37 +331,28 @@ function Taste({ r }: { r: Recipe }) {
   const insets = useSafeAreaInsets();
   const [ans, setAns] = useState<(number | null)[]>(r.senses.map(() => null));
   const [score, setScore] = useState<number | null>(null);
-  // หักคะแนนจากในครัวจำลอง อ่านไว้ก่อน เพราะส่งคะแนนแล้วความคืบหน้าของจานนี้ถูกล้าง
-  const [kit] = useState(() => { const cur = progress.find((x) => x.recipe === r.id); return { miss: cur?.miss ?? 0, skip: cur?.skip?.length ?? 0 }; });
-  const [raw, setRaw] = useState(0);
   const submit = () => {
-    const taste = tasteScore(ans as number[]);
-    const sc = finalScore(taste, kit.miss, kit.skip);
-    setRaw(taste);
+    const sc = tasteScore(ans as number[]); // คะแนนมาจากคำตอบตอนชิมอย่างเดียว การแตะในครัวจำลองไม่มีผล
     setScore(sc);
     const id = device || Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
     cancelTimer(progress.find((x) => x.recipe === r.id));
-    set((prev) => ({ runs: [...prev.runs, { recipe: r.id, score: sc, at: Date.now() }], progress: putProgress(prev.progress, r.id, null), device: id }));
-    void api.logRun(id, r.id, taste); // ผลทดสอบในครัวจริงเก็บคะแนนรสชาติล้วน ไม่รวมการแตะบนจอ
+    set((prev) => ({ runs: [...prev.runs, { recipe: r.id, score: sc, at: Date.now(), ans: ans as number[] }], progress: putProgress(prev.progress, r.id, null), device: id }));
+    void api.logRun(id, r.id, sc);
   };
   return (
-    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={{ padding: space.lg, paddingTop: insets.top + space.lg, gap: space.md, paddingBottom: insets.bottom + space.xl }}>
+    <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={[wide, { padding: space.lg, paddingTop: insets.top + space.lg, gap: space.md, paddingBottom: insets.bottom + space.xl }]}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View style={{ flex: 1, gap: space.xs }}>
           <T v="title" accessibilityRole="header">{score === null ? t('taste.title') : t('taste.result')}</T>
           {score === null && <T tone="muted">{t('taste.intro')}</T>}
         </View>
         {score !== null && score >= 4 ? <Float motion="jump"><Mascot name="yum" size={120} /></Float>
-          : <Mascot name={score === null ? 'sip' : 'hmm'} size={120} />}
+          : <Mascot name={score === null ? 'sip' : 'hmm'} size={120} still />}
       </View>
       {score !== null && (
         <Card tone="accent" style={{ alignItems: 'center' }}>
           <T v="hero" tone="pastel">{score.toFixed(1)}</T>
           <T v="bodyBold" tone="pastel">{t('taste.outOf')}</T>
-          {kitchenPenalty(kit.miss, kit.skip) > 0 && <>
-            <T v="small" tone="pastel">{t('taste.tasteOnly', { s: raw.toFixed(1) })}</T>
-            <T v="small" tone="pastel">{t('taste.penalty', { p: kitchenPenalty(kit.miss, kit.skip).toFixed(1), skip: kit.skip, miss: kit.miss })}</T>
-          </>}
         </Card>
       )}
       {r.senses.map((sense, k) => (
@@ -365,13 +386,14 @@ function Taste({ r }: { r: Recipe }) {
 
 const s = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg },
+  know: { backgroundColor: '#F1EFFF', borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: 4 },
   ask: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill },
   bar: { flexDirection: 'row', gap: 6, paddingHorizontal: space.lg, paddingVertical: space.md },
   seg: { flex: 1, height: 8, borderRadius: radius.pill },
   others: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.md },
   pill: { flexDirection: 'row', alignItems: 'center', gap: space.xs, minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill, maxWidth: '100%' },
   sheet: { flex: 1, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, overflow: 'hidden' },
-  foot: { paddingHorizontal: space.lg, paddingTop: space.md, gap: space.xs, borderTopWidth: StyleSheet.hairlineWidth },
+  foot: { paddingTop: space.md, borderTopWidth: StyleSheet.hairlineWidth },
   link: { minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   heat: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 36, paddingHorizontal: space.md, borderRadius: radius.pill },
   safetyBtn: { flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'flex-start', minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: '#FFE3D6' },

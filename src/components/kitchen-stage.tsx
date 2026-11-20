@@ -6,7 +6,7 @@ import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 
 import { Actor, T, useMove } from '@/components/ui';
 import { IMG } from '@/data/images';
-import { actsAt, decoysFor, FOOD_NAME, nextAct, shownStage, stageAt, type Act, type Food, type Side, type Stage, type Station } from '@/data/kitchen';
+import { actsAt, FOOD_NAME, nextAct, shownStage, stageAt, type Act, type Food, type Side, type Stage, type Station } from '@/data/kitchen';
 import type { Heat, Recipe } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
 
@@ -21,12 +21,12 @@ const SPEED = 330; // หน่วยต่อวินาที
 const native = Platform.OS !== 'web';
 
 /** ของที่ต้องแตะของขั้นนี้ ใช้ทั้งในครัวและตอนกดไปขั้นต่อไป (ข้ามโดยแตะไม่ครบจะถูกหักคะแนน) */
-export const kitchenActs = (r: Recipe, i: number) => actsAt(r.id, r.steps, i, pickables(r).map((g) => g.id));
+const kitchenActs = (r: Recipe, i: number) => actsAt(r.id, r.steps, i, pickables(r).map((g) => g.id));
 export type Taps = { step: number; n: number[] };
 
 /** ครัวจำลองของหน้าทำอาหาร (เหมือนต้นแบบ): แตะจุดในครัวให้เชฟเดินไป แล้วแตะหยิบ หมุนไฟ ใส่ของ คน จัดจาน ทีละอย่าง
- *  onMiss = แตะผิด (ของหลอก เดินผิดที่) onStir = แตะคนในขั้นที่มีจับเวลา ให้เริ่มจับเวลาของขั้นนั้น */
-export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recipe; i: number; taps: Taps; setTaps: (f: (prev: Taps) => Taps) => void; onMiss: () => void; onStir: () => void }) {
+ *  onStir = แตะคนในขั้นที่มีจับเวลา ให้เริ่มจับเวลาของขั้นนั้น */
+export function KitchenStage({ r, i, taps, setTaps, onStir }: { r: Recipe; i: number; taps: Taps; setTaps: (f: (prev: Taps) => Taps) => void; onStir: () => void }) {
   const { height: screenH } = useWindowDimensions();
   const H = Math.round(Math.min(250, Math.max(170, screenH * 0.27)));
   const k = H / HEIGHT;
@@ -38,10 +38,11 @@ export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recip
   const st = shownStage(r.id, r.steps, i, acts, done);
 
   // เชฟอยู่ที่ไหน: เปิดหน้ามายังอยู่นอกครัว ต้องแตะจุดของขั้นนั้นก่อน เชฟถึงเดินไป
-  const [chefAt, setChefAt] = useState<Station | 'door'>('door');
+  // กลับมาทำต่อกลางจาน เชฟยืนรออยู่ที่จุดของขั้นก่อนหน้า
+  const [chefAt, setChefAt] = useState<Station | 'door'>(() => (i > 0 ? stageAt(r.id, r.steps, i - 1).at : 'door'));
   const arrived = chefAt === base.at;
-  const [note, setNote] = useState<{ step: number; text: string } | null>(null);
-  const warn = (text: string) => { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {}); setNote({ step: i, text }); onMiss(); };
+  // แตะผิดจุด: บอกเฉยๆ ว่ายังไม่ใช่ตรงนั้น ไม่นับ ไม่หักคะแนน
+  const [note, setNote] = useState<number | null>(null);
   const tap = (n: number) => {
     Haptics.selectionAsync().catch(() => {});
     setNote(null);
@@ -49,8 +50,8 @@ export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recip
     setTaps((prev) => { const list = prev.step === i ? [...prev.n] : []; list[n] = (list[n] ?? 0) + 1; return { step: i, n: list }; });
   };
 
-  const [x] = useState(() => new Animated.Value(SPOT.door));
-  const [zoom] = useState(() => new Animated.Value(0)); // 0 = เห็นทั้งครัว 1 = ซูมตามเชฟ
+  const [x] = useState(() => new Animated.Value(SPOT[chefAt]));
+  const [zoom] = useState(() => new Animated.Value(arrived ? 1 : 0)); // 0 = ถอยให้เห็นทั้งเชฟและจุดที่ต้องไป 1 = ซูมตามเชฟ
   const [walking, setWalking] = useState<0 | 1 | -1>(0);
   const target = SPOT[chefAt];
   useEffect(() => {
@@ -81,11 +82,16 @@ export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recip
   // กล้องตอนซูม: เชฟอยู่กลางจอค่อนซ้าย (ของที่ทำอยู่ทางขวาของเชฟ) แต่ไม่เลยขอบครัว ตอนเห็นทั้งครัว: ย่อทั้งครัวให้พอดีความกว้างจอ วางชิดล่าง
   const x0 = viewW / (2 * k) - 60, x1 = x0 + WORLD - viewW / k;
   const cam = x1 > x0 ? x.interpolate({ inputRange: [x0, x1], outputRange: [0, viewW - WORLD * k], extrapolate: 'clamp' }) : 0;
+  // ตอนเลือกที่: ถอยกล้องพอให้เห็นเชฟกับจุดที่ต้องไป ไม่ย่อทั้งครัวจนเหลือผนังว่าง วางชิดล่าง
   const fit = viewW ? Math.min(1, viewW / (WORLD * k)) : 1;
+  const [cx, , w] = AREA[base.at], me = SPOT[chefAt];
+  const left = Math.min(me - 70, cx - w / 2) - 30, right = Math.max(me + 90, cx + w / 2) + 30;
+  const out = viewW ? Math.max(fit, Math.min(1, viewW / ((right - left) * k))) : 1;
+  const outX = Math.max(viewW - WORLD * k * out, Math.min(0, viewW / 2 - ((left + right) / 2) * k * out));
   const world = [
-    { translateX: Animated.multiply(zoom, cam) },
-    { translateY: zoom.interpolate({ inputRange: [0, 1], outputRange: [H * (1 - fit), 0] }) },
-    { scale: zoom.interpolate({ inputRange: [0, 1], outputRange: [fit, 1] }) },
+    { translateX: Animated.add(Animated.multiply(zoom, cam), zoom.interpolate({ inputRange: [0, 1], outputRange: [outX, 0] })) },
+    { translateY: zoom.interpolate({ inputRange: [0, 1], outputRange: [H * (1 - out), 0] }) },
+    { scale: zoom.interpolate({ inputRange: [0, 1], outputRange: [out, 1] }) },
   ];
   const pose = walking ? 'walk' : arrived ? st.pose : 'think';
   const tapDone = acts.findIndex((a) => a.kind === 'tap');
@@ -110,10 +116,10 @@ export function KitchenStage({ r, i, taps, setTaps, onMiss, onStir }: { r: Recip
         <Stove st={st} k={k} />
         </View>
         {arrived
-          ? <Hotspots acts={acts} done={done} st={st} k={k} pics={pics} onTap={tap} onDecoy={(name) => warn(name)} />
-          : <Stations goal={base.at} k={k} scale={k * fit} onGo={(s) => { if (s === base.at) { setNote(null); setChefAt(s); } else warn(''); }} />}
+          ? <Hotspots acts={acts} done={done} st={st} k={k} pics={pics} onTap={tap} />
+          : <Stations goal={base.at} k={k} scale={k * out} onGo={(s) => { if (s === base.at) { setNote(null); setChefAt(s); } else setNote(i); }} />}
       </Animated.View>
-      <Guide acts={arrived ? acts : []} done={done} goal={base.heat} go={arrived ? null : base.at} note={note?.step === i ? note.text : null} />
+      <Guide acts={arrived ? acts : []} done={done} goal={base.heat} go={arrived ? null : base.at} wrong={note === i} />
     </View>
   );
 }
@@ -127,27 +133,27 @@ type Pic = ReturnType<typeof pickables>[number];
 
 // ตำแหน่งของที่แตะได้ในครัว (กลางชิ้น กว้าง สูง) ชั้นตู้เย็นมีหกช่อง ของจริงกับของหลอกสลับช่องกัน
 const SLOTS: [number, number][] = [[78, 112], [136, 112], [78, 180], [136, 180], [78, 232], [136, 232]];
-const PICK_SLOT = [0, 3, 4, 1], DECOY_SLOT = [2, 5];
+const PICK_SLOT = [0, 3, 4, 1];
 const SPOTS = { knob: [1020, 268, 30, 30], board: [682, 220, 112, 40], tap: [456, 200, 40, 40], source: [1014, 214, 44, 34], side: [772, 216, 56, 40] } as const;
 const panSpot = (pot: boolean) => [930, pot ? 200 : 214, 124, pot ? 76 : 52] as const;
 const FOOD_COLOR: Partial<Record<Food, string>> = { oil: '#FFE07A', egg: '#FFFFFF', beaten: '#FFD34D', bits: '#FF5A4A', mince: '#9A5B3C', sauce: '#6B3A22', leaves: '#2FB383', beans: '#5DBB63',
   cream: '#FFF8E8', paste: '#E8572F', curry: '#F4F1E4', chicken: '#F7D9B5', veg: '#7BC96F', water: '#BFE6FF', eggs: '#F3E6D3', caramel: '#C8782E', stew: '#7A4526', pork: '#B5683F' };
 
 /** ป้ายมุมซ้ายบน: ต้องแตะอะไร หรือคำเตือนเมื่อแตะผิด */
-function Guide({ acts, done, goal, go, note }: { acts: Act[]; done: number[]; goal: Heat; go: Station | null; note: string | null }) {
+function Guide({ acts, done, goal, go, wrong }: { acts: Act[]; done: number[]; goal: Heat; go: Station | null; wrong: boolean }) {
   const { t, pick } = useSettings();
-  if (!go && !acts.length && note === null) return null;
+  if (!go && !acts.length && !wrong) return null;
   const c = nextAct(acts, done), a = acts[c], n = done[c] ?? 0;
   const food = a?.food && FOOD_NAME[a.food] ? pick(FOOD_NAME[a.food]!) : '';
   const picks = acts.filter((x) => x.kind === 'pick').length;
-  const text = note !== null ? (note ? t('kitchen.notNeeded', { x: note }) : t('kitchen.notThere'))
+  const text = wrong ? t('kitchen.notThere')
     : go ? t('kitchen.go', { x: t(`kitchen.at.${go}`) })
     : c < 0 ? t('kitchen.done')
     : a.kind === 'pick' ? t('kitchen.pick', { n: acts.filter((x, j) => x.kind === 'pick' && (done[j] ?? 0) > 0).length, total: picks })
     : a.kind === 'heat' ? t('kitchen.heat', { x: t(`cook.heat${goal}`) })
     : a.kind === 'chop' || a.kind === 'mix' ? t(`kitchen.${a.kind}`, { n, total: a.taps })
     : t(`kitchen.${a.kind}`, { x: food });
-  const bg = note !== null ? '#FFD6CC' : !go && c < 0 ? '#C9F2CF' : '#FFFFFF';
+  const bg = wrong ? '#FFD6CC' : !go && c < 0 ? '#C9F2CF' : '#FFFFFF';
   return (
     <View accessibilityLiveRegion="polite" style={{ position: 'absolute', left: 8, top: 8, maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999, backgroundColor: bg }}>
       <T v="smallBold" tone="pastel">{text}</T>
@@ -182,11 +188,10 @@ function Stations({ goal, k, scale, onGo }: { goal: Station; k: number; scale: n
   ))}</>;
 }
 
-/** ของที่แตะได้หลังเดินถึง: ของที่ต้องแตะตอนนี้มีวงกะพริบ ตู้เย็นมีของหลอกปนอยู่สองอย่าง */
-function Hotspots({ acts, done, st, k, pics, onTap, onDecoy }: { acts: Act[]; done: number[]; st: Stage; k: number; pics: Pic[]; onTap: (n: number) => void; onDecoy: (name: string) => void }) {
+/** ของที่แตะได้หลังเดินถึง: ของที่ต้องแตะตอนนี้มีวงกะพริบ  */
+function Hotspots({ acts, done, st, k, pics, onTap }: { acts: Act[]; done: number[]; st: Stage; k: number; pics: Pic[]; onTap: (n: number) => void }) {
   const { t, pick } = useSettings();
   const bob = useMove('puff');
-  const [tried, setTried] = useState<string[]>([]);
   const c = nextAct(acts, done);
   if (c < 0) return null;
   const a = acts[c];
@@ -197,17 +202,11 @@ function Hotspots({ acts, done, st, k, pics, onTap, onDecoy }: { acts: Act[]; do
   );
   const float = (n: number, child: ReactNode) => <Animated.View key={n} style={{ position: 'absolute', left: 0, top: 0, transform: [{ translateY: Animated.multiply(bob, (n % 2 ? 3 : -3) * k) }] }}>{child}</Animated.View>;
   if (a.kind === 'pick') {
-    const decoys = decoysFor(pics.map((g) => g.img));
     return <>
       {acts.map((x, n) => {
         if (x.kind !== 'pick' || (done[n] ?? 0) > 0) return null;
         const g = pics.find((p) => p.id === x.item)!, [cx, cy] = SLOTS[PICK_SLOT[n] ?? n];
         return float(n, <Spot box={[cx, cy, 46, 46]} k={k} scale={k} label={t('kitchen.take', { x: pick(g.name) })} onPress={() => onTap(n)} ring round>{bubble(g.src)}</Spot>);
-      })}
-      {decoys.map((d, n) => {
-        const [cx, cy] = SLOTS[DECOY_SLOT[n]];
-        return float(n + 7, <Spot box={[cx, cy, 46, 46]} k={k} scale={k} label={t('kitchen.take', { x: pick(d.name) })} ring={!tried.includes(d.img)} round
-          onPress={() => { setTried([...tried, d.img]); onDecoy(pick(d.name)); }}>{bubble(IMG[d.img])}</Spot>);
       })}
     </>;
   }

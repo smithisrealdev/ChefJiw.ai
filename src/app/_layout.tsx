@@ -1,5 +1,4 @@
-import { IBMPlexSansThaiLooped_400Regular, IBMPlexSansThaiLooped_600SemiBold, IBMPlexSansThaiLooped_700Bold } from '@expo-google-fonts/ibm-plex-sans-thai-looped';
-import { Mitr_500Medium } from '@expo-google-fonts/mitr';
+import { Anuphan_400Regular, Anuphan_600SemiBold, Anuphan_700Bold } from '@expo-google-fonts/anuphan';
 import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
@@ -17,7 +16,7 @@ if (Platform.OS !== 'web') Notifications.setNotificationHandler({ handleNotifica
 
 function Root() {
   const { ready, isDark, colors } = useSettings();
-  const [fontsLoaded, fontError] = useFonts({ Mitr_500Medium, IBMPlexSansThaiLooped_400Regular, IBMPlexSansThaiLooped_600SemiBold, IBMPlexSansThaiLooped_700Bold });
+  const [fontsLoaded, fontError] = useFonts({ Anuphan_400Regular, Anuphan_600SemiBold, Anuphan_700Bold });
   // ฟอนต์โหลดไม่ได้ก็เปิดแอปด้วยฟอนต์ระบบ ดีกว่าค้างที่หน้าเปิด
   const show = ready && (fontsLoaded || !!fontError);
   useEffect(() => { if (show) SplashScreen.hideAsync(); }, [show]);

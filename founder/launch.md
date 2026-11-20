@@ -89,7 +89,7 @@ and refund any pre-orders if the pack is not going ahead.
   is six weeks and the longest task in the plan. Consider a paid recipe developer.
 - ★ Developer: one-time in-app purchase for the pack (App Store and Google Play),
   restore purchase, and receipt checks on the server. Deadline Fri 15 Jan.
-- Developer: the "It didn't work" button and the one-pan label. Fri 15 Jan.
+- Developer: the "It didn't work" button and the one-pan label. Fri 15 Jan. **Done 20 Nov** (the button's two-part answer needs the updated `ask` function deployed).
 - Founder: store listings, screenshots, privacy policy, support email. Fri 22 Jan.
 - ★ Developer: submit to both stores by Fri 29 Jan; review can take a week or more.
 - Founder: turn off beta mode for launch (three steps in the README). Fri 29 Jan.

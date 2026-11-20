@@ -10,7 +10,7 @@ def face(look=(0, 0), mouth=True, blush=0.85, show='all'):
     look = ขยับลูกตาเวลามองไปทางอื่น mouth=False เมื่อมีของบังปาก show = 'eyes' วาดเฉพาะตา 'noeyes' วาดทุกอย่างยกเว้นตา (ชั้นแยกสำหรับกะพริบตา)"""
     L, R, Y = 196 + look[0], 284 + look[0], 262 + look[1]
     eyes = f'<circle cx="{L}" cy="{Y}" r="12.5" fill="{INK}"/><circle cx="{R}" cy="{Y}" r="12.5" fill="{INK}"/>'
-    rest = (f'<ellipse cx="164" cy="290" rx="22" ry="15" fill="#FF8FB1" opacity="{blush}"/><ellipse cx="316" cy="290" rx="22" ry="15" fill="#FF8FB1" opacity="{blush}"/>'
+    rest = (f'<ellipse cx="166" cy="290" rx="17" ry="11" fill="#FF8FB1" opacity="{blush * 0.6}"/><ellipse cx="314" cy="290" rx="17" ry="11" fill="#FF8FB1" opacity="{blush * 0.6}"/>'
             + (f'<path d="M229 267 h22" stroke="{INK}" stroke-width="8" stroke-linecap="round"/>' if mouth else ''))
     return f'<g transform="translate(240 178) scale(0.8) translate(-240 -262)">{eyes if show == "eyes" else rest if show == "noeyes" else rest + eyes}</g>'
 star = lambda x, y, s, c=YEL: f'<path d="M{x} {y-s} q{s*0.18} {s*0.82} {s} {s} q-{s*0.82} {s*0.18} -{s} {s} q-{s*0.18} -{s*0.82} -{s} -{s} q{s*0.82} -{s*0.18} {s} -{s} z" fill="{c}"/>'
@@ -37,13 +37,9 @@ def legs(skin, sock, accent, feet, drop, only=None):
     out = ''
     for k, ((hx, hy), (fx, fy, rot)) in enumerate(zip(((208, 372 + drop), (272, 372 + drop)), feet)):
         if only is not None and k != only: continue
-        ax, ay = fx, fy - 14; mx, my = hx + (ax - hx) * 0.62, hy + (ay - hy) * 0.62  # ถุงเท้าคลุมช่วงล่างของขา
-        dx, dy = ax - hx, ay - hy; n = max(1.0, (dx * dx + dy * dy) ** 0.5); px, py = -dy / n * 19, dx / n * 19
-        sx, sy = hx + dx * 0.74, hy + dy * 0.74
-        out += (f'<path d="M{hx} {hy} L{ax} {ay}" stroke="{skin}" stroke-width="38" stroke-linecap="round"/><path d="M{mx} {my} L{ax} {ay}" stroke="{sock}" stroke-width="38"/><circle cx="{ax}" cy="{ay}" r="19" fill="{sock}"/>'
-                f'<path d="M{sx - px} {sy - py} L{sx + px} {sy + py}" stroke="{accent}" stroke-width="6"/>'
-                f'<g transform="rotate({rot} {fx} {fy})"><ellipse cx="{fx}" cy="{fy}" rx="36" ry="18" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="4"/>'
-                f'<path d="M{fx-26} {fy+10} q26 8 52 0" stroke="{accent}" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M{fx-6} {fy-10} l9 11" stroke="{accent}" stroke-width="6" stroke-linecap="round"/></g>')
+        ax, ay = fx, fy - 14  # ขาเรียบถึงรองเท้าสีเดียว ไม่มีถุงเท้าหรือลาย (วาดให้เรียบ ไม่ดูเป็นการ์ตูนเด็ก)
+        out += (f'<path d="M{hx} {hy} L{ax} {ay}" stroke="{skin}" stroke-width="38" stroke-linecap="round"/>'
+                f'<g transform="rotate({rot} {fx} {fy})"><ellipse cx="{fx}" cy="{fy}" rx="36" ry="18" fill="{accent}"/></g>')
     return out
 LAYER = ['all']  # 'all' = ภาพเต็ม  'body' = ตัดส่วนที่ขยับแยกออก  ชื่อส่วน หรือ 'legL' 'legR' = วาดเฉพาะส่วนนั้น ใช้ทำภาพแยกชั้นให้แอปขยับทีละส่วน
 _n = [0]
@@ -76,15 +72,15 @@ def person(skin, top, clothes, hair, accent, look=(0, 0), mouth=True, sock='#FFF
 {head if whole else ''}
 {arms_front if whole else ''}{moving}</g>{both_legs if legs_front else ''}</g>{front}{around}</g>''')
 
-# ---------- เชฟจิ๋ว: หมวกเชฟ ผมหน้าม้าปัดข้าง เสื้อแขนยาวฟ้า ผ้ากันเปื้อนเต็มตัวสีส้มมีกระเป๋า ----------
+# ---------- เชฟจิ๋ว: หมวกเชฟ ผมหน้าม้าปัดข้าง เสื้อแขนยาวฟ้า ผ้ากันเปื้อนเต็มตัวสีส้ม ----------
 S1, SKY, BROWN = '#FFE3C2', '#BFD9FF', '#6B4632'
 apron = (f'<path d="M204 216 V268 M276 216 V268" stroke="{CORAL_D}" stroke-width="9" stroke-linecap="round"/>'
-         f'<path d="M198 264 H282 Q290 264 290 272 V300 L326 312 L338 404 H142 L154 312 L190 300 V272 Q190 264 198 264 Z" fill="{CORAL}"/><rect x="212" y="326" width="56" height="38" rx="13" fill="{CORAL_L}"/>')
+         f'<path d="M198 264 H282 Q290 264 290 272 V300 L326 312 L338 404 H142 L154 312 L190 300 V272 Q190 264 198 264 Z" fill="{CORAL}"/>')
 chef_hair = hair_cap(BROWN, 'M100 40 H380 V182 C356 154 324 142 292 142 Q262 166 226 138 Q166 144 100 192 Z', 'chef')
 def toque(rot=-8):
     return (f'<g transform="translate(240 96) rotate({rot}) scale(0.86) translate(-240 -150)"><path d="M184 152 Q240 134 296 152 L296 122 Q240 106 184 122 Z" fill="{HAT_D}" stroke="{HAT_D}" stroke-width="5" stroke-linejoin="round"/>'
             f'<path d="M180 124 C146 108 152 58 194 58 C202 20 278 20 286 58 C328 58 334 108 300 124 Q240 106 180 124 Z" fill="{HAT}" stroke="{HAT_D}" stroke-width="5" stroke-linejoin="round"/>'
-            f'<path d="M214 64 q6 22 0 42 M266 64 q-6 22 0 42" stroke="{HAT_D}" stroke-width="5" stroke-linecap="round" fill="none"/></g>')
+            '</g>')
 def chef(**k):
     k.setdefault('hat', toque())
     return person(S1, SKY, apron, chef_hair, CORAL, **k)
@@ -95,7 +91,7 @@ spatula = lambda x, y, r: (f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y
                            f'<rect x="{x+64}" y="{y-15}" width="34" height="30" rx="7" fill="#A7B0C2"/><path d="M{x+72} {y-6} h18 M{x+72} {y+6} h18" stroke="#8792A8" stroke-width="4" stroke-linecap="round"/></g>')
 knife = lambda x, y, r: (f'<g transform="rotate({r} {x} {y})"><rect x="{x-12}" y="{y-7}" width="30" height="14" rx="6" fill="{INK}"/>'
                          f'<path d="M{x+16} {y-10} H{x+74} Q{x+80} {y-10} {x+77} {y-2} L{x+70} {y+10} H{x+16} Z" fill="#E4E8F2" stroke="#A7B0C2" stroke-width="3" stroke-linejoin="round"/></g>')
-food = lambda x, y: f'<circle cx="{x-34}" cy="{y-30}" r="9" fill="{GREEN_L}"/><circle cx="{x-2}" cy="{y-50}" r="9" fill="{CORAL}"/><circle cx="{x+30}" cy="{y-34}" r="9" fill="{YEL}"/><circle cx="{x-10}" cy="{y-20}" r="8" fill="{GREEN}"/><circle cx="{x+16}" cy="{y-62}" r="7" fill="{GREEN_L}"/>'
+food = lambda x, y: f'<circle cx="{x-34}" cy="{y-30}" r="9" fill="{GREEN_L}"/><circle cx="{x-2}" cy="{y-50}" r="9" fill="{CORAL}"/><circle cx="{x+30}" cy="{y-34}" r="9" fill="{YEL}"/>'
 def build():
     P = {
       # เอนตัวตามกระทะ ของในกระทะลอยขึ้น
@@ -103,7 +99,7 @@ def build():
                    parts={'food': food(262, 346), 'wok': wok(262, 346, -10) + A1('L', 200, 340, -34, 12) + A1('R', 356, 328, 30, 8)}),
       # กระโดดตัวลอย แขนขากาง
       'cheer': chef(feet=((170, 432, -22), (310, 432, 22)), bparts={'armL': A1('L', 88, 172, -14, 16), 'armR': A1('R', 392, 172, 14, 16)}, hat=toque(-14),
-                    extras={'stars': star(50, 96, 22) + star(432, 84, 26) + star(400, 22, 13) + star(96, 30, 12)}),
+                    extras={'stars': star(50, 96, 22) + star(432, 84, 26)}),
       # เอียงคอคิด เท้าไขว้
       'think': chef(look=(10, -8), tilt=11, lean=3, feet=((214, 440, 0), (250, 438, -24)), arms_front=A1('L', 230, 334, -38, 16), parts={'hand': A1('R', 262, 268, 54, 44)}, hat=toque(4), blush=0.6,
                     extras={'bubbles': f'<circle cx="392" cy="112" r="8" fill="{HAT_D}"/><circle cx="414" cy="82" r="13" fill="{HAT_D}"/><circle cx="442" cy="40" r="22" fill="{HAT_D}"/>'}),
@@ -124,40 +120,37 @@ def build():
       'wash': chef(lean=4, tilt=-8, look=(8, 8), parts={'hands': A1('L', 334, 348, -8, 24) + A1('R', 384, 338, 22, 2)}, hat=toque(-4)),
     }
 
-    # ---------- ใบเตย: หมวกบักเก็ต ผมเปียคู่ผูกโบว์ เสื้อยืดเขียวมินต์ เอี๊ยมกระโปรงยีนส์ติดกระดุมเหลือง ถุงผ้าใส่ผัก ----------
+    # ---------- ใบเตย: หมวกบักเก็ต ผมเปียคู่ เสื้อยืดเขียวมินต์ เอี๊ยมกระโปรงยีนส์ติดกระดุมเหลือง ถุงผ้าใส่ผัก ----------
     S2, MINT, DENIM, DENIM_D, CREAM, CREAM_D, DARKHAIR = '#FFDDBE', '#A6ECCF', '#7C9BF0', '#5E7FE0', '#FFF3DC', '#EAD9B4', '#4A3A36'
     pinafore = (f'<path d="M206 214 V270 M274 214 V270" stroke="{DENIM}" stroke-width="16" stroke-linecap="round"/>'
                 f'<path d="M196 262 H284 Q292 262 292 270 V304 L334 314 L348 406 H132 L146 314 L188 304 V270 Q188 262 196 262 Z" fill="{DENIM}"/>'
-                f'<circle cx="206" cy="276" r="7" fill="{YEL}"/><circle cx="274" cy="276" r="7" fill="{YEL}"/><path d="M216 316 H264 V340 Q240 352 216 340 Z" fill="none" stroke="{DENIM_D}" stroke-width="5" stroke-linejoin="round"/>'
-                f'<path d="M150 346 Q240 336 330 346" stroke="{DENIM_D}" stroke-width="5" fill="none"/>')
-    braid = lambda x, d: (f'<path d="M{x} 206 q{d*14} 34 {d*4} 68 q{-d*6} 24 {d*6} 44" stroke="{DARKHAIR}" stroke-width="30" stroke-linecap="round" fill="none"/>'
-                          f'<rect x="{x + d*2 - 18}" y="296" width="36" height="16" rx="8" fill="{CORAL}"/>')
+                f'<circle cx="206" cy="276" r="7" fill="{YEL}"/><circle cx="274" cy="276" r="7" fill="{YEL}"/>')
+    braid = lambda x, d: (f'<path d="M{x} 206 q{d*14} 34 {d*4} 68 q{-d*6} 24 {d*6} 44" stroke="{DARKHAIR}" stroke-width="30" stroke-linecap="round" fill="none"/>')
     toey_hair = hair_cap(DARKHAIR, 'M100 40 H380 V190 C356 160 322 150 296 148 Q240 170 184 148 C158 150 124 160 100 190 Z', 'toey')
     bucket = (f'<g transform="translate(240 92) scale(0.86) translate(-240 -130)"><path d="M96 132 Q240 96 384 132 Q396 150 372 156 Q240 126 108 156 Q84 150 96 132 Z" fill="{CREAM_D}"/>'
-              f'<path d="M140 136 C132 60 186 26 240 26 C294 26 348 60 340 136 Q240 110 140 136 Z" fill="{CREAM}"/><path d="M146 112 Q240 88 334 112" stroke="{CREAM_D}" stroke-width="6" fill="none"/></g>')
+              f'<path d="M140 136 C132 60 186 26 240 26 C294 26 348 60 340 136 Q240 110 140 136 Z" fill="{CREAM}"/></g>')
     def toey(**k):
         return person(S2, MINT, pinafore, toey_hair, GREEN, bparts={'braids': braid(150, -1) + braid(330, 1)}, hat=bucket, **k)
     A2 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S2, MINT, 0.4)
     tote = lambda x, y: (f'<path d="M{x-24} {y-4} q24 -60 48 0" stroke="{CREAM_D}" stroke-width="8" fill="none" stroke-linecap="round"/>'
-        f'<path d="M{x-26} {y+2} q-20 -42 6 -58 q24 18 8 58 z" fill="{GREEN}"/><path d="M{x-2} {y+2} q-8 -50 24 -62 q18 28 -4 62 z" fill="{GREEN_L}"/><path d="M{x+16} {y+4} l20 -50 q10 4 6 14 l-12 38 z" fill="{CORAL}"/>'
-        f'<path d="M{x-44} {y} h88 l-6 68 q-38 10 -76 0 z" fill="{CREAM}" stroke="{CREAM_D}" stroke-width="4" stroke-linejoin="round"/>' + heart(x, y + 36, 0.75, CORAL))
+        f'<path d="M{x-8} {y+2} q-14 -48 16 -62 q20 26 0 62 z" fill="{GREEN}"/>'
+        f'<path d="M{x-44} {y} h88 l-6 68 q-38 10 -76 0 z" fill="{CREAM}"/>')
     P.update({
       # เดินกลับจากตลาด ก้าวขา มือหนึ่งหิ้วถุงผ้า อีกมือแกว่งข้างตัว
-      'shop': toey(lean=5, tilt=-5, feet=((196, 442, -6), (290, 440, 14)), split_legs=True, arms_back=A2('L', 122, 336, -26, 4), arms_front=tote(390, 326) + A2('R', 382, 318, 22, -4), front=star(56, 150, 15)),
+      'shop': toey(lean=5, tilt=-5, feet=((196, 442, -6), (290, 440, 14)), split_legs=True, arms_back=A2('L', 122, 336, -26, 4), arms_front=tote(390, 326) + A2('R', 382, 318, 22, -4)),
       # นั่งบนลังไม้ อ่านรายการของ แกว่งขา
       'list': toey(tilt=7, feet=((196, 446, -14), (292, 434, 22)), split_legs=True, split_ground=True,
-                   ground=f'<rect x="126" y="384" width="228" height="80" rx="12" fill="{STRAW}"/><path d="M138 412 h204 M138 438 h204" stroke="{STRAW_D}" stroke-width="6" stroke-linecap="round"/>',
+                   ground=f'<rect x="126" y="384" width="228" height="80" rx="12" fill="{STRAW}"/>',
                    arms_front=f'<rect x="262" y="292" width="104" height="116" rx="14" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="5"/>'
                f'<path d="M280 322 l8 8 l14 -16 M280 354 l8 8 l14 -16" stroke="{GREEN}" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
                f'<path d="M316 324 h34 M316 356 h34 M282 386 h66" stroke="{HAT_D}" stroke-width="7" stroke-linecap="round"/>' + A2('R', 348, 352, 30, 0) + A2('L', 208, 340, -34, 14)),
     })
 
-    # ---------- น้องชิม: ฮู้ดหมีสีเหลืองสวมฮู้ด หน้าม้า กระโปรงพลีทชมพู ถุงเท้าชมพู ถือช้อนใหญ่ ----------
+    # ---------- น้องชิม: ฮู้ดหมีสีเหลืองสวมฮู้ด หน้าม้า กระโปรงชมพู ถือช้อนใหญ่ ----------
     S3, BUTTER, BUTTER_D, ROSE, ROSE_D, BLACK = '#FFDCCB', '#FFE27A', '#F2C744', '#FFB3C4', '#F58CA5', '#3A2F33'
     bear_hood = (f'<circle cx="162" cy="92" r="30" fill="{BUTTER}"/><circle cx="318" cy="92" r="30" fill="{BUTTER}"/><circle cx="162" cy="92" r="15" fill="{BUTTER_D}"/><circle cx="318" cy="92" r="15" fill="{BUTTER_D}"/>'
                  f'<path d="M126 158 C126 50 354 50 354 158 L356 200 C356 262 310 272 240 272 C170 272 124 262 124 200 Z" fill="{BUTTER}"/>')
-    chim_clothes = (f'<path d="M222 268 v26 M258 268 v26" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/><circle cx="222" cy="298" r="5" fill="#FFFFFF"/><circle cx="258" cy="298" r="5" fill="#FFFFFF"/>'
-                    + heart(240, 328, 0.8, CORAL) + f'<path d="M106 356 Q240 344 374 356 V420 H106 Z" fill="{ROSE}"/><path d="M160 354 V410 M214 350 V410 M266 350 V410 M320 354 V410" stroke="{ROSE_D}" stroke-width="5" stroke-linecap="round"/>')
+    chim_clothes = f'<path d="M106 356 Q240 344 374 356 V420 H106 Z" fill="{ROSE}"/>'
     chim_hair = f'<path d="M158 160 C158 92 322 92 322 160 Q296 138 268 158 Q240 136 212 158 Q184 138 158 160 Z" fill="{BLACK}"/>'
     def chim(**k):
         k.setdefault('blush', 0.95)
@@ -171,10 +164,10 @@ def build():
       'sip': chim(tilt=-6, drop=40, legs_front=True, feet=((112, 448, -62), (368, 448, 62)), ground=f'<ellipse cx="240" cy="456" rx="214" ry="22" fill="#CFE3FF"/>',
                   arms_front=A3('L', 208, 338, -34, 14),
                   parts={'spoon': f'<path d="M312 206 L262 192" stroke="{WOOD}" stroke-width="11" stroke-linecap="round"/><ellipse cx="248" cy="188" rx="22" ry="14" fill="{WOOD}"/>' + A3('R', 316, 212, 46, 18)},
-                  extras={'hearts': heart(420, 150, 1.1) + heart(62, 184, 0.7)}),
+                  extras={'hearts': heart(420, 150, 1.1)}),
       # กระโดดชูช้อน ขาข้างหนึ่งเตะไปข้างหลัง
       'yum': chim(lean=7, tilt=-6, feet=((184, 436, -14), (318, 408, 46)), bparts={'arm': A3('L', 96, 176, -14, 16)}, parts={'spoon': bigspoon(384, 286, 14) + A3('R', 382, 300, 22, -2)},
-                  extras={'stars': star(52, 96, 20) + star(436, 26, 14) + star(108, 30, 11)}),
+                  extras={'stars': star(52, 96, 20)}),
       # เอียงคอสงสัย เท้าเขี่ยพื้น
       'hmm': chim(look=(-9, -7), tilt=-13, lean=-4, feet=((204, 440, 0), (296, 434, 30)), arms_front=A3('L', 208, 338, -34, 14), parts={'spoon': bigspoon(368, 340, 22) + A3('R', 362, 340, 26, 2)}, blush=0.6,
                   extras={'bubbles': f'<circle cx="100" cy="92" r="7" fill="{HAT_D}"/><circle cx="76" cy="64" r="11" fill="{HAT_D}"/><circle cx="46" cy="28" r="16" fill="{HAT_D}"/>'}),
@@ -197,7 +190,7 @@ for name, layers in SPLIT.items():
 LAYER[0] = 'all'
 for n, svg in POSES.items(): open(n + '.svg', 'w').write(svg)
 
-# ฉาก: วาดเฉพาะของในฉาก ตัวละครวางทับในแอปเพื่อให้ขยับได้ (ตำแหน่งอยู่ใน SCENE ที่ src/data/images.ts) พื้นหลังโปร่งใส ใช้สีอ่อนเข้มของสีหัวจอ แล้วแต้มสีสดเฉพาะของชิ้นเล็ก
+# ฉาก: วาดเฉพาะของในฉาก แอปเลิกใช้ฉากบนหัวจอแล้ว ภาพชุดนี้เก็บไว้สำหรับงานโปรโมต พื้นหลังโปร่งใส ใช้สีอ่อนเข้มของสีหัวจอ แล้วแต้มสีสดเฉพาะของชิ้นเล็ก
 scene = lambda w, h, body: f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}">\n{body}\n</svg>'
 floor = lambda y, c, h=360: f'<rect x="0" y="{y}" width="780" height="{h - y}" fill="{c}"/>'
 beam = lambda x1, x2, y, fx1, fx2, h=360: f'<path d="M{x1} {y} L{x2} {y} L{fx2} {h} L{fx1} {h} Z" fill="#FFFFFF" opacity="0.1"/>'

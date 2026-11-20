@@ -139,15 +139,3 @@ export function nextAct(acts: Act[], done: number[]) {
   const pick = acts.findIndex((a, k) => a.kind === 'pick' && left(k));
   return pick >= 0 ? pick : acts.findIndex((_, k) => left(k));
 }
-
-// ของหลอกในตู้เย็น (เหมือนต้นแบบ): ของที่สูตรนี้ไม่ใช้ หยิบผิดแล้วมีคำเตือนและหักคะแนน ใช้ภาพที่มีอยู่แล้ว
-export const DECOYS: { img: 'morning-glory' | 'chicken' | 'pork' | 'egg'; name: L }[] = [
-  { img: 'morning-glory', name: { th: 'ผักบุ้ง', en: 'morning glory' } }, { img: 'chicken', name: { th: 'ไก่', en: 'chicken' } },
-  { img: 'pork', name: { th: 'หมู', en: 'pork' } }, { img: 'egg', name: { th: 'ไข่', en: 'eggs' } },
-];
-/** ของหลอกสองอย่างที่ไม่ซ้ำกับภาพของที่ต้องหยิบ */
-export const decoysFor = (used: string[]) => DECOYS.filter((d) => !used.includes(d.img)).slice(0, 2);
-
-/** หักคะแนนจากในครัว: หยิบผิดหรือเดินผิดที่ครั้งละ 0.2 ข้ามขั้นโดยไม่ได้แตะให้ครบขั้นละ 0.3 คะแนนต่ำสุด 1.5 */
-export const kitchenPenalty = (miss: number, skips: number) => Math.round((miss * 0.2 + skips * 0.3) * 10) / 10;
-export const finalScore = (taste: number, miss: number, skips: number) => Math.max(1.5, Math.round((taste - kitchenPenalty(miss, skips)) * 10) / 10);

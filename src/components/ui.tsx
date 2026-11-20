@@ -1,51 +1,59 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextProps, type TextStyle, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
-import { LAYERS, type Beat, type BodyMove, type Head, type MascotName, type Motion, type Part, type PartMove, type SCENE } from '@/data/images';
+import { LAYERS, MASCOT, type BodyMove, type Head, type MascotName, type Motion, type Part, type PartMove } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
-import { fonts, onPastel, onTint, radius, space, touch, type, vivid } from '@/theme/tokens';
+import { fonts, onPastel, onTint, radius, space, touch, type, typeCook, vivid, wide } from '@/theme/tokens';
+
+// จริงเมื่ออยู่ในการ์ดสีอ่อนตอนธีมมืด: พื้นการ์ดเข้มตามธีม ตัวอักษรกับปุ่มแบบ "pastel" จึงต้องเปลี่ยนตามธีมด้วย (การ์ดสีสด coral/navy สีคงที่ ไม่เข้าเงื่อนไขนี้)
+const OnThemed = createContext(false);
+
+// จริงในหน้าทำอาหาร: ตัวอักษรชุดใหญ่ (typeCook)
+export const BigType = createContext(false);
 
 type TextVariant = 'hero' | 'price' | 'title' | 'heading' | 'subheading' | 'body' | 'bodyBold' | 'small' | 'smallBold' | 'step';
-const VARIANT: Record<TextVariant, TextStyle> = {
+const variants = (z: typeof type | typeof typeCook): Record<TextVariant, TextStyle> => ({
   // ตัวเลขเด่นของจอ (ราคาต่อมื้อ เวลาที่เหลือ จำนวนจานที่ทำแล้ว)
-  // ตัวเลขใช้ฟอนต์เนื้อความตัวหนา เพราะเลขศูนย์ของฟอนต์หัวข้อ (Mitr) มีขีดทับ
-  hero: { fontFamily: fonts.bodyBold, fontSize: type.hero, lineHeight: type.hero * 1.2, fontVariant: ['tabular-nums'] },
-  price: { fontFamily: fonts.bodyBold, fontSize: type.xl, lineHeight: type.xl * 1.35, fontVariant: ['tabular-nums'] },
-  title: { fontFamily: fonts.heading, fontSize: type.xxl, lineHeight: type.xxl * 1.3 },
-  heading: { fontFamily: fonts.heading, fontSize: type.xl, lineHeight: type.xl * 1.35 },
-  subheading: { fontFamily: fonts.heading, fontSize: type.lg, lineHeight: type.lg * 1.4 },
-  body: { fontFamily: fonts.body, fontSize: type.md, lineHeight: type.md * 1.6 },
-  bodyBold: { fontFamily: fonts.bodySemi, fontSize: type.md, lineHeight: type.md * 1.6 },
-  small: { fontFamily: fonts.body, fontSize: type.sm, lineHeight: type.sm * 1.5 },
-  smallBold: { fontFamily: fonts.bodySemi, fontSize: type.sm, lineHeight: type.sm * 1.5 },
+  hero: { fontFamily: fonts.bodyBold, fontSize: z.hero, lineHeight: z.hero * 1.2, fontVariant: ['tabular-nums'] },
+  price: { fontFamily: fonts.bodyBold, fontSize: z.xl, lineHeight: z.xl * 1.35, fontVariant: ['tabular-nums'] },
+  title: { fontFamily: fonts.heading, fontSize: z.xxl, lineHeight: z.xxl * 1.3 },
+  heading: { fontFamily: fonts.heading, fontSize: z.xl, lineHeight: z.xl * 1.35 },
+  subheading: { fontFamily: fonts.heading, fontSize: z.lg, lineHeight: z.lg * 1.4 },
+  body: { fontFamily: fonts.body, fontSize: z.md, lineHeight: z.md * 1.6 },
+  bodyBold: { fontFamily: fonts.bodySemi, fontSize: z.md, lineHeight: z.md * 1.6 },
+  small: { fontFamily: fonts.body, fontSize: z.sm, lineHeight: z.sm * 1.5 },
+  smallBold: { fontFamily: fonts.bodySemi, fontSize: z.sm, lineHeight: z.sm * 1.5 },
   // คำสั่งในหน้าทำอาหาร อ่านได้จากระยะหนึ่งช่วงแขน (แผน: ไม่ต่ำกว่า 18)
-  step: { fontFamily: fonts.bodySemi, fontSize: type.xl, lineHeight: type.xl * 1.55 },
-};
+  step: { fontFamily: fonts.bodySemi, fontSize: z.xl, lineHeight: z.xl * 1.55 },
+});
+const VARIANT = variants(type), VARIANT_COOK = variants(typeCook);
 
 /** ข้อความทั้งแอป ขยายตามขนาดตัวอักษรของเครื่องอัตโนมัติ; tone 'pastel' ใช้บนพื้นสีอ่อนที่ไม่เปลี่ยนตามธีม */
 export function T({ v = 'body', tone = 'ink', style, children, ...rest }: { v?: TextVariant; tone?: 'ink' | 'muted' | 'success' | 'warn' | 'pastel' | 'pastelMuted' | 'onPrimary' | 'onNavy' | 'onNavyMuted' | 'yellow'; style?: StyleProp<TextStyle>; children: ReactNode } & Omit<TextProps, 'style' | 'children'>) {
   const { colors } = useSettings();
-  const color = { ink: colors.ink, muted: colors.muted, success: colors.success, warn: colors.warn, pastel: onPastel.ink, pastelMuted: onPastel.muted, onPrimary: colors.onPrimary, onNavy: '#FFFFFF', onNavyMuted: vivid.onNavyMuted, yellow: vivid.yellow }[tone];
-  return <Text style={[VARIANT[v], { color }, style]} {...rest}>{children}</Text>;
+  const themed = useContext(OnThemed);
+  const color = { ink: colors.ink, muted: colors.muted, success: colors.success, warn: colors.warn, pastel: themed ? colors.ink : onPastel.ink, pastelMuted: themed ? colors.muted : onPastel.muted, onPrimary: colors.onPrimary, onNavy: '#FFFFFF', onNavyMuted: vivid.onNavyMuted, yellow: vivid.yellow }[tone];
+  return <Text style={[(useContext(BigType) ? VARIANT_COOK : VARIANT)[v], { color }, style]} {...rest}>{children}</Text>;
 }
 
 export function Button({ label, onPress, kind = 'primary', icon, size = 'md', disabled, style }: { label: string; onPress: () => void; kind?: 'primary' | 'secondary' | 'accent' | 'onPastel' | 'onPastelLight'; icon?: IconName; size?: 'md' | 'cook'; disabled?: boolean; style?: StyleProp<ViewStyle> }) {
   const { colors } = useSettings();
   // onPastel*: ปุ่มที่วางบนการ์ดพาสเทล สีคงที่ทั้งสองธีมเพื่อให้คอนทราสต์ผ่านเสมอ
-  const bg = { primary: colors.primary, secondary: colors.surfaceSoft, accent: colors.accent, onPastel: onPastel.ink, onPastelLight: '#FFFFFF' }[kind];
-  const fg = { primary: colors.onPrimary, secondary: colors.ink, accent: colors.onAccent, onPastel: '#FFFFFF', onPastelLight: onPastel.ink }[kind];
+  const themed = useContext(OnThemed), big = useContext(BigType);
+  const bg = { primary: colors.primary, secondary: colors.surfaceSoft, accent: colors.accent, onPastel: themed ? colors.primary : onPastel.ink, onPastelLight: themed ? colors.surface : '#FFFFFF' }[kind];
+  const fg = { primary: colors.onPrimary, secondary: colors.ink, accent: colors.onAccent, onPastel: themed ? colors.onPrimary : '#FFFFFF', onPastelLight: themed ? colors.ink : onPastel.ink }[kind];
   return (
     <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress}
       style={({ pressed }) => [s.button, { backgroundColor: bg, minHeight: size === 'cook' ? touch.cook : 48, opacity: disabled ? 0.45 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] }, style]}>
       {icon && <Icon name={icon} color={fg} />}
-      <Text style={{ fontFamily: fonts.heading, fontSize: size === 'cook' ? type.lg : type.md, color: fg }}>{label}</Text>
+      <Text style={{ fontFamily: fonts.heading, fontSize: size === 'cook' ? typeCook.lg : big ? typeCook.md : type.md, color: fg }}>{label}</Text>
     </Pressable>
   );
 }
@@ -63,23 +71,28 @@ export function IconButton({ icon, label, onPress, onPastelBg, filled }: { icon:
 
 export function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   const { colors } = useSettings();
+  const big = useContext(BigType);
   return (
     <Pressable accessibilityRole="button" accessibilityState={{ selected }} onPress={onPress}
       style={({ pressed }) => [s.chip, { backgroundColor: selected ? colors.primary : colors.surfaceSoft, transform: [{ scale: pressed ? 0.96 : 1 }] }]}>
-      <Text style={{ fontFamily: fonts.bodySemi, fontSize: type.md, color: selected ? colors.onPrimary : colors.ink }}>{label}</Text>
+      <Text style={{ fontFamily: fonts.bodySemi, fontSize: big ? typeCook.md : type.md, color: selected ? colors.onPrimary : colors.ink }}>{label}</Text>
     </Pressable>
   );
 }
 
-/** การ์ดพื้นสี: soft = พื้นรองตามธีม; note/ai/done/danger/accent = พาสเทลที่ใช้ตัวอักษรเข้มเสมอ; navy/coral/mint = การ์ดเด่นสีสด (navy ใช้ตัวอักษรขาว) */
+/** การ์ด: soft = พื้นรองตามธีม; note/ai/done/danger = สีอ่อนมากตามความหมาย (ธีมมืดเป็นสีเข้มอมสีเดียวกัน); accent/mint = พื้นรองสำหรับตัวเลขและสรุป;
+ *  navy/coral = การ์ดเด่นสีสด จอละใบเดียว (navy ใช้ตัวอักษรขาว) */
 export function Card({ tone = 'soft', children, style, onPress, label }: { tone?: 'soft' | 'note' | 'ai' | 'done' | 'danger' | 'accent' | 'surface' | 'navy' | 'coral' | 'mint'; children: ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; label?: string }) {
-  const { colors } = useSettings();
-  const bg = { soft: colors.surfaceSoft, surface: colors.surface, note: colors.note, ai: colors.ai, done: colors.done, danger: colors.danger, accent: colors.accent, navy: vivid.navy, coral: vivid.coral, mint: vivid.mint }[tone];
-  if (!onPress) return <View style={[s.card, { backgroundColor: bg }, style]}>{children}</View>;
+  const { colors, isDark } = useSettings();
+  const bg = { soft: colors.surfaceSoft, surface: colors.surface, note: colors.note, ai: colors.ai, done: colors.done, danger: colors.danger, accent: colors.surfaceSoft, navy: vivid.navy, coral: vivid.coral, mint: colors.surfaceSoft }[tone];
+  const themed = isDark && tone !== 'navy' && tone !== 'coral';
+  if (!onPress) return <OnThemed.Provider value={themed}><View style={[s.card, { backgroundColor: bg }, style]}>{children}</View></OnThemed.Provider>;
   return (
+    <OnThemed.Provider value={themed}>
     <Pressable accessibilityRole="button" accessibilityLabel={label} onPress={onPress} style={({ pressed }) => [s.card, { backgroundColor: bg, transform: [{ scale: pressed ? 0.98 : 1 }] }, style]}>
       {children}
     </Pressable>
+    </OnThemed.Provider>
   );
 }
 
@@ -207,7 +220,12 @@ function HeadLayer({ head, width, blinkDelay, tempo }: { head: Head; width: numb
 }
 
 /** ตัวละครหนึ่งท่า ภาพจัตุรัส: ทั้งตัวขยับไปด้วยกันก่อน (หายใจ โยกตัว) แล้วแขนขาและของในมือขยับรอบข้อต่อของตัวเอง จึงดูเป็นร่างเดียว */
-export function Mascot({ name, size }: { name: MascotName; size: number | '100%' }) {
+export function Mascot({ name, size, still }: { name: MascotName; size: number | '100%'; still?: boolean }) {
+  // still = ภาพนิ่ง จอหนึ่งให้ขยับได้แค่ตัวเอกหรือจังหวะที่มีความหมาย (ครบเวลา ได้คะแนน กำลังรอคำตอบ) แอปจึงไม่ดูเป็นเกม
+  if (still) return <Image source={MASCOT[name]} style={{ width: size, aspectRatio: 1 }} contentFit="contain" accessible={false} />;
+  return <Moving name={name} size={size} />;
+}
+function Moving({ name, size }: { name: MascotName; size: number | '100%' }) {
   const [width, setWidth] = useState(typeof size === 'number' ? size : 0);
   const [tempo] = useState(() => 0.9 + Math.random() * 0.22); // แต่ละตัวเร็วช้าไม่เท่ากัน
   const { body, head, front, parts, sway } = LAYERS[name];
@@ -229,69 +247,46 @@ export function Mascot({ name, size }: { name: MascotName; size: number | '100%'
   );
 }
 
-/** ตัวละครที่เปลี่ยนท่าได้: ท่าใหม่ค่อยๆ ขึ้นแทนพร้อมย่อตัวนิดหนึ่ง เหมือนคนขยับเปลี่ยนท่า ไม่กระตุกจากภาพหนึ่งไปอีกภาพ */
-export function Actor({ name, size, motion }: { name: MascotName; size: number | '100%'; motion?: Motion }) {
+/** ตัวละครที่เปลี่ยนท่าได้ (เชฟในครัวจำลอง): ท่าใหม่ค่อยๆ ขึ้นแทนพร้อมย่อตัวนิดหนึ่ง เหมือนคนขยับเปลี่ยนท่า ไม่กระตุกจากภาพหนึ่งไปอีกภาพ */
+export function Actor({ name, size }: { name: MascotName; size: number | '100%' }) {
   const [v] = useState(() => new Animated.Value(1));
   useEffect(() => {
     v.setValue(0);
     Animated.timing(v, { toValue: 1, duration: 240, easing: Easing.out(Easing.quad), useNativeDriver: Platform.OS !== 'web' }).start();
   }, [v, name]);
-  const inner = <Mascot key={name} name={name} size={size} />;
   return (
     <Animated.View style={{ width: size, opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] }), transformOrigin: 'bottom',
       transform: [{ scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [0.93, 1] }) }, { scaleX: v.interpolate({ inputRange: [0, 1], outputRange: [1.04, 1] }) }] }}>
-      {motion ? <Float motion={motion}>{inner}</Float> : inner}
+      <Mascot key={name} name={name} size={size} />
     </Animated.View>
   );
 }
 
-/** ตัวละครในฉากทำหลายอย่างสลับกันไปตามลำดับ แต่ละท่านานไม่เท่ากันทุกรอบ */
-function Cycle({ seq }: { seq: Beat[] }) {
-  const [k, setK] = useState(0);
-  useEffect(() => {
-    if (seq.length < 2) return;
-    let alive = true;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
-      if (!reduce && alive) timer = setTimeout(() => setK((x) => (x + 1) % seq.length), seq[k].ms * (0.8 + Math.random() * 0.4));
-    }).catch(() => {});
-    return () => { alive = false; clearTimeout(timer); };
-  }, [k, seq]);
-  return <Actor name={seq[k].name} size="100%" motion={seq[k].motion} />;
-}
-
 /** หัวหน้าจอพร้อมมาสคอต พื้นสีสดประจำหน้า แล้วต่อด้วยแผ่นเนื้อหาสีพื้น */
-export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; mascot?: number; scene?: (typeof SCENE)[keyof typeof SCENE]; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
+export function Screen({ tint, title, subtitle, lead, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; lead?: MascotName; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   const { colors, isDark } = useSettings();
   const insets = useSafeAreaInsets();
   const head = (
-    <View style={[s.header, { paddingTop: insets.top + space.md }]}>
+    <View style={[s.header, wide, { paddingTop: insets.top + space.md }]}>
       <View style={{ flex: 1, gap: space.xs }}>
         {onBack && <View style={{ marginBottom: space.sm }}><IconButton icon="back" label={backLabel ?? ''} onPress={onBack} onPastelBg /></View>}
         <T v="title" style={isDark ? undefined : { color: onTint(tint) }} accessibilityRole="header">{title}</T>
         {subtitle && <T v="smallBold" tone="muted" style={isDark ? undefined : { color: onTint(tint) }}>{subtitle}</T>}
       </View>
       {right}
-      {mascot && <Float><Image source={mascot} style={s.mascot} contentFit="contain" accessible={false} /></Float>}
+      {/* ตัวละครตัวเดียวบนสีเรียบ ไม่มีฉากหลัง: สีของจอกับตัวละครพอแล้ว ที่เหลือให้เนื้อหา */}
+      {lead && <View style={{ marginBottom: -space.sm }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants"><Mascot name={lead} size={104} /></View>}
     </View>
   );
   const content = { padding: space.lg, gap: space.md, paddingBottom: footer ? 120 : space.xxl };
-  const foot = footer && <View style={[s.footer, { paddingBottom: Math.max(insets.bottom, space.md) }]}>{footer}</View>;
-  // หน้าที่มีฉาก: เลื่อนทั้งหน้า ฉากจึงเลื่อนขึ้นไปพ้นจอ ไม่กินที่ของเนื้อหา
-  if (scene) return (
+  const foot = footer && <View style={[s.footer, { paddingBottom: Math.max(insets.bottom, space.md), backgroundColor: colors.bg }]}><View style={[wide, { paddingHorizontal: space.lg }]}>{footer}</View></View>;
+  // หน้าแท็บ (มีตัวละคร): หัวจอเลื่อนขึ้นไปพร้อมเนื้อหา ไม่กินที่ของรายการ
+  if (lead && !onBack) return (
     <View style={{ flex: 1, backgroundColor: tint }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         {head}
-        <View style={{ width: '100%', aspectRatio: scene.ratio, marginTop: -space.sm }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <Image source={scene.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
-          {scene.cast.map((c, k) => (
-            <View key={k} style={{ position: 'absolute', left: `${c.left * 100}%`, top: `${c.top * 100}%`, width: `${c.width * 100}%`, aspectRatio: 1 }}>
-              <Cycle seq={c.seq} />
-            </View>
-          ))}
-        </View>
-        <View style={[s.sheet, content, { overflow: 'visible', backgroundColor: colors.bg }]}>
-          {children}
+        <View style={[s.sheet, { overflow: 'visible', backgroundColor: colors.bg }]}>
+          <View style={[content, wide]}>{children}</View>
           {/* ปิดสีหัวจอที่จะโผล่ตอนเลื่อนเกินด้านล่าง */}
           <View style={{ position: 'absolute', left: 0, right: 0, top: '100%', height: 800, backgroundColor: colors.bg }} />
         </View>
@@ -303,7 +298,7 @@ export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel
     <View style={{ flex: 1, backgroundColor: tint }}>
       {head}
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
-        <ScrollView contentContainerStyle={content} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={[content, wide]} keyboardShouldPersistTaps="handled">
           {children}
         </ScrollView>
         {foot}
@@ -320,11 +315,11 @@ export function Sheet({ visible, onClose, title, closeLabel, children }: { visib
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={s.scrim} onPress={onClose} accessibilityLabel={closeLabel} />
       <View style={[s.modal, { backgroundColor: colors.bg, paddingBottom: Math.max(insets.bottom, space.lg) }]}>
-        <View style={s.modalHead}>
+        <View style={[s.modalHead, wide]}>
           <T v="heading" style={{ flex: 1 }} accessibilityRole="header">{title}</T>
           <Button label={closeLabel} kind="secondary" onPress={onClose} />
         </View>
-        <ScrollView contentContainerStyle={{ gap: space.sm, paddingBottom: space.lg }}>{children}</ScrollView>
+        <ScrollView contentContainerStyle={[wide, { gap: space.sm, paddingBottom: space.lg }]}>{children}</ScrollView>
       </View>
     </Modal>
   );
@@ -356,7 +351,7 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
     <Card tone={kind === 'offline' ? 'note' : 'danger'} style={{ gap: space.sm }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
         <View accessibilityRole="alert" accessibilityLiveRegion="polite" style={{ flex: 1 }}>
-          <T v="subheading" style={{ color: kind === 'offline' ? onPastel.ink : onPastel.warn }}>{title}</T>
+          <T v="subheading" tone={kind === 'offline' ? 'pastel' : 'warn'}>{title}</T>
           <T tone="pastel">{body}</T>
         </View>
         <Float motion="shake"><Mascot name="oops" size={72} /></Float>
@@ -366,11 +361,6 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
       {kind === 'quota' && !BETA && <Button kind="onPastel" label={t('ask.seeMember')} onPress={() => router.push('/paywall')} style={{ alignSelf: 'flex-start' }} />}
     </Card>
   );
-}
-
-/** ป้ายข้อมูลสั้นๆ พื้นขาว ใช้บนการ์ดสีสด */
-export function Pill({ label }: { label: string }) {
-  return <View style={s.pill}><Text style={{ fontFamily: fonts.bodySemi, fontSize: type.sm, color: onPastel.ink }}>{label}</Text></View>;
 }
 
 export const mmss = (s: number) => Math.floor(s / 60) + ':' + String(Math.max(0, s) % 60).padStart(2, '0');
@@ -388,11 +378,9 @@ const s = StyleSheet.create({
   iconButton: { width: touch.min, height: touch.min, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   chip: { minHeight: touch.min, paddingHorizontal: space.lg, borderRadius: radius.pill, justifyContent: 'center' },
   card: { borderRadius: radius.lg, padding: space.lg, gap: space.xs },
-  pill: { backgroundColor: '#FFFFFF', borderRadius: radius.pill, paddingHorizontal: space.md, minHeight: 30, justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: space.lg, paddingBottom: space.lg, gap: space.md },
-  mascot: { width: 128, height: 128 },
   sheet: { flex: 1, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden' },
-  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: space.lg, paddingTop: space.sm },
+  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: space.sm },
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
   modal: { maxHeight: '88%', borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg, paddingHorizontal: space.lg, paddingTop: space.lg },
   modalHead: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginBottom: space.md },

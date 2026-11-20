@@ -12,9 +12,8 @@ import { dark, light, type Palette } from '@/theme/tokens';
 export type Progress = {
   recipe: string; o1: number; o2: number; adapt: string[]; step: number; total: number;
   timer?: { step: string; endAt: number; note: string | null }; // เก็บไว้กับจาน จึงเดินต่อแม้ออกไปทำจานอื่น
-  miss?: number; skip?: string[]; // แตะผิดในครัวจำลอง และขั้นที่กดผ่านโดยแตะไม่ครบ ใช้หักคะแนนตอนชิม
 };
-export type Run = { recipe: string; score: number; at: number };
+export type Run = { recipe: string; score: number; at: number; ans?: number[] }; // ans = คำตอบตอนชิม เชฟใช้เตือนครั้งหน้า
 type Saved = {
   lang: Lang; country: Country; theme: 'system' | 'light' | 'dark'; runs: Run[];
   progress: Progress[]; // จานที่ทำค้างไว้ ล่าสุดก่อน ทำหลายจานสลับกันได้ เช่น แผนวันอาทิตย์

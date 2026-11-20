@@ -1,22 +1,22 @@
 import { router } from 'expo-router';
-import { Pressable, Switch, View } from 'react-native';
+import { Pressable, StyleSheet, Switch, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { Card, Screen, T, Thumb } from '@/components/ui';
-import { DISH_TINT, IMG, SCENE } from '@/data/images';
+import { DISH_TINT, IMG } from '@/data/images';
 import { MENU } from '@/data/recipes';
 import { badges, cookedDays, monthGrid } from '@/lib/calendar';
 import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
 import { FREE_PER_DAY } from '@/lib/quota';
 import { useSettings } from '@/lib/settings';
-import { radius, space } from '@/theme/tokens';
+import { onPastel, radius, space } from '@/theme/tokens';
 
 function Row({ label, sub, value, onPress }: { label: string; sub?: string; value: string; onPress: () => void }) {
   const { colors } = useSettings();
   return (
     <Pressable accessibilityRole="button" accessibilityLabel={`${label}: ${value}`} onPress={onPress}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 60, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.surfaceSoft }}>
+      style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 56, paddingBottom: space.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line }}>
       <View style={{ flex: 1 }}>
         <T v="bodyBold">{label}</T>
         {sub && <T v="small" tone="muted">{sub}</T>}
@@ -32,10 +32,10 @@ export default function Me() {
   const avg = runs.length ? (runs.reduce((s, r) => s + r.score, 0) / runs.length).toFixed(1) : '–';
   const now = new Date(), cooked = cookedDays(runs, now.getFullYear(), now.getMonth()), earned = badges(runs);
   return (
-    <Screen tint={colors.header.me} title={t('me.title')} scene={SCENE.me}>
+    <Screen tint={colors.header.me} title={t('me.title')} lead="list">
       <View style={{ flexDirection: 'row', gap: space.sm }}>
-        <Card tone="mint" style={{ flex: 1 }}><T v="hero" tone="pastel">{runs.length}</T><T v="smallBold" tone="pastel">{t('me.cooked')}</T></Card>
-        <Card tone="accent" style={{ flex: 1 }}><T v="hero" tone="pastel">{avg}</T><T v="smallBold" tone="pastel">{t('me.avg')}</T></Card>
+        <Card style={{ flex: 1 }}><T v="hero">{runs.length}</T><T v="smallBold" tone="muted">{t('me.cooked')}</T></Card>
+        <Card style={{ flex: 1 }}><T v="hero">{avg}</T><T v="smallBold" tone="muted">{t('me.avg')}</T></Card>
       </View>
 
       {/* ปฏิทินของเดือนนี้: วันที่ทำอาหารจบเป็นสติกเกอร์รูปจานนั้น */}
@@ -65,9 +65,9 @@ export default function Me() {
       <T v="subheading" accessibilityRole="header">{t('me.badges')}</T>
       <View style={{ flexDirection: 'row', gap: space.sm }}>
         {(['first', 'five', 'perfect'] as const).map((b) => (
-          <Card key={b} tone={earned[b] ? 'accent' : 'soft'} style={{ flex: 1, alignItems: 'center' }}>
+          <Card key={b} tone={earned[b] ? 'note' : 'soft'} style={{ flex: 1, alignItems: 'center' }}>
             <View style={{ width: 40, height: 40, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: earned[b] ? '#FFFFFF' : colors.line }}>
-              {earned[b] && <Icon name="check" color={colors.success} />}
+              {earned[b] && <Icon name="check" color={onPastel.success} />}
             </View>
             <T v="smallBold" tone={earned[b] ? 'pastel' : 'muted'} style={{ textAlign: 'center' }}>{t(`me.badge.${b}`)}</T>
             <T v="small" tone={earned[b] ? 'pastelMuted' : 'muted'}>{t(earned[b] ? 'me.earned' : 'me.locked')}</T>
@@ -98,12 +98,12 @@ export default function Me() {
         <Row label={t('me.country')} sub={t('me.countryHint')} value={t(`country.${country}`)}
           onPress={() => set({ country: COUNTRIES[(COUNTRIES.indexOf(country) + 1) % COUNTRIES.length] })} />
       )}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 60, padding: space.md, borderRadius: radius.lg, backgroundColor: colors.surfaceSoft }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 56, paddingBottom: space.md, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.line }}>
         <View style={{ flex: 1 }}>
           <T v="bodyBold">{t('me.dark')}</T>
           {theme === 'system' && <T v="small" tone="muted">{t('me.darkSystem')}</T>}
         </View>
-        <Switch accessibilityLabel={t('me.dark')} value={isDark} onValueChange={(v) => set({ theme: v ? 'dark' : 'light' })}
+        <Switch accessibilityLabel={t('me.dark')} hitSlop={12} value={isDark} onValueChange={(v) => set({ theme: v ? 'dark' : 'light' })}
           trackColor={{ true: colors.success, false: colors.line }} thumbColor="#FFFFFF" />
       </View>
     </Screen>

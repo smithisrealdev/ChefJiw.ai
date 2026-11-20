@@ -4,10 +4,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { Button, Card, Mascot, Screen, T, Thumb } from '@/components/ui';
-import { DISH_TINT, IMG, SCENE } from '@/data/images';
+import { DISH_TINT, IMG } from '@/data/images';
 import { MENU, planShopping, SUNDAY_PLAN } from '@/data/recipes';
 import { useSettings } from '@/lib/settings';
-import { radius, space } from '@/theme/tokens';
+import { space } from '@/theme/tokens';
 
 // shortcut: เทียบกับข้าวจานละ 50 บาทแบบร้านในไทย ถ้าเปิดประเทศอื่นอีกให้ใช้ราคาอาหารนอกบ้านของประเทศนั้น
 const PLATE = 50;
@@ -22,7 +22,7 @@ export default function Plan() {
   const back = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   return (
-    <Screen tint={colors.header.cook} title={t('plan.title')} subtitle={t('plan.sub')} scene={SCENE.plan} onBack={back} backLabel={t('tab.home')}
+    <Screen tint={colors.header.cook} title={t('plan.title')} subtitle={t('plan.sub')} lead="shop" onBack={back} backLabel={t('tab.home')}
       footer={
         <Card tone="accent" style={s.foot}>
           <View style={{ flex: 1 }}>
@@ -60,13 +60,13 @@ export default function Plan() {
           <T v="subheading" accessibilityRole="header">{t('plan.shop')}</T>
           <T v="small" tone="muted">{t('detail.haveHint')}</T>
         </View>
-        <Mascot name="list" size={84} />
+        <Mascot name="list" size={84} still />
       </View>
       {SHOP.items.map((g) => {
         const on = have.includes(g.id);
         return (
           <Pressable key={g.id + g.unit.th} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${pick(g.name)} ${g.q} ${pick(g.unit)}`}
-            onPress={() => setHave(on ? have.filter((x) => x !== g.id) : [...have, g.id])} style={[s.row, { backgroundColor: colors.surfaceSoft }]}>
+            onPress={() => setHave(on ? have.filter((x) => x !== g.id) : [...have, g.id])} style={[s.row, { borderBottomColor: colors.line }]}>
             <View style={[s.box, { borderColor: colors.ink, backgroundColor: on ? colors.success : 'transparent' }]}>
               {on && <Icon name="check" color={colors.bg} size={18} />}
             </View>
@@ -90,6 +90,6 @@ export default function Plan() {
 const s = StyleSheet.create({
   foot: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },
   dish: { flexDirection: 'row', alignItems: 'center', gap: space.md },
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.lg },
+  row: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingBottom: space.md, borderBottomWidth: StyleSheet.hairlineWidth },
   box: { width: 28, height: 28, borderRadius: 8, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
 });

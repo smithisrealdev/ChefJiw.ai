@@ -3,15 +3,16 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
-import { Button, Card, Chip, Float, Screen, T, Thumb } from '@/components/ui';
+import { Button, Card, Chip, Mascot, Screen, T, Thumb } from '@/components/ui';
 import { IMG } from '@/data/images';
 import { buildRecipe, DEFAULT_OPTS, MENU, type ImgKey } from '@/data/recipes';
+import { lastAns, reminders } from '@/lib/assistant';
 import { cancelTimer, putProgress, useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
 
 export default function RecipeDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors, t, pick, price, set, progress } = useSettings();
+  const { colors, t, pick, price, set, progress, runs } = useSettings();
   // จานที่ทำค้างไว้ เปิดหน้านี้ด้วยตัวเลือกเดิม และปุ่มหลักพาไปทำต่อ ไม่เริ่มใหม่
   const cooking = progress.find((x) => x.recipe === id);
   const [o1, setO1] = useState(cooking?.o1 ?? DEFAULT_OPTS[id]?.[0] ?? 0);
@@ -19,6 +20,8 @@ export default function RecipeDetail() {
   const [adapt, setAdapt] = useState<string[]>(cooking?.adapt ?? []);
   const [have, setHave] = useState<string[]>([]);
   const r = buildRecipe(id, o1, o2, adapt);
+  const last = r ? reminders(r, lastAns(runs, id)) : [];
+  const menu = MENU.find((m) => m.id === id);
   if (!r) return <Screen tint={colors.header.cook} title={t('recipes.empty')} onBack={() => router.replace('/recipes')} backLabel={t('detail.back')}><T>{t('recipes.emptyHint')}</T></Screen>;
 
   const total = r.ingredients.filter((g) => !have.includes(g.id)).reduce((sum, g) => sum + g.baht, 0);
@@ -32,8 +35,8 @@ export default function RecipeDetail() {
 
   return (
     <Screen tint={colors.header.cook} title={pick(r.name)} onBack={back} backLabel={t('detail.back')}
-      subtitle={`${t('recipes.minutes', { n: r.mins })}${MENU.find((m) => m.id === r.id)?.easy ? ` · ${t('detail.easy')}` : ''} · ${t('detail.kcal', { n: r.kcal })}`}
-      right={<Float><Thumb source={IMG[r.img]} size={104} /></Float>}
+      subtitle={`${t('recipes.minutes', { n: r.mins })}${menu?.easy ? ` · ${t('detail.easy')}` : ''}${menu?.onePan ? ` · ${t(menu.onePan === 'pot' ? 'detail.onePot' : 'detail.onePan')}` : ''} · ${t('detail.kcal', { n: r.kcal })}`}
+      right={<Thumb source={IMG[r.img]} size={104} />}
       footer={
         <Card tone="accent" style={s.buy}>
           <View style={{ flex: 1 }}>
@@ -42,15 +45,26 @@ export default function RecipeDetail() {
           </View>
           <View style={{ alignItems: 'center', gap: space.xs }}>
             <Button kind="onPastel" label={cooking ? t('detail.resume', { n: cooking.step + 1 }) : t('detail.start')} size="cook" onPress={cooking ? () => router.push(`/cook/${r.id}`) : start} />
-            {cooking && <Pressable accessibilityRole="button" onPress={start} hitSlop={8}><T v="smallBold" tone="pastel" style={{ textDecorationLine: 'underline' }}>{t('detail.restart')}</T></Pressable>}
+            {cooking && <Pressable accessibilityRole="button" onPress={start} style={{ minHeight: 44, justifyContent: 'center' }}><T v="smallBold" tone="pastel" style={{ textDecorationLine: 'underline' }}>{t('detail.restart')}</T></Pressable>}
           </View>
         </Card>
       }>
+      {/* เชฟจำได้ว่าครั้งก่อนตรงไหนยังไม่ดี และจะเตือนอีกทีตอนถึงขั้นนั้น */}
+      {last.length > 0 && (
+        <Card tone="ai" style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <View style={{ flex: 1 }}>
+            <T v="smallBold" tone="pastelMuted">{t('memory.title')} · {t('memory.last')}</T>
+            {last.map((m) => <T key={m.sense.th} v="bodyBold" tone="pastel">• {pick(m.sense)}: {pick(m.said)}</T>)}
+            <T v="small" tone="pastel">{t('memory.where')}</T>
+          </View>
+          <Mascot name="think" size={64} still />
+        </Card>
+      )}
       {[{ g: r.g1, v: o1, setV: setO1 }, { g: r.g2, v: o2, setV: setO2 }].map(({ g, v, setV }) => (
         <View key={pick(g.title)} style={{ gap: space.sm }}>
           <T v="subheading" accessibilityRole="header">{pick(g.title)}</T>
           <View style={s.wrap}>{g.opts.map((o, i) => <Chip key={i} label={pick(o.label)} selected={v === i} onPress={() => setV(i)} />)}</View>
-          <Card tone="note"><T tone="pastel">{pick(g.opts[v].note)}</T></Card>
+          <T v="small" tone="muted">{pick(g.opts[v].note)}</T>
         </View>
       ))}
 
@@ -64,7 +78,7 @@ export default function RecipeDetail() {
         const on = have.includes(g.id);
         return (
           <Pressable key={g.id} accessibilityRole="checkbox" accessibilityState={{ checked: on }} accessibilityLabel={`${pick(g.name)} ${g.q} ${pick(g.unit)}`}
-            onPress={() => setHave(toggle(have, g.id))} style={[s.ing, { backgroundColor: colors.surfaceSoft }]}>
+            onPress={() => setHave(toggle(have, g.id))} style={[s.ing, { borderBottomColor: colors.line }]}>
             <View style={[s.box, { borderColor: colors.ink, backgroundColor: on ? colors.success : 'transparent' }]}>
               {on && <Icon name="check" color={colors.bg} size={18} />}
             </View>
@@ -84,7 +98,8 @@ export default function RecipeDetail() {
 
 const s = StyleSheet.create({
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  ing: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.lg },
+  // แถวรายการแบบเรียบ คั่นด้วยเส้นบาง ไม่ใส่กล่องให้ทุกแถว
+  ing: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingBottom: space.md, borderBottomWidth: StyleSheet.hairlineWidth },
   box: { width: 28, height: 28, borderRadius: 8, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
   noImg: { width: 48, height: 48, borderRadius: radius.sm },
   buy: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.sm },

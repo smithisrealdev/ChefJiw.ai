@@ -1,11 +1,6 @@
 // ถามเชฟจิ๋ว: ต้องเข้าสู่ระบบ ฟรีวันละ FREE_PER_DAY คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวคืนสิทธิ์
 import { admin, chat, cors, FREE_PER_DAY, isLang, isText, json, localDay, MODELS, requireUser } from '../_shared/common.ts';
-
-const SYSTEM = `You are Chef Jiw, the cooking coach inside a step-by-step cooking app for home cooks in Thailand and beyond.
-The person is cooking right now, often with messy hands, so answer in 2 to 4 short, plain sentences they can act on at the stove.
-Answer only about cooking, ingredients, kitchen technique and kitchen safety. If the question is about something else, say briefly that you can only help with cooking.
-If the question involves fire, burns, gas, injury or food poisoning, give the immediate safe action first and tell them to call local emergency services when it is serious. Never guess about allergies or medical issues; tell them to check with a doctor.
-Reply in the language given in the request.`;
+import { messages } from './prompt.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -13,8 +8,10 @@ Deno.serve(async (req) => {
   if (!user) return json({ error: 'unauthorized' }, 401);
 
   const body = await req.json().catch(() => ({}));
-  const { question, recipe, step, lang, tzOffset } = body ?? {};
+  const { question, recipe, step, lang, tzOffset, context, mode } = body ?? {};
   if (!isText(question, 500) || !isText(recipe, 80) || !isText(step, 80) || !isLang(lang)) return json({ error: 'bad_request' }, 400);
+  // รายละเอียดของขั้น (แอปรุ่นใหม่ส่งมา) ไม่ส่งมาก็ตอบได้เหมือนเดิม
+  if (context !== undefined && !isText(context, 1500)) return json({ error: 'bad_request' }, 400);
 
   const day = localDay(tzOffset);
   const { data: allowed, error } = await admin.rpc('reserve_ai_call', { p_user: user.id, p_day: day, p_limit: FREE_PER_DAY });
@@ -25,10 +22,7 @@ Deno.serve(async (req) => {
     const answer = await chat(MODELS.ask, {
       max_tokens: 2000,
       reasoning: { effort: 'low' },
-      messages: [
-        { role: 'system', content: SYSTEM },
-        { role: 'user', content: `Language: ${lang === 'th' ? 'Thai' : 'English'}\nDish: ${recipe}\nCurrent step: ${step}\n\nQuestion:\n${question}` },
-      ],
+      messages: messages({ question, recipe, step, lang, context, rescue: mode === 'rescue' }),
     });
     return json({ answer });
   } catch (e) {
