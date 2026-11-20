@@ -7,25 +7,29 @@ import { Icon } from '@/components/icon';
 import { ResumeCard } from '@/components/resume-card';
 import { Button, Card, Float, Mascot, Pill, Screen, T, Thumb } from '@/components/ui';
 import { IMG, MASCOT, SCENE } from '@/data/images';
-import { MENU, planShopping } from '@/data/recipes';
+import { buildRecipe, MENU, planShopping } from '@/data/recipes';
+import { lastAns, reminders } from '@/lib/assistant';
 import { BETA } from '@/lib/beta';
-import type { L } from '@/lib/i18n';
 import { useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
-
-// บทพูดเชฟจิ๋วจากหน้าร้านในต้นแบบ
-const LINES: L[] = [
-  { th: 'ยินดีต้อนรับ! วันนี้ทำกะเพราหมูสับไข่ดาวกันไหม?', en: 'Welcome! Shall we make basil pork with fried egg today?' },
-  { th: 'ใช้เวลา 15 นาที เดี๋ยวพาทำทีละขั้น', en: 'It takes 15 minutes. I will guide you step by step.' },
-  { th: 'ดูสูตรก่อนก็ได้ ว่ามีวัตถุดิบครบไหม', en: 'Check the recipe first to see if you have everything.' },
-];
 
 const PER_MEAL = planShopping().perMeal;
 
 export default function Home() {
   const { colors, t, pick, price, runs } = useSettings();
   const [line, setLine] = useState(0);
-  const pickToday = MENU[0];
+  // เชฟแนะนำจากสิ่งที่เคยทำ: จานที่ครั้งก่อนยังมีข้อให้แก้ก่อน ไม่งั้นจานที่ยังไม่เคยทำ บทพูดอ้างคะแนนและคำตอบครั้งก่อน
+  const ready = MENU.filter((m) => m.ready), lastRun = runs.at(-1), lastDish = lastRun && MENU.find((m) => m.id === lastRun.recipe);
+  const lastRecipe = lastRun ? buildRecipe(lastRun.recipe) : null;
+  const fix = lastRecipe ? reminders(lastRecipe, lastAns(runs, lastRecipe.id))[0] : undefined;
+  const pickToday = (fix && lastDish) || ready.find((m) => !runs.some((x) => x.recipe === m.id)) || ready[0];
+  const next = pick(pickToday.name);
+  const LINES = [
+    fix && lastDish ? t('home.fix', { dish: pick(lastDish.name), x: pick(fix.said) })
+      : lastRun && lastDish ? t('home.again', { dish: pick(lastDish.name), score: lastRun.score.toFixed(1), next })
+      : t('home.first', { next }),
+    t('home.time', { n: pickToday.mins }), t('home.check'),
+  ];
   return (
     <Screen tint={colors.header.home} title={t('home.title')} scene={SCENE.home}>
       {/* จุดเด่นของจอ: จานแนะนำวันนี้ พร้อมบทพูดของเชฟและปุ่มเริ่มทำ */}
@@ -43,7 +47,7 @@ export default function Home() {
         </View>
         <View style={{ backgroundColor: '#FFFFFF', borderRadius: radius.sm, padding: space.md }}>
           <T v="smallBold" tone="pastelMuted">{t('home.chef')}</T>
-          <T v="bodyBold" tone="pastel">{pick(LINES[line % LINES.length])}</T>
+          <T v="bodyBold" tone="pastel">{LINES[line % LINES.length]}</T>
         </View>
         <View style={{ flexDirection: 'row', gap: space.sm }}>
           <Button kind="onPastel" size="cook" label={t('detail.start')} onPress={() => router.push(`/recipe/${pickToday.id}`)} style={{ flex: 1, paddingHorizontal: space.md }} />

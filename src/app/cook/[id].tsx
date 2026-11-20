@@ -9,10 +9,11 @@ import Svg, { Circle } from 'react-native-svg';
 
 import { Icon } from '@/components/icon';
 import { kitchenActs, KitchenStage, type Taps } from '@/components/kitchen-stage';
-import { ApiNotice, Button, Card, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
+import { ApiNotice, Button, Card, Chip, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
 import { finalScore, kitchenPenalty, nextAct } from '@/data/kitchen';
 import { buildRecipe, MENU, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
+import { lastAns, reminders, stepContext } from '@/lib/assistant';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY, freeLeft, localDay, spendOne } from '@/lib/quota';
 import { cancelTimer, putProgress, useSettings, type Progress } from '@/lib/settings';
@@ -40,14 +41,15 @@ export default function Cook() {
 }
 
 function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colors }: { r: Recipe; p: Progress; start: number; onStep: (i: number) => void; onTimer: (timer: Progress['timer']) => void; onFinish: () => void; onMiss: () => void; onSkip: (step: string) => void; t: ReturnType<typeof useSettings>['t']; colors: ReturnType<typeof useSettings>['colors'] }) {
-  const { pick, isDark } = useSettings();
+  const { pick, isDark, runs } = useSettings();
   const insets = useSafeAreaInsets();
   const [i, setI] = useState(start);
-  const [askOpen, setAskOpen] = useState(false);
+  const [askOpen, setAskOpen] = useState<false | 'ask' | 'rescue'>(false);
   const [taps, setTaps] = useState<Taps>({ step: start, n: [] });
   const step = r.steps[i], prev = i > 0 ? r.steps[i - 1] : null, last = i === r.steps.length - 1;
   const heat = currentHeat(r.steps, i);
   const ink = isDark ? colors.ink : onPastel.ink;
+  const ans = lastAns(runs, r.id);
 
   const go = (n: number) => { setI(n); onStep(n); };
   const exit = () => {
@@ -62,7 +64,7 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
         <IconButton icon="close" label={t('cook.close')} onPress={exit} onPastelBg />
         <T v="subheading" style={{ color: ink, flex: 1, textAlign: 'center' }}>{t('cook.step', { n: step.phase, total: r.phases })}</T>
         {/* ปุ่มถามเชฟอยู่ที่เดิมทุกขั้น */}
-        <Pressable accessibilityRole="button" onPress={() => setAskOpen(true)} style={[s.ask, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
+        <Pressable accessibilityRole="button" onPress={() => setAskOpen('ask')} style={[s.ask, { backgroundColor: isDark ? colors.surface : '#FFFFFF' }]}>
           <Icon name="chat" color={ink} size={20} />
           <T v="smallBold" style={{ color: ink }}>{t('cook.ask')}</T>
         </Pressable>
@@ -93,10 +95,23 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
               {step.gather.map((g) => <T key={g.th} v="bodyBold">• {pick(g)}</T>)}
             </Card>
           )}
+          {/* เชฟจำคำตอบตอนชิมครั้งก่อน แล้วเตือนตรงขั้นที่คำแนะนำนั้นใช้ */}
+          {reminders(r, ans, step.id).map((m) => (
+            <Card key={m.sense.th} tone="ai" style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+              <View style={{ flex: 1 }}>
+                <T v="smallBold" tone="pastelMuted">{t('memory.title')}</T>
+                <T v="bodyBold" tone="pastel">{t('memory.said', { sense: pick(m.sense), x: pick(m.said) })}</T>
+                <T tone="pastel">{t('memory.tip', { x: pick(m.tip) })}</T>
+              </View>
+              <Mascot name="think" size={64} />
+            </Card>
+          ))}
           <Card tone="note">
             <T v="smallBold" tone="pastelMuted">{t('cook.see')}</T>
             <T v="bodyBold" tone="pastel">{pick(step.see)}</T>
           </Card>
+          {/* ทำแล้วไม่เป็นอย่างที่บอก: ให้เชฟไล่ดูขั้นนี้ด้วยกัน */}
+          <Button kind="secondary" icon="alert" label={t('rescue.button')} onPress={() => setAskOpen('rescue')} style={{ alignSelf: 'flex-start' }} />
           {step.timer && <Timer key={step.id} seconds={step.timer} name={pick(r.name)} endAt={p.timer?.step === step.id ? p.timer.endAt : null}
             onStart={(endAt, note) => onTimer({ step: step.id, endAt, note })} t={t} />}
         </ScrollView>
@@ -113,7 +128,9 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, onMiss, onSkip, t, colo
         </View>
       </View>
 
-      <AskSheet key={step.id} visible={askOpen} onClose={() => setAskOpen(false)} r={r} step={step} />
+      <AskSheet key={step.id + askOpen} visible={askOpen !== false} mode={askOpen || 'ask'} onClose={() => setAskOpen(false)} r={r} step={step}
+        knows={[pick(step.title), heat !== null ? t(`cook.heat${heat}`) : '', r.g1.opts[p.o1] ? pick(r.g1.opts[p.o1].label) : '', r.g2.opts[p.o2] ? pick(r.g2.opts[p.o2].label) : ''].filter(Boolean)}
+        context={stepContext(r, i, { o1: p.o1, o2: p.o2, heat: heat !== null ? t(`cook.heat${heat}`) : null, ans, pick })} />
     </View>
   );
 }
@@ -215,12 +232,17 @@ function Timer({ seconds, name, endAt, onStart, t }: { seconds: number; name: st
 }
 
 /** คำตอบที่เตรียมไว้ขึ้นทันทีโดยไม่ต้องใช้เน็ต และเหตุฉุกเฉินเข้าถึงได้ในสองแตะ */
-function AskSheet({ visible, onClose, r, step }: { visible: boolean; onClose: () => void; r: Recipe; step: Step }) {
+function AskSheet({ visible, mode, onClose, r, step, knows, context }: { visible: boolean; mode: 'ask' | 'rescue'; onClose: () => void; r: Recipe; step: Step; knows: string[]; context: string }) {
   const { t, pick } = useSettings();
   const [open, setOpen] = useState<number | null>(null);
   const [safety, setSafety] = useState(false);
   return (
-    <Sheet visible={visible} onClose={onClose} title={t('ask.title')} closeLabel={t('ask.back')}>
+    <Sheet visible={visible} onClose={onClose} title={t(mode === 'rescue' ? 'rescue.title' : 'ask.title')} closeLabel={t('ask.back')}>
+      {/* สิ่งที่แชตทั่วไปไม่รู้: ตอนนี้ทำถึงขั้นไหน ไฟระดับไหน เลือกสูตรแบบไหน */}
+      <View style={{ gap: space.xs }}>
+        <T v="smallBold" tone="muted">{t('ask.knows')}</T>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.xs }}>{knows.map((x) => <View key={x} style={s.know}><T v="smallBold" tone="pastel">{x}</T></View>)}</View>
+      </View>
       <Pressable accessibilityRole="button" accessibilityState={{ expanded: safety }} onPress={() => setSafety(!safety)} style={s.safetyBtn}>
         <Icon name="alert" color={onPastel.warn} />
         <T v="bodyBold" style={{ color: onPastel.warn }}>{t('ask.emergency')}</T>
@@ -231,6 +253,7 @@ function AskSheet({ visible, onClose, r, step }: { visible: boolean; onClose: ()
           <T v="step" tone="pastel" style={{ fontSize: 18 }}>{pick(a)}</T>
         </Card>
       ))}
+      {mode === 'rescue' && <TypedAsk r={r} step={step} onLeave={onClose} mode={mode} context={context} />}
       <T v="smallBold" tone="muted" style={{ marginTop: space.sm }}>{t('ask.often')}</T>
       {r.qa(step).map(([q, a], k) => (
         <Card key={q.th} tone={open === k ? 'note' : 'soft'} onPress={() => setOpen(open === k ? null : k)} label={pick(q)}>
@@ -238,13 +261,13 @@ function AskSheet({ visible, onClose, r, step }: { visible: boolean; onClose: ()
           {open === k && <T tone="pastel">{pick(a)}</T>}
         </Card>
       ))}
-      <TypedAsk r={r} step={step} onLeave={onClose} />
+      {mode === 'ask' && <TypedAsk r={r} step={step} onLeave={onClose} mode={mode} context={context} />}
     </Sheet>
   );
 }
 
 /** พิมพ์ถามเอง: ต้องเข้าสู่ระบบ ฟรีวันละ FREE_PER_DAY คำถาม สมาชิกไม่จำกัด คำถามที่ล้มเหลวไม่ถูกนับ */
-function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => void }) {
+function TypedAsk({ r, step, onLeave, mode, context }: { r: Recipe; step: Step; onLeave: () => void; mode: 'ask' | 'rescue'; context: string }) {
   const { t, lang, colors, signedIn, member, asked, set, pick } = useSettings();
   const [text, setText] = useState('');
   const [state, setState] = useState<{ kind: 'idle' | 'login' | 'quota' | 'loading' | 'answer' | 'error'; q?: string; answer?: string; error?: ApiErrorKind }>({ kind: 'idle' });
@@ -256,7 +279,7 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
     if (!member && left <= 0) return setState({ kind: 'quota' });
     setState({ kind: 'loading', q: question }); setText('');
     try {
-      const res = await api.askChef(question, { recipe: pick(r.name), step: pick(step.title), lang });
+      const res = await api.askChef(question, { recipe: pick(r.name), step: pick(step.title), lang, context, mode });
       if (!member) set({ asked: spendOne(asked, localDay()) });
       setState({ kind: 'answer', q: question, answer: res.answer });
     } catch (e) {
@@ -271,6 +294,12 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
 
   return (
     <View style={{ gap: space.sm, marginTop: space.sm }}>
+      {mode === 'rescue' && <>
+        <T v="bodyBold">{t('rescue.pick')}</T>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>
+          {(['s1', 's2', 's3', 's4'] as const).map((k) => <Chip key={k} label={t(`rescue.${k}`)} selected={false} onPress={() => send(t('rescue.said', { x: t(`rescue.${k}`) }))} />)}
+        </View>
+      </>}
       {state.kind === 'login' && (
         <Card tone="ai"><T v="subheading" tone="pastel">{t('ask.loginTitle')}</T><T tone="pastel">{t('ask.loginBody')}</T>
           <Button kind="onPastel" label={t('me.signIn')} onPress={() => goTo('/login')} style={{ alignSelf: 'flex-start', marginTop: space.sm }} /></Card>
@@ -287,7 +316,7 @@ function TypedAsk({ r, step, onLeave }: { r: Recipe; step: Step; onLeave: () => 
       {state.kind === 'error' && state.error && <ApiNotice kind={state.error} onRetry={() => send(state.q)} />}
       <View style={{ flexDirection: 'row', gap: space.sm, alignItems: 'center' }}>
         <TextInput value={text} onChangeText={setText} onSubmitEditing={() => send()} returnKeyType="send"
-          placeholder={t('ask.typePlaceholder')} placeholderTextColor={colors.muted} accessibilityLabel={t('ask.typeLabel')}
+          placeholder={t(mode === 'rescue' ? 'rescue.type' : 'ask.typePlaceholder')} placeholderTextColor={colors.muted} accessibilityLabel={t('ask.typeLabel')}
           style={{ flex: 1, minHeight: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: colors.surfaceSoft, color: colors.ink, fontFamily: fonts.body, fontSize: type.md }} />
         <IconButton filled icon="next" label={t('ask.send')} onPress={() => send()} />
       </View>
@@ -311,7 +340,7 @@ function Taste({ r }: { r: Recipe }) {
     setScore(sc);
     const id = device || Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
     cancelTimer(progress.find((x) => x.recipe === r.id));
-    set((prev) => ({ runs: [...prev.runs, { recipe: r.id, score: sc, at: Date.now() }], progress: putProgress(prev.progress, r.id, null), device: id }));
+    set((prev) => ({ runs: [...prev.runs, { recipe: r.id, score: sc, at: Date.now(), ans: ans as number[] }], progress: putProgress(prev.progress, r.id, null), device: id }));
     void api.logRun(id, r.id, taste); // ผลทดสอบในครัวจริงเก็บคะแนนรสชาติล้วน ไม่รวมการแตะบนจอ
   };
   return (
@@ -365,6 +394,7 @@ function Taste({ r }: { r: Recipe }) {
 
 const s = StyleSheet.create({
   top: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: space.lg },
+  know: { backgroundColor: '#E9E6FF', borderRadius: radius.pill, paddingHorizontal: space.md, paddingVertical: 4 },
   ask: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 44, paddingHorizontal: space.md, borderRadius: radius.pill },
   bar: { flexDirection: 'row', gap: 6, paddingHorizontal: space.lg, paddingVertical: space.md },
   seg: { flex: 1, height: 8, borderRadius: radius.pill },

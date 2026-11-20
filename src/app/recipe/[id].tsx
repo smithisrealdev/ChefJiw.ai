@@ -3,15 +3,16 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
-import { Button, Card, Chip, Float, Screen, T, Thumb } from '@/components/ui';
+import { Button, Card, Chip, Float, Mascot, Screen, T, Thumb } from '@/components/ui';
 import { IMG } from '@/data/images';
 import { buildRecipe, DEFAULT_OPTS, MENU, type ImgKey } from '@/data/recipes';
+import { lastAns, reminders } from '@/lib/assistant';
 import { cancelTimer, putProgress, useSettings } from '@/lib/settings';
 import { radius, space } from '@/theme/tokens';
 
 export default function RecipeDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { colors, t, pick, price, set, progress } = useSettings();
+  const { colors, t, pick, price, set, progress, runs } = useSettings();
   // จานที่ทำค้างไว้ เปิดหน้านี้ด้วยตัวเลือกเดิม และปุ่มหลักพาไปทำต่อ ไม่เริ่มใหม่
   const cooking = progress.find((x) => x.recipe === id);
   const [o1, setO1] = useState(cooking?.o1 ?? DEFAULT_OPTS[id]?.[0] ?? 0);
@@ -19,6 +20,7 @@ export default function RecipeDetail() {
   const [adapt, setAdapt] = useState<string[]>(cooking?.adapt ?? []);
   const [have, setHave] = useState<string[]>([]);
   const r = buildRecipe(id, o1, o2, adapt);
+  const last = r ? reminders(r, lastAns(runs, id)) : [];
   if (!r) return <Screen tint={colors.header.cook} title={t('recipes.empty')} onBack={() => router.replace('/recipes')} backLabel={t('detail.back')}><T>{t('recipes.emptyHint')}</T></Screen>;
 
   const total = r.ingredients.filter((g) => !have.includes(g.id)).reduce((sum, g) => sum + g.baht, 0);
@@ -46,6 +48,17 @@ export default function RecipeDetail() {
           </View>
         </Card>
       }>
+      {/* เชฟจำได้ว่าครั้งก่อนตรงไหนยังไม่ดี และจะเตือนอีกทีตอนถึงขั้นนั้น */}
+      {last.length > 0 && (
+        <Card tone="ai" style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+          <View style={{ flex: 1 }}>
+            <T v="smallBold" tone="pastelMuted">{t('memory.title')} · {t('memory.last')}</T>
+            {last.map((m) => <T key={m.sense.th} v="bodyBold" tone="pastel">• {pick(m.sense)}: {pick(m.said)}</T>)}
+            <T v="small" tone="pastel">{t('memory.where')}</T>
+          </View>
+          <Mascot name="think" size={64} />
+        </Card>
+      )}
       {[{ g: r.g1, v: o1, setV: setO1 }, { g: r.g2, v: o2, setV: setO2 }].map(({ g, v, setV }) => (
         <View key={pick(g.title)} style={{ gap: space.sm }}>
           <T v="subheading" accessibilityRole="header">{pick(g.title)}</T>
