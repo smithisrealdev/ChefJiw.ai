@@ -1,0 +1,12 @@
+{
+  "short_name": "ChefJiw",
+  "name": "ChefJiw",
+  "icons": [
+    { "src": "icon-180.png", "type": "image/png", "sizes": "180x180" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#FBEBD2",
+  "background_color": "#FBEBD2"
+}
