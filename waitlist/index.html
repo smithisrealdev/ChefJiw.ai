@@ -6,11 +6,11 @@
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#4B5BEF">
 <title>ChefJiw: เชฟจิ๋วพาทำอาหารไทยทีละขั้น</title>
-<meta name="description" content="แอปสอนทำอาหารไทยทีละขั้น ลองแกงเขียวหวานฟรี ชุด 12 จาน 99 บาท จ่ายครั้งเดียว ลงชื่อรอเปิดตัวหรือสั่งจองได้แล้ว">
+<meta name="description" content="แอปสอนทำอาหารไทยทีละขั้น ลองฟรี 5 จานได้เลย ชุด 12 จาน 99 บาท จ่ายครั้งเดียวตอนชุดพร้อม ลงชื่อไว้ก่อนยังไม่ต้องจ่าย">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="th_TH">
 <meta property="og:title" content="ChefJiw: เชฟจิ๋วพาทำอาหารไทยทีละขั้น">
-<meta property="og:description" content="ลองแกงเขียวหวานฟรี ชุด 12 จาน 99 บาท จ่ายครั้งเดียว ลงชื่อรอเปิดตัวหรือสั่งจองได้แล้ว">
+<meta property="og:description" content="ลองฟรี 5 จานได้เลย ชุด 12 จาน 99 บาท จ่ายครั้งเดียวตอนชุดพร้อม ลงชื่อไว้ก่อนยังไม่ต้องจ่าย">
 <!-- Facebook และ LINE ต้องการ URL เต็ม: ได้โดเมนจริงแล้วแก้เป็น https://<โดเมน>/img/og.png -->
 <meta property="og:image" content="img/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -47,7 +47,6 @@
   .small { font-size: 15px; color: var(--muted); }
   section { padding: 28px 0 0; }
   .card { background: var(--soft); border-radius: 24px; padding: 22px 18px; margin-top: 28px; }
-  .card.pre { background: var(--note); }
   .card.priv { background: var(--ai); font-size: 15px; }
   .dish { display: flex; gap: 14px; align-items: center; background: var(--soft); border-radius: 20px; padding: 12px 14px; margin-bottom: 10px; }
   .dish img { width: 64px; height: 64px; flex: none; }
@@ -58,8 +57,6 @@
   .plan { background: var(--note); border-radius: 20px; padding: 14px 16px; margin: 4px 0 12px; }
   .plates { display: flex; gap: 6px; margin-bottom: 6px; }
   .plates img { width: 56px; height: 56px; }
-  .pay { background: #FFFFFF; border-radius: 18px; padding: 14px 16px; }
-  .pp { font: 500 26px/1.3 'Mitr', system-ui, sans-serif; letter-spacing: 1px; margin: 0 0 2px; user-select: all; }
   form { display: grid; gap: 14px; }
   label { display: grid; gap: 6px; font-weight: 600; }
   .opt { font-weight: 400; color: var(--muted); }
@@ -73,7 +70,7 @@
 </style>
 </head>
 <body>
-<div class="banner" id="setup" hidden>ยังตั้งค่าไม่ครบ: ใส่เลขพร้อมเพย์ ชื่อบัญชี และช่องทางติดต่อใน CONFIG ท้ายไฟล์ ก่อนแชร์หน้านี้</div>
+<div class="banner" id="setup" hidden>ยังตั้งค่าไม่ครบ: ใส่ช่องทางติดต่อใน CONFIG ท้ายไฟล์ ก่อนแชร์หน้านี้</div>
 <header class="hero">
   <div class="wrap">
     <img src="img/chef.png" alt="" width="128" height="128">
@@ -81,8 +78,8 @@
     <h1>ทำกับข้าวให้ออกมาอร่อย ตั้งแต่ครั้งแรกที่ลอง</h1>
     <p>เชฟจิ๋วพาทำอาหารไทยทีละขั้นบนมือถือ บอกว่าต้องทำอะไรตอนนี้ ไฟแรงแค่ไหน จับเวลาให้ และบอกว่าต้องดูอะไรถึงจะไปขั้นต่อไปได้</p>
     <div class="ctas">
-      <a class="btn yellow" href="#join">ลงชื่อรอเปิดตัว ฟรี</a>
-      <a class="btn white" href="#preorder">สั่งจองชุด 12 จาน 99 บาท</a>
+      <a class="btn yellow" href="https://chefjiwai.vercel.app/">ลองแอปฟรีตอนนี้</a>
+      <a class="btn white" href="#join">ลงชื่อรับชุด 12 จาน ยังไม่ต้องจ่าย</a>
     </div>
     <p class="small">เปิดตัวบน iPhone และ Android เดือนกุมภาพันธ์ 2570 ใช้ได้ทั้งภาษาไทยและอังกฤษ</p>
   </div>
@@ -91,9 +88,12 @@
 <main class="wrap">
   <section>
     <h2>ลองฟรีก่อนจ่าย</h2>
+    <p>ช่วงทดลองเปิดให้ใช้ฟรี 5 จานในเว็บบนมือถือ ไม่ต้องโหลดแอป ไม่ต้องสมัคร</p>
     <div class="dish"><img src="img/dish-kaprao.png" alt=""><div><b>กะเพราหมูสับไข่ดาว</b><span>15 นาที เหมาะเป็นจานแรกของมือใหม่</span></div></div>
     <div class="dish"><img src="img/dish-green-curry.png" alt=""><div><b>แกงเขียวหวานไก่จากพริกแกง</b><span>จานที่คนทำตามคลิปแล้วพลาดบ่อยที่สุด ลองดูว่าเชฟจิ๋วสอนได้ดีกว่าไหม ก่อนจ่ายสักบาท</span></div></div>
-    <p>ติดตรงไหนกด "ถามเชฟ" พิมพ์ถามได้ฟรีวันละ 3 คำถาม และทุกขั้นมีคำตอบสำหรับปัญหาที่เจอบ่อยเตรียมไว้ให้แล้ว</p>
+    <p class="small">และไข่เจียวหมูสับ หมูพะโล้ไข่ ผัดพริกขิงหมูถั่วฝักยาว</p>
+    <p>ติดตรงไหนกด "ถามเชฟ" พิมพ์ถามได้ฟรีวันละ 20 คำถาม และทุกขั้นมีคำตอบสำหรับปัญหาที่เจอบ่อยเตรียมไว้ให้แล้ว</p>
+    <a class="btn dark" href="https://chefjiwai.vercel.app/">ลองแอปฟรีตอนนี้</a>
   </section>
 
   <section>
@@ -122,68 +122,36 @@
   </section>
 
   <section id="join" class="card">
-    <h2>ลงชื่อรอเปิดตัว</h2>
-    <p>ฟรี เราจะแจ้งวันเปิดตัวให้ทางช่องทางที่ให้ไว้</p>
+    <h2>ลงชื่อรับชุด 12 จาน</h2>
+    <p><b>ยังไม่ต้องจ่าย</b> เมื่อชุดพร้อมใช้ เราจะแจ้งทางช่องทางที่ให้ไว้ ลองดูก่อนว่ามีจานอะไร แล้วค่อยจ่าย 99 บาทถ้ายังอยากได้</p>
     <form data-kind="waitlist">
       <label><span>ชื่อเล่น <span class="opt">(ไม่ใส่ก็ได้)</span></span><input name="name" maxlength="80" autocomplete="nickname"></label>
       <label>LINE ID เบอร์โทร หรืออีเมล<input name="contact" required minlength="3" maxlength="120"></label>
-      <label class="check"><input type="checkbox" name="consent" required><span>ยินยอมให้ ChefJiw ใช้ช่องทางนี้ติดต่อเรื่องการเปิดตัว ตามที่เขียนไว้ใน<a href="#privacy">เรื่องข้อมูลส่วนตัว</a></span></label>
+      <label class="check"><input type="checkbox" name="consent" required><span>ยินยอมให้ ChefJiw ใช้ช่องทางนี้แจ้งเมื่อชุด 12 จานพร้อม ตามที่เขียนไว้ใน<a href="#privacy">เรื่องข้อมูลส่วนตัว</a></span></label>
       <button type="submit" class="btn dark">ลงชื่อ</button>
       <p class="status" role="status" aria-live="polite"></p>
     </form>
-    <p class="done" hidden tabindex="-1">ลงชื่อแล้ว ขอบคุณที่รอ เราจะติดต่อไปตอนเปิดตัว</p>
-  </section>
-
-  <section id="preorder" class="card pre">
-    <h2>สั่งจองชุด 12 จาน 99 บาท</h2>
-    <ul>
-      <li>ได้ชุด 12 จานและแผนวันอาทิตย์ 4 แผนในแอป ภายในวันที่ <span data-c="delivery"></span> ก่อนเปิดให้ทุกคน</li>
-      <li>ขอคืนเงินเต็มจำนวนได้ ถ้าเราตัดสินใจไม่ทำชุดนี้ (แจ้งภายในวันที่ <span data-c="decision"></span>) ถ้าส่งไม่ทันวันที่บอก หรือถ้าคุณเปลี่ยนใจก่อนวันส่ง เราโอนคืนภายใน 7 วันหลังได้รับแจ้ง</li>
-    </ul>
-    <h3>1. โอน 99 บาททางพร้อมเพย์</h3>
-    <div class="pay">
-      <p class="pp" id="pp"></p>
-      <p class="small">ชื่อบัญชี <span data-c="payee"></span></p>
-      <button type="button" class="btn light" id="copy">คัดลอกเลขพร้อมเพย์</button>
-    </div>
-    <h3>2. แจ้งโอนตรงนี้</h3>
-    <form data-kind="preorder">
-      <label>ชื่อ<input name="name" required maxlength="80" autocomplete="name"></label>
-      <label>LINE ID เบอร์โทร หรืออีเมล<input name="contact" required minlength="3" maxlength="120"></label>
-      <label>โอนเมื่อไร หรือเลข 4 ตัวท้ายบัญชีที่ใช้โอน<input name="paid_note" required maxlength="200" placeholder="เช่น 30 พ.ย. 20:15"></label>
-      <label class="check"><input type="checkbox" name="consent" required><span>ยินยอมให้ ChefJiw ใช้ข้อมูลนี้ยืนยันคำสั่งจอง ส่งชุด และคืนเงิน ตามที่เขียนไว้ใน<a href="#privacy">เรื่องข้อมูลส่วนตัว</a></span></label>
-      <button type="submit" class="btn dark">แจ้งโอนแล้ว</button>
-      <p class="status" role="status" aria-live="polite"></p>
-    </form>
-    <p class="done" hidden tabindex="-1">ได้รับแจ้งโอนแล้ว เราจะเช็กยอดแล้วติดต่อกลับเพื่อยืนยัน</p>
+    <p class="done" hidden tabindex="-1">ลงชื่อแล้ว เราจะแจ้งเมื่อชุดพร้อม ระหว่างรอลองทำจานฟรีในแอปได้เลย</p>
   </section>
 
   <section id="privacy" class="card priv">
     <h2>เรื่องข้อมูลส่วนตัว</h2>
-    <p>เราเก็บชื่อ ช่องทางติดต่อ และข้อมูลการโอนที่คุณกรอก เพื่อแจ้งการเปิดตัว ยืนยันคำสั่งจอง ส่งชุด และคืนเงินเท่านั้น ไม่ขายและไม่ส่งต่อให้ใคร เก็บไว้ไม่เกิน 90 วันหลังเปิดตัว ขอดู แก้ ลบข้อมูล หรือถอนความยินยอมได้ทุกเมื่อที่ <span data-c="contact"></span></p>
+    <p>เราเก็บชื่อและช่องทางติดต่อที่คุณกรอก เพื่อแจ้งเมื่อชุด 12 จานพร้อมเท่านั้น ไม่ขายและไม่ส่งต่อให้ใคร เก็บไว้ไม่เกิน 90 วันหลังเปิดตัว ขอดู แก้ ลบข้อมูล หรือถอนความยินยอมได้ทุกเมื่อที่ <span data-c="contact"></span></p>
   </section>
 </main>
 <footer class="wrap small">ChefJiw · ติดต่อ <span data-c="contact"></span></footer>
 
 <script>
-  // เจ้าของหน้ากรอก 3 ช่องแรกก่อนแชร์ ค่า Supabase สองค่าล่างเป็นค่าสาธารณะ ใส่ในหน้าเว็บได้
+  // เจ้าของหน้ากรอกช่องติดต่อก่อนแชร์ ค่า Supabase สองค่าล่างเป็นค่าสาธารณะ ใส่ในหน้าเว็บได้
+  // ไม่รับเงินล่วงหน้าแล้ว: ผู้ซื้อจำลอง 16 จาก 20 ไม่จ่ายก่อนได้ของ (founder/panel-v4) จ่ายตอนชุดพร้อมแทน
   const CONFIG = {
-    promptpay: '', // เลขพร้อมเพย์ที่รับเงินสั่งจอง (เบอร์โทรหรือเลขบัตรประชาชน)
-    payee: '', // ชื่อบัญชีที่คนโอนจะเห็นในแอปธนาคาร
-    contact: '', // ช่องทางขอคืนเงินหรือขอลบข้อมูล เช่น LINE OA หรืออีเมล
-    delivery: '6 ก.พ. 2570', // วันส่งชุด = soft launch ใน founder/launch.md
-    decision: '14 ธ.ค. 2569', // วันตัดสินใจทำชุดต่อหรือไม่ = decision gate ใน founder/launch.md
+    contact: '', // ช่องทางขอลบข้อมูล เช่น LINE OA หรืออีเมล
     supabaseUrl: 'https://jqfjqsvpjzcktfrnvobo.supabase.co',
     publishableKey: 'sb_publishable_2HY5AMKiXYFJdWXD4uHHLw_ZPN8l4qK',
   };
 
   for (const el of document.querySelectorAll('[data-c]')) el.textContent = CONFIG[el.dataset.c] || '(ยังไม่ได้ใส่)';
-  document.getElementById('pp').textContent = CONFIG.promptpay || '(ยังไม่ได้ใส่เลขพร้อมเพย์)';
-  document.getElementById('setup').hidden = Boolean(CONFIG.promptpay && CONFIG.payee && CONFIG.contact);
-  document.getElementById('copy').onclick = async (e) => {
-    try { await navigator.clipboard.writeText(CONFIG.promptpay); e.target.textContent = 'คัดลอกแล้ว'; }
-    catch { e.target.textContent = 'กดค้างที่เลขด้านบนเพื่อคัดลอก'; }
-  };
+  document.getElementById('setup').hidden = Boolean(CONFIG.contact);
 
   // ?g=fb1 ในลิงก์ที่แชร์แต่ละกลุ่ม บอกว่าคนลงชื่อมาจากกลุ่มไหน
   const source = (new URLSearchParams(location.search).get('g') || '').slice(0, 40) || null;
@@ -195,7 +163,6 @@
       const row = { kind: form.dataset.kind, contact: f.get('contact').trim(), consent: f.get('consent') === 'on', source };
       const name = (f.get('name') || '').trim();
       if (name) row.name = name;
-      if (f.has('paid_note')) row.paid_note = f.get('paid_note').trim();
       btn.disabled = true; status.textContent = 'กำลังส่ง…';
       try {
         const r = await fetch(CONFIG.supabaseUrl + '/rest/v1/waitlist', {

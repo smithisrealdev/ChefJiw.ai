@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { Icon } from '@/components/icon';
@@ -16,6 +16,8 @@ export default function Login() {
   const { colors, isDark, t, signedIn, asked, set } = useSettings();
   const [busy, setBusy] = useState<Provider | null>(null);
   const [error, setError] = useState<ApiErrorKind | null>(null);
+  const [open, setOpen] = useState<Provider[] | null>(null);
+  useEffect(() => { void api.providers().then(setOpen); }, []);
 
   const signIn = async (p: Provider) => {
     setBusy(p); setError(null);
@@ -48,7 +50,8 @@ export default function Login() {
             </View>
           ))}
           {error && <ApiNotice kind={error} />}
-          {PROVIDERS.map(([id, name], k) => (
+          {open?.length === 0 && <T tone="muted">{t('login.none')}</T>}
+          {PROVIDERS.filter(([id]) => open?.includes(id)).map(([id, name], k) => (
             <Button key={id} size="cook" kind={k === 0 ? 'primary' : 'secondary'} disabled={busy !== null}
               label={busy === id ? t('login.busy') : t('login.with', { p: name })} onPress={() => signIn(id)} />
           ))}

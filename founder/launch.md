@@ -23,12 +23,18 @@ purchase.
    weekday evening, then one free Sunday cook-ahead plan (three dishes that keep,
    one shopping list) on a Sunday. The founder watches over a video call or in
    person, and notes where each cook stopped, what they asked and how long it took.
-2. **Pre-sale.** At the end, each cook is offered the 12-dish pack at 99 baht as a
-   refundable pre-order with a stated delivery date. Paid by PromptPay, recorded
-   in a form.
-3. **Waitlist page.** The v3 pitch on one page with two buttons, "Join the
-   waitlist" and "Pre-order for 99 baht", shared in three Thai home-cooking groups
+2. **Pay when ready, not pre-order.** Panel v4 (`founder/panel-v4/results.md`,
+   20 Nov) tested the app as built: 16 of 20 would not pay ahead for a pack that
+   does not exist yet, and most said they would pay 99 baht once it is out and the
+   free dishes had worked for them. So the pre-order is gone. At the end, each cook
+   is asked to sign up for the pack on the waitlist (no payment) and whether they
+   would pay 99 baht the day it is released.
+3. **Waitlist page.** `waitlist/`: "try the app free now" and "sign up for the
+   12-dish pack, pay nothing yet", shared in three Thai home-cooking groups
    (Facebook or LINE OpenChat). 14 days.
+
+The test kit (recruiting message, session script, what to write down, how to read
+the logged scores) is `founder/kitchen-test.md`.
 
 **Success lines, written before running** (proposed; adjust before you start,
 never after):
@@ -37,16 +43,15 @@ never after):
 |---|---|
 | Green curry | 6 of 8 finish without outside help; average taster score 4 or more out of 5; 5 of 8 say it beat how they usually learn a dish |
 | Sunday plan | 5 of 8 cook it; for 4 of them the recorded cost per meal is under 50 baht and the food lasts to midweek |
-| Pre-sale to testers | 3 of 8 pre-pay 99 baht |
-| Waitlist page | 100 sign-ups and 10 paid pre-orders in 14 days |
+| Pack sign-up from testers | 5 of 8 sign up and say they would pay 99 baht on release day |
+| Waitlist page | 100 sign-ups in 14 days, and 30 people open the free app from the page |
 
 **How to read it.** If real cooks pass, trust them over the panel and build the
 pack. If they finish the dishes but don't pay, go back to `/founder-offer` or
 `/founder-pricing`. If they don't finish the dishes, fix the recipes and the cook
 mode first: no offer survives a dish that fails.
 
-**Rules for the test.** Pre-orders are refundable and say when the pack will be
-delivered. The waitlist form asks for consent to contact (Thailand's PDPA). No
+**Rules for the test.** No money is taken before the pack exists. The waitlist form asks for consent to contact (Thailand's PDPA). No
 quotes from testers are used as testimonials without written permission. Not
 legal advice.
 
@@ -59,16 +64,19 @@ changes). ★ marks the critical path: if it slips, launch day slips.
 - ★ Founder: write and cook the green curry and one Sunday plan (three dishes
   that keep) yourself, twice each, fixing amounts and times. Deadline Thu 26 Nov.
 - ★ Founder: recruit 8 cooks and book their two cooking slots. Deadline Sun 29 Nov.
-- Founder: set up PromptPay pre-order, the form and the refund promise. Sun 29 Nov.
 - Developer: add the green curry and the Sunday plan to the app (cost per meal
   next to a 50-baht plate), free in beta. Deadline Fri 27 Nov. **Done 19 Nov**
   (recipes still untested).
 - Developer: log, per tester, which dish they finished and their taster score, so
   the results don't depend on memory. Deadline Fri 27 Nov. **Done 19 Nov**.
-- Developer: a test build the 8 cooks can install. Needs the founder's Expo
-  account for an EAS build. Deadline Sun 29 Nov.
+- Developer: a test build the 8 cooks can install. **Not needed for the test**:
+  cooks open https://chefjiwai.vercel.app on their phone and can add it to the home
+  screen. The EAS build (founder's Expo account) moves to the build phase.
 - Founder or Developer: the one-page waitlist. Deadline Sun 29 Nov. **Page built 19 Nov**
-  (`waitlist/`); still needs the PromptPay number, payee name, a contact and hosting.
+  (`waitlist/`); pre-order removed 20 Nov. Still needs a contact and hosting.
+- Founder: turn on anonymous sign-ins in Supabase (Authentication, Sign In /
+  Providers), so typed questions and "It didn't work" answer without an account.
+  Deadline Fri 27 Nov.
 
 **Week 2, Mon 30 Nov - Sun 6 Dec: cook**
 - ★ Founder: 8 green curry sessions (weekday evenings), 8 Sunday plans (Sun 6 Dec).
@@ -76,12 +84,11 @@ changes). ★ marks the critical path: if it slips, launch day slips.
 - Developer: fix whatever breaks during sessions within a day.
 
 **Week 3, Mon 7 - Sun 13 Dec: sell and fix**
-- ★ Founder: pre-sale offer to the 8 cooks (Mon 7 Dec); waitlist closes Sun 13 Dec.
+- ★ Founder: ask the 8 cooks to sign up for the pack (Mon 7 Dec); waitlist closes Sun 13 Dec.
 - Founder and Developer: fix the steps where cooks got stuck.
 
 **Decision gate, Mon 14 Dec:** compare the results with the success lines.
-Pass: start the build below. Fail: back to `/founder-offer` or `/founder-pricing`,
-and refund any pre-orders if the pack is not going ahead.
+Pass: start the build below. Fail: back to `/founder-offer` or `/founder-pricing`.
 
 **If the test passes: build, Mon 14 Dec 2026 - Fri 29 Jan 2027**
 - ★ Founder: develop and test-cook the 12 pack dishes, each cooked by home cooks
@@ -89,7 +96,7 @@ and refund any pre-orders if the pack is not going ahead.
   is six weeks and the longest task in the plan. Consider a paid recipe developer.
 - ★ Developer: one-time in-app purchase for the pack (App Store and Google Play),
   restore purchase, and receipt checks on the server. Deadline Fri 15 Jan.
-- Developer: the "It didn't work" button and the one-pan label. Fri 15 Jan. **Done 20 Nov** (the button's two-part answer needs the updated `ask` function deployed).
+- Developer: the "It didn't work" button and the one-pan label. Fri 15 Jan. **Done 20 Nov**, `ask` function deployed 20 Nov.
 - Founder: store listings, screenshots, privacy policy, support email. Fri 22 Jan.
 - ★ Developer: submit to both stores by Fri 29 Jan; review can take a week or more.
 - Founder: turn off beta mode for launch (three steps in the README). Fri 29 Jan.
@@ -97,8 +104,8 @@ and refund any pre-orders if the pack is not going ahead.
   store payouts, tax) from `/founder-ops`; channel calendar from
   `/founder-marketing`; name and look from `/founder-brand`.
 
-**Soft launch, Sat 6 Feb 2027:** the 8 testers and the waitlist only, with the
-pre-orders fulfilled first.
+**Soft launch, Sat 6 Feb 2027:** the 8 testers and the waitlist only; they hear
+first and are the first asked to pay.
 
 **Public launch, Sat 13 Feb 2027.**
 
@@ -109,7 +116,7 @@ Thai home cooks cook in the evening, so the day is built around dinner.
 | Time | Who | What |
 |---|---|---|
 | 08:00 | Developer | Check both store listings are live; buy the pack once on each store; ask the chef one question |
-| 09:00 | Founder | Email or message the waitlist: the pack is live, pre-orders already delivered |
+| 09:00 | Founder | Email or message the waitlist: the pack is live, testers and sign-ups first |
 | 10:00 | Founder | Post in the three cooking groups, with a video of the green curry being cooked from the app |
 | 12:00 | Founder | Answer every comment and message |
 | 16:00 | Founder | Second post: tonight's free green curry, with the shopping list |

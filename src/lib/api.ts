@@ -58,6 +58,22 @@ export const api = {
     if (exchangeError) throw new ApiError('failed');
     return { member: await api.member() };
   },
+  /** ผู้ใช้ทดลองไม่ต้องสมัคร: ถ้ายังไม่มี session ให้เข้าแบบไม่ระบุตัวตน โควตาคำถามจึงนับต่อเครื่องได้ คืน false ถ้า Supabase ยังไม่เปิดการเข้าแบบนี้ */
+  async guest(): Promise<boolean> {
+    if (!supabase) return false;
+    if ((await supabase.auth.getSession()).data.session) return true;
+    return !(await supabase.auth.signInAnonymously()).error;
+  },
+  /** ช่องทางเข้าสู่ระบบที่เปิดอยู่จริงใน Supabase (LINE ยังไม่มีจึงไม่ขึ้น) */
+  async providers(): Promise<Provider[]> {
+    const url = process.env.EXPO_PUBLIC_SUPABASE_URL, key = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    if (!url || !key) return [];
+    try {
+      const res = await fetch(`${url}/auth/v1/settings`, { headers: { apikey: key } });
+      const on: Record<string, boolean> = (await res.json()).external ?? {};
+      return (['google', 'apple'] as const).filter((p) => on[p]);
+    } catch { return []; }
+  },
   async signOut() { await supabase?.auth.signOut(); },
   async member(): Promise<boolean> {
     if (!supabase) return false;

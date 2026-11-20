@@ -274,7 +274,7 @@ function TypedAsk({ r, step, onLeave, mode, context }: { r: Recipe; step: Step; 
 
   const send = async (question = text.trim()) => {
     if (!question || state.kind === 'loading') return;
-    if (!signedIn) return setState({ kind: 'login' });
+    if (!signedIn && !(await api.guest())) return setState({ kind: 'login' });
     if (!member && left <= 0) return setState({ kind: 'quota' });
     setState({ kind: 'loading', q: question }); setText('');
     try {
