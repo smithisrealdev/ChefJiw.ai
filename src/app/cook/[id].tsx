@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Icon } from '@/components/icon';
+import { KitchenStage } from '@/components/kitchen-stage';
 import { ApiNotice, Button, Card, Float, IconButton, Mascot, mmss, Sheet, Skeleton, T } from '@/components/ui';
 import { buildRecipe, MENU, SAFETY, tasteScore, type Heat, type Recipe, type Step } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind } from '@/lib/api';
@@ -65,6 +66,7 @@ function Steps({ r, p, start, onStep, onTimer, onFinish, t, colors }: { r: Recip
         {Array.from({ length: r.phases }, (_, k) => <View key={k} style={[s.seg, { backgroundColor: k < step.phase ? ink : 'rgba(36,33,43,0.18)' }]} />)}
       </View>
       <OtherTimers current={r.id} ink={ink} />
+      <KitchenStage r={r} i={i} />
 
       <View style={[s.sheet, { backgroundColor: colors.bg }]}>
         <ScrollView contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: space.xl }}>

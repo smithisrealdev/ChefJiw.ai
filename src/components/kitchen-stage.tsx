@@ -1,0 +1,247 @@
+import { Image } from 'expo-image';
+import { useEffect, useState, type ReactNode } from 'react';
+import { AccessibilityInfo, Animated, Easing, Platform, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
+
+import { Actor, useMove } from '@/components/ui';
+import { IMG } from '@/data/images';
+import { stageAt, type Food, type Side, type Stage, type Station } from '@/data/kitchen';
+import type { Recipe } from '@/data/recipes';
+
+// ครัวยาว 1200 x 320 หน่วย (ตรงกับ kitchen.png ที่วาดใน assets/images/chef/src/draw.py) จอเห็นทีละช่วง กล้องเลื่อนตามเชฟ
+const WORLD = 1200, HEIGHT = 320, FLOOR = 296;
+const CHEF = 230, FEET = 0.956; // ขนาดภาพเชฟ และตำแหน่งเท้าในภาพ (สัดส่วนจากบน)
+// จุดที่เชฟยืนในแต่ละที่ มือขวาของท่าทำงานยื่นไปทางขวาราวหนึ่งในสี่ของภาพ จึงยืนซ้ายของของที่ทำ
+const SPOT: Record<Station, number> = { fridge: 240, sink: 368, board: 620, stove: 836 };
+const SPEED = 330; // หน่วยต่อวินาที
+const native = Platform.OS !== 'web';
+
+/** ครัวจำลองของหน้าทำอาหาร: เชฟเดินไปที่ตู้เย็น อ่าง เขียง หรือเตาตามขั้น ไฟเตาตามระดับไฟ ของในกระทะเพิ่มทีละขั้น */
+export function KitchenStage({ r, i }: { r: Recipe; i: number }) {
+  const { height: screenH } = useWindowDimensions();
+  const H = Math.round(Math.min(250, Math.max(170, screenH * 0.27)));
+  const k = H / HEIGHT;
+  const [viewW, setViewW] = useState(0);
+  const st = stageAt(r.id, r.steps, i);
+  const target = SPOT[st.at];
+
+  const [x] = useState(() => new Animated.Value(-120)); // เชฟเดินเข้าครัวจากซ้ายตอนเปิดหน้า
+  const [walking, setWalking] = useState<0 | 1 | -1>(0);
+  useEffect(() => {
+    let alive = true;
+    let anim: Animated.CompositeAnimation | undefined;
+    // อ่านตำแหน่งปัจจุบันจากค่าที่กำลังเคลื่อนอยู่ ถ้าเปลี่ยนขั้นระหว่างเดิน เชฟเลี้ยวไปที่ใหม่ได้ทันที
+    const from = (x as unknown as { __getValue: () => number }).__getValue();
+    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
+      if (!alive) return;
+      const d = target - from;
+      if (reduce || Math.abs(d) < 4) { x.setValue(target); setWalking(0); return; }
+      setWalking(d > 0 ? 1 : -1);
+      anim = Animated.timing(x, { toValue: target, duration: Math.min(2400, Math.max(500, (Math.abs(d) / SPEED) * 1000)), easing: Easing.inOut(Easing.sin), useNativeDriver: native });
+      anim.start(({ finished }) => { if (finished && alive) setWalking(0); });
+    }).catch(() => { x.setValue(target); });
+    return () => { alive = false; anim?.stop(); };
+  }, [x, target]);
+
+  // กล้อง: ให้เชฟอยู่กลางจอค่อนซ้าย (ของที่ทำอยู่ทางขวาของเชฟ) แต่ไม่เลยขอบครัว
+  const x0 = viewW / (2 * k) - 60, x1 = x0 + WORLD - viewW / k;
+  const cam = x1 > x0 ? x.interpolate({ inputRange: [x0, x1], outputRange: [0, viewW - WORLD * k], extrapolate: 'clamp' }) : 0;
+  const pose = walking ? 'walk' : st.pose;
+
+  return (
+    <View style={{ height: H, overflow: 'hidden', backgroundColor: '#FFE9A8' }} onLayout={(e) => setViewW(e.nativeEvent.layout.width)}
+      accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <Animated.View style={{ width: WORLD * k, height: H, transform: [{ translateX: cam }] }}>
+        <Image source={require('@/assets/images/chef/kitchen.png')} style={StyleSheet.absoluteFill} contentFit="fill" accessible={false} />
+        <Fridge open={st.at === 'fridge'} k={k} r={r} />
+        <Sink st={st} k={k} />
+        <Board items={st.board} k={k} />
+        <SidePlate side={st.side} k={k} r={r} />
+        {/* เชฟ: ยืนบนพื้น หันตามทางที่เดิน */}
+        <Animated.View style={{ position: 'absolute', left: 0, top: (FLOOR - FEET * CHEF) * k, width: CHEF * k, transform: [{ translateX: Animated.add(Animated.multiply(x, k), -(CHEF * k) / 2) }] }}>
+          <View style={{ transform: [{ scaleX: walking === -1 ? -1 : 1 }] }}>
+            <Actor name={pose} size={CHEF * k} />
+          </View>
+        </Animated.View>
+        {/* กระทะอยู่หน้ามือเชฟ ตะหลิวจึงดูจุ่มลงไปในกระทะ */}
+        <Stove st={st} k={k} />
+      </Animated.View>
+    </View>
+  );
+}
+
+/** วางภาพ SVG ชิ้นหนึ่งในครัวตามพิกัดของครัว */
+function Piece({ x, y, w, h, k, children, style }: { x: number; y: number; w: number; h: number; k: number; children: ReactNode; style?: object }) {
+  return (
+    <Animated.View style={[{ position: 'absolute', left: x * k, top: y * k, width: w * k, height: h * k }, style]}>
+      <Svg width="100%" height="100%" viewBox={`0 0 ${w} ${h}`}>{children}</Svg>
+    </Animated.View>
+  );
+}
+
+/** ตู้เย็นเปิดตอนหยิบของ ของจริงของสูตรนี้ลอยขึ้นมาให้เห็นว่าต้องหยิบอะไร */
+function Fridge({ open, k, r }: { open: boolean; k: number; r: Recipe }) {
+  const bob = useMove('puff');
+  if (!open) return null;
+  // ภาพวัตถุดิบ: ใช้ img ของวัตถุดิบ ถ้าไม่มีลองชื่อ id ที่ตรงกับภาพที่มีอยู่
+  const items = r.ingredients.map((g) => ({ id: g.id, src: g.img ? IMG[g.img] : (IMG as Record<string, number>)[g.id] })).filter((g) => g.src).slice(0, 4);
+  return (
+    <>
+      <Piece x={10} y={40} w={168} h={258} k={k}>
+        <Rect x={34} y={6} width={130} height={248} rx={16} fill="#EEF4FF" />
+        <Path d="M36 90 H162 M36 160 H162 M36 210 H162" stroke="#D8D1F0" strokeWidth={5} />
+        <Circle cx={70} cy={76} r={12} fill="#FF7A59" /><Rect x={100} y={60} width={34} height={28} rx={6} fill="#7BE0B5" />
+        <Ellipse cx={80} cy={148} rx={20} ry={11} fill="#FFFFFF" /><Rect x={112} y={132} width={30} height={26} rx={6} fill="#FFD84D" />
+        {/* ประตูเปิดออกไปทางซ้าย */}
+        <Path d="M2 2 L32 10 V252 L2 258 Z" fill="#FFFFFF" stroke="#D8D1F0" strokeWidth={4} />
+      </Piece>
+      {items.map((g, n) => (
+        <Animated.View key={g.id} style={{ position: 'absolute', left: (30 + n * 44) * k, top: (6 + (n % 2) * 18) * k, width: 46 * k, height: 46 * k, borderRadius: 999, backgroundColor: '#FFFFFF',
+          alignItems: 'center', justifyContent: 'center', transform: [{ translateY: Animated.multiply(bob, 6 * k * (n % 2 ? 1 : -1)) }] }}>
+          <Image source={g.src} style={{ width: 36 * k, height: 36 * k }} contentFit="contain" accessible={false} />
+        </Animated.View>
+      ))}
+    </>
+  );
+}
+
+/** น้ำไหลจากก๊อกตอนล้าง พร้อมของที่ล้างอยู่ในอ่าง */
+function Sink({ st, k }: { st: Stage; k: number }) {
+  const flow = useMove('twinkle');
+  if (st.at !== 'sink') return null;
+  return (
+    <>
+      <Piece x={430} y={200} w={20} h={42} k={k} style={{ opacity: flow.interpolate({ inputRange: [0, 1], outputRange: [0.95, 0.6] }) }}>
+        <Rect x={6} y={0} width={8} height={42} rx={4} fill="#8FD3FF" />
+      </Piece>
+      <Piece x={396} y={222} w={72} h={22} k={k}>
+        {st.sink === 'leaves' && <Leaves cx={36} cy={14} />}
+        <Ellipse cx={20} cy={18} rx={6} ry={3} fill="#FFFFFF" opacity={0.8} /><Ellipse cx={56} cy={16} rx={5} ry={2.5} fill="#FFFFFF" opacity={0.8} />
+      </Piece>
+    </>
+  );
+}
+
+function Board({ items, k }: { items: Food[]; k: number }) {
+  if (!items.length) return null;
+  return <Piece x={620} y={196} w={130} h={40} k={k}>{items.map((f) => <G key={f}>{BOARD[f]}</G>)}</Piece>;
+}
+
+/** ของที่พักข้างเตา: ไข่ดาวที่ตักขึ้น จานที่ทำเสร็จ กล่องเก็บแกง */
+function SidePlate({ side, k, r }: { side: Side | null; k: number; r: Recipe }) {
+  const pop = useMove('puff');
+  if (!side) return null;
+  if (side === 'dish') return (
+    <Animated.View style={{ position: 'absolute', left: 724 * k, top: 168 * k, width: 76 * k, height: 76 * k, transform: [{ translateY: Animated.multiply(pop, -4 * k) }] }}>
+      <Image source={IMG[r.img]} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
+    </Animated.View>
+  );
+  return (
+    <Piece x={744} y={204} w={56} h={36} k={k}>
+      {side === 'box' ? <>
+        <Rect x={6} y={10} width={44} height={24} rx={6} fill="#CDEBFF" stroke="#8FB8E8" strokeWidth={3} />
+        <Rect x={2} y={4} width={52} height={10} rx={5} fill="#7BC6F5" />
+      </> : <>
+        <Ellipse cx={28} cy={28} rx={26} ry={7} fill="#FFFFFF" stroke="#D8D1F0" strokeWidth={3} />
+        {side === 'egg' ? <><Path d="M12 26 Q14 14 26 16 Q40 12 44 24 Q40 32 28 31 Q14 32 12 26 Z" fill="#FFFFFF" stroke="#EEE6D8" strokeWidth={2} /><Circle cx={28} cy={22} r={6} fill="#FFB020" /></>
+          : <><Ellipse cx={20} cy={22} rx={7} ry={9} fill="#FFFDF5" /><Ellipse cx={34} cy={22} rx={7} ry={9} fill="#FFFDF5" /></>}
+      </>}
+    </Piece>
+  );
+}
+
+/** เตา: เปลวไฟตามระดับไฟ กระทะหรือหม้อพร้อมของข้างใน ของกระดกตามจังหวะผัดตอนไฟเปิด ไอร้อนลอยขึ้น */
+function Stove({ st, k }: { st: Stage; k: number }) {
+  const flick = useMove('flick');
+  const toss = useMove(st.pot ? 'puff' : 'toss');
+  const s1 = useMove('rise'), s2 = useMove('rise', 600), s3 = useMove('rise', 1200);
+  const hot = st.heat > 0, food = st.pan.length > 0;
+  const rim = st.pot ? 186 : 206;
+  return (
+    <>
+      {hot && (
+        <Piece x={880} y={218} w={100} h={30} k={k} style={{ transformOrigin: 'bottom', transform: [{ scaleY: flick.interpolate({ inputRange: [0, 1], outputRange: [0.8, 1.15] }) }] }}>
+          {Array.from({ length: st.heat + 1 }, (_, n) => {
+            const fx = 50 + (n - st.heat / 2) * 18, fh = 10 + st.heat * 5;
+            return <G key={n}><Path d={`M${fx - 7} 26 Q${fx} ${26 - fh * 2} ${fx + 7} 26 Z`} fill="#FF8A4C" /><Path d={`M${fx - 4} 26 Q${fx} ${26 - fh} ${fx + 4} 26 Z`} fill="#FFD84D" /></G>;
+          })}
+        </Piece>
+      )}
+      <Piece x={860} y={st.pot ? 150 : 170} w={140} h={st.pot ? 92 : 72} k={k}>
+        {st.pot ? <>
+          <Path d="M14 54 h10 M116 54 h10" stroke="#5E9FD8" strokeWidth={9} strokeLinecap="round" />
+          <Rect x={22} y={36} width={96} height={52} rx={12} fill="#7BC6F5" />
+          <Ellipse cx={70} cy={36} rx={50} ry={10} fill="#5E9FD8" />
+          <Ellipse cx={70} cy={37} rx={44} ry={7} fill={food ? surface(st.pan) : '#3A5F86'} />
+        </> : <>
+          <Path d="M128 34 L140 28" stroke="#24212B" strokeWidth={8} strokeLinecap="round" />
+          <Ellipse cx={70} cy={36} rx={62} ry={9} fill="#3A3644" />
+        </>}
+      </Piece>
+      {food && (
+        <Piece x={860} y={rim - 40} w={140} h={50} k={k} style={hot ? { transform: [{ translateY: Animated.multiply(toss, (st.pot ? 2 : 7) * k) }] } : undefined}>
+          {st.pan.map((f) => <G key={f}>{(st.pot ? POT : WOK)[f]}</G>)}
+        </Piece>
+      )}
+      {!st.pot && (
+        <Piece x={860} y={196} w={140} h={44} k={k}>
+          {/* ขอบหน้ากระทะบังของที่อยู่ต่ำกว่าขอบ */}
+          <Path d="M8 10 Q70 58 132 10 Q70 22 8 10 Z" fill="#24212B" />
+        </Piece>
+      )}
+      {hot && food && [s1, s2, s3].map((v, n) => (
+        <Piece key={n} x={890 + n * 22} y={rim - 70} w={20} h={40} k={k}
+          style={{ opacity: v.interpolate({ inputRange: [0, 0.2, 0.8, 1], outputRange: [0, 0.85, 0.5, 0] }), transform: [{ translateY: Animated.multiply(v, -26 * k) }] }}>
+          <Path d="M10 38 q-8 -9 0 -18 q8 -9 0 -18" stroke="#FFFFFF" strokeWidth={5} strokeLinecap="round" fill="none" />
+        </Piece>
+      ))}
+    </>
+  );
+}
+
+/** สีผิวน้ำในหม้อ: ของเหลวชั้นบนสุดของรายการ */
+function surface(pan: Food[]) {
+  const liquid: Partial<Record<Food, string>> = { cream: '#FFF8E8', paste: '#E8572F', curry: '#A8D46A', water: '#BFE6FF', caramel: '#C8782E', stew: '#7A4526' };
+  return pan.map((f) => liquid[f]).filter(Boolean).at(-1) ?? '#3A5F86';
+}
+
+const Leaves = ({ cx, cy }: { cx: number; cy: number }) => (
+  <G>{[[-16, 0, -20], [-4, -4, 15], [8, 1, -10], [18, -3, 25], [0, 4, 0]].map(([dx, dy, a], n) => (
+    <Ellipse key={n} cx={cx + dx} cy={cy + dy} rx={8} ry={4} fill={n % 2 ? '#4CC992' : '#2FB383'} transform={`rotate(${a} ${cx + dx} ${cy + dy})`} />))}</G>
+);
+const dots = (pts: [number, number][], r: number, colors: string[]) => pts.map(([x, y], n) => <Circle key={n} cx={x} cy={y} r={r} fill={colors[n % colors.length]} />);
+const cubes = (pts: [number, number][], s: number, fill: string, edge: string) => pts.map(([x, y], n) => <Rect key={n} x={x - s / 2} y={y - s / 2} width={s} height={s} rx={2} fill={fill} stroke={edge} strokeWidth={1.5} />);
+
+// ของในกระทะ: ผิวกระทะอยู่ที่ y≈44 ของชิ้นนี้ (ขอบกระทะ) กองนูนขึ้นเหนือขอบเล็กน้อย
+const WOK: Partial<Record<Food, ReactNode>> = {
+  oil: <Ellipse cx={70} cy={44} rx={48} ry={5} fill="#FFE07A" opacity={0.6} />,
+  egg: <G><Path d="M44 44 Q46 30 64 33 Q86 28 94 40 Q90 50 70 49 Q48 51 44 44 Z" fill="#FFFFFF" /><Circle cx={70} cy={38} r={8} fill="#FFB020" /></G>,
+  beaten: <Ellipse cx={70} cy={43} rx={50} ry={6} fill="#FFD34D" />,
+  omelet: <G><Ellipse cx={70} cy={41} rx={46} ry={9} fill="#F2B13A" />{dots([[50, 37], [64, 34], [80, 36], [92, 40], [58, 43], [76, 42]], 5, ['#F7C95B', '#E59A2A'])}</G>,
+  bits: <G>{dots([[46, 42], [56, 39], [64, 43], [74, 38], [84, 42], [94, 40], [60, 36], [88, 37]], 3, ['#FFF3DC', '#FF5A4A'])}</G>,
+  mince: <G>{dots([[42, 43], [50, 39], [58, 42], [64, 36], [72, 40], [80, 35], [88, 41], [96, 43], [54, 34], [68, 32], [84, 31], [76, 44]], 5, ['#9A5B3C', '#7E4A30', '#B06A45'])}</G>,
+  sauce: <G><Ellipse cx={70} cy={41} rx={44} ry={7} fill="#6B3A22" opacity={0.35} /><Ellipse cx={56} cy={36} rx={8} ry={2} fill="#FFFFFF" opacity={0.5} /></G>,
+  leaves: <Leaves cx={72} cy={34} />,
+  beans: <G>{[[44, 40, 20], [60, 36, -15], [76, 38, 10], [90, 40, -25], [66, 42, 30]].map(([x, y, a], n) => (
+    <Rect key={n} x={x - 10} y={y - 2.5} width={20} height={5} rx={2.5} fill="#5DBB63" transform={`rotate(${a} ${x} ${y})`} />))}</G>,
+  paste: <Ellipse cx={70} cy={42} rx={40} ry={6} fill="#E8572F" />,
+};
+// ของในหม้อ: ผิวน้ำอยู่ที่ y≈46 ของชิ้นนี้ ของลอยอยู่บนผิวน้ำ
+const POT: Partial<Record<Food, ReactNode>> = {
+  chicken: <G>{cubes([[52, 44], [70, 42], [86, 45]], 9, '#F7D9B5', '#E3B98D')}</G>,
+  veg: <G>{dots([[60, 46], [80, 44], [94, 47]], 5, ['#7BC96F'])}{dots([[60, 46], [80, 44], [94, 47]], 2, ['#E8F7D8'])}</G>,
+  eggs: <G><Ellipse cx={58} cy={44} rx={7} ry={5} fill="#F3E6D3" /><Ellipse cx={82} cy={45} rx={7} ry={5} fill="#F3E6D3" /></G>,
+  pork: <G>{cubes([[50, 45], [66, 42], [90, 44]], 10, '#B5683F', '#8E4E2C')}</G>,
+  bits: <G>{dots([[54, 44], [66, 46], [78, 43], [88, 46]], 3, ['#FFF3DC', '#2FB383'])}</G>,
+  leaves: <Leaves cx={74} cy={44} />,
+};
+// ของบนเขียง: ผิวเขียงอยู่ที่ y≈34 ของชิ้นนี้
+const BOARD: Partial<Record<Food, ReactNode>> = {
+  bits: <G>{dots([[30, 32], [38, 30], [46, 33], [56, 31], [64, 33], [36, 34], [52, 34]], 3.5, ['#FFF3DC', '#FF5A4A'])}<Ellipse cx={92} cy={30} rx={9} ry={6} fill="#FFF3DC" /></G>,
+  chicken: <G>{cubes([[30, 30], [42, 31], [54, 30], [36, 24], [48, 24]], 10, '#F7D9B5', '#E3B98D')}<Rect x={78} y={22} width={34} height={12} rx={6} fill="#F7D9B5" /></G>,
+  veg: <G>{dots([[32, 29], [46, 30], [60, 29]], 7, ['#7BC96F'])}{dots([[32, 29], [46, 30], [60, 29]], 3, ['#E8F7D8'])}<Leaves cx={92} cy={30} /></G>,
+  pork: <G>{cubes([[30, 29], [44, 30], [58, 29], [37, 21], [51, 21]], 12, '#E9A88A', '#C9805F')}</G>,
+  beans: <G>{[24, 34, 44, 54, 64].map((x2, n) => <Rect key={n} x={x2} y={29 - (n % 2) * 3} width={8} height={4} rx={2} fill="#5DBB63" />)}<Rect x={80} y={27} width={36} height={5} rx={2.5} fill="#5DBB63" /></G>,
+  mortar: <G><Path d="M40 16 H86 Q84 36 63 36 Q42 36 40 16 Z" fill="#9AA6BD" /><Ellipse cx={63} cy={16} rx={23} ry={4} fill="#6E7891" /><Rect x={70} y={-2} width={8} height={22} rx={4} fill="#C98B4E" transform="rotate(20 74 10)" /></G>,
+  bowl: <G><Path d="M38 14 H90 Q88 36 64 36 Q40 36 38 14 Z" fill="#FFFFFF" stroke="#D8D1F0" strokeWidth={3} /><Ellipse cx={64} cy={15} rx={24} ry={4} fill="#FFD34D" /></G>,
+};

@@ -5,7 +5,7 @@ import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, Scroll
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
-import { LAYERS, type BodyMove, type Head, type MascotName, type Motion, type Part, type PartMove, type SCENE } from '@/data/images';
+import { LAYERS, type Beat, type BodyMove, type Head, type MascotName, type Motion, type Part, type PartMove, type SCENE } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -86,7 +86,7 @@ export function Card({ tone = 'soft', children, style, onPress, label }: { tone?
 type Ease = 'sin' | 'up' | 'down';
 const EASE = { sin: Easing.inOut(Easing.sin), up: Easing.out(Easing.quad), down: Easing.in(Easing.quad) };
 // แต่ละจังหวะ: [ค่าปลายทาง, เวลา (ms), การเร่ง] แล้วพัก rest ก่อนวนใหม่
-const MOVES: Record<Motion | PartMove | BodyMove | 'blink', { steps: [number, number, Ease][]; rest: number }> = {
+const MOVES: Record<Motion | PartMove | BodyMove | 'blink' | 'flick' | 'rise', { steps: [number, number, Ease][]; rest: number }> = {
   bob: { steps: [[-6, 1400, 'sin'], [0, 1400, 'sin']], rest: 0 },
   sway: { steps: [[1, 800, 'sin'], [-1, 1600, 'sin'], [0, 800, 'sin']], rest: 0 },
   jump: { steps: [[-20, 240, 'up'], [0, 240, 'down'], [-12, 180, 'up'], [0, 180, 'down']], rest: 900 },
@@ -120,21 +120,40 @@ const MOVES: Record<Motion | PartMove | BodyMove | 'blink', { steps: [number, nu
   waddle: { steps: [[1, 200, 'sin'], [-1, 400, 'sin'], [0, 200, 'sin']], rest: 0 },
   ponder: { steps: [[1, 1500, 'sin'], [-1, 3000, 'sin'], [0, 1500, 'sin']], rest: 0 },
   squash: { steps: [[1, 200, 'up'], [0, 260, 'down']], rest: 740 },
+  // เดิน: ตัวเด้งลงทุกครั้งที่เท้าแตะพื้น (สองครั้งต่อรอบก้าว) แขนแกว่งสวนกับขา รอบเท่ากับ stepL/stepR
+  bounce: { steps: [[-1, 200, 'up'], [0, 200, 'down']], rest: 0 },
+  armL: { steps: [[1, 400, 'sin'], [-1, 400, 'sin']], rest: 0 },
+  armR: { steps: [[-1, 400, 'sin'], [1, 400, 'sin']], rest: 0 },
+  // คนกระทะ: กวาดไปกลับ บางรอบหยุดดูครู่หนึ่ง
+  stir: { steps: [[1, 420, 'sin'], [-1, 520, 'sin'], [1, 480, 'sin'], [0, 300, 'sin']], rest: 500 },
+  // สับ: ลงเร็วสามที แล้วพักเลื่อนของ
+  chop: { steps: [[1, 90, 'down'], [0, 130, 'up'], [1, 90, 'down'], [0, 130, 'up'], [1, 90, 'down'], [0, 200, 'up']], rest: 650 },
+  // ครัวจำลอง: เปลวไฟพลิ้ว ไอร้อนลอยขึ้นแล้วจางหายเริ่มใหม่
+  flick: { steps: [[1, 120, 'sin'], [0.3, 140, 'sin'], [0.8, 110, 'sin'], [0, 130, 'sin']], rest: 0 },
+  rise: { steps: [[1, 1700, 'sin'], [0, 1, 'sin']], rest: 250 },
+  // ถูล้าง: ไปมาเร็วๆ
+  scrub: { steps: [[1, 220, 'sin'], [-1, 260, 'sin'], [1, 240, 'sin'], [0, 200, 'sin']], rest: 260 },
 };
-/** วนการขยับชุดหนึ่งไปเรื่อยๆ หลังหน่วง delay หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว */
-function useMove(move: keyof typeof MOVES, delay = 0) {
+/** วนการขยับชุดหนึ่งไปเรื่อยๆ หลังหน่วง delay หยุดนิ่งถ้าเครื่องตั้งค่าลดการเคลื่อนไหว
+ *  คนจริงไม่ขยับเป๊ะเท่ากันทุกรอบ: แต่ละตัวมีจังหวะเร็วช้าของตัวเอง และช่วงพักสุ่มสั้นยาวทุกรอบ
+ *  tempo ส่งมาจากตัวละคร ให้ทุกส่วนของตัวเดียวกันใช้จังหวะเดียวกัน แขนขาจึงยังเข้าจังหวะกัน */
+export function useMove(move: keyof typeof MOVES, delay = 0, tempo = 1) {
   const [v] = useState(() => new Animated.Value(0));
   useEffect(() => {
-    let loop: Animated.CompositeAnimation | undefined;
+    let run: Animated.CompositeAnimation | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let alive = true;
     const { steps, rest } = MOVES[move];
     if (!steps.length) return;
-    const frames = steps.map(([toValue, duration, ease]) => Animated.timing(v, { toValue, duration, easing: EASE[ease], useNativeDriver: Platform.OS !== 'web' }));
-    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
-      if (!reduce) timer = setTimeout(() => { loop = Animated.loop(Animated.sequence([...frames, Animated.delay(rest)])); loop.start(); }, delay);
-    }).catch(() => {});
-    return () => { clearTimeout(timer); loop?.stop(); };
-  }, [v, move, delay]);
+    const frames = steps.map(([toValue, duration, ease]) => Animated.timing(v, { toValue, duration: duration * tempo, easing: EASE[ease], useNativeDriver: Platform.OS !== 'web' }));
+    const once = () => {
+      if (!alive) return;
+      run = Animated.sequence(frames);
+      run.start(({ finished }) => { if (finished && alive) timer = setTimeout(once, rest * tempo * (0.6 + Math.random() * 0.8)); });
+    };
+    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => { if (!reduce && alive) timer = setTimeout(once, delay); }).catch(() => {});
+    return () => { alive = false; clearTimeout(timer); run?.stop(); };
+  }, [v, move, delay, tempo]);
   return v;
 }
 
@@ -155,12 +174,12 @@ export function Float({ children, motion = 'bob', delay = 0 }: { children: React
 }
 
 /** ชั้นหนึ่งของตัวละครที่ขยับเอง: หมุนรอบข้อต่อ (pivot) และหรือยกขึ้นลง ระยะเป็นสัดส่วนของขนาดภาพ จึงขยับเท่ากันทุกขนาด */
-function Limb({ part, width, children }: { part: Part; width: number; children?: ReactNode }) {
-  const v = useMove(part.move);
+function Limb({ part, width, tempo, children }: { part: Part; width: number; tempo: number; children?: ReactNode }) {
+  const v = useMove(part.move, 0, tempo);
   const deg = part.deg ?? 0;
   const transform = [
     { translateY: Animated.multiply(v, width * (part.lift ?? 0)) },
-    { translateX: Animated.multiply(v, part.move === 'sip' ? width * -0.02 : 0) },
+    { translateX: Animated.multiply(v, width * (part.slide ?? (part.move === 'sip' ? -0.02 : 0))) },
     { rotate: v.interpolate({ inputRange: [-1, 1], outputRange: [`${-deg}deg`, `${deg}deg`] }) },
     { scale: part.move === 'twinkle' ? v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] }) : 1 },
   ];
@@ -176,10 +195,10 @@ function Limb({ part, width, children }: { part: Part; width: number; children?:
 }
 
 /** หัว: เอียงหรือเด้งรอบคอตามจังหวะของท่า และกะพริบตาเป็นระยะ (ตาอยู่ในชั้นของหัว จึงเอียงไปด้วยกัน) */
-function HeadLayer({ head, width, blinkDelay }: { head: Head; width: number; blinkDelay: number }) {
-  const eyes = useMove('blink', blinkDelay);
+function HeadLayer({ head, width, blinkDelay, tempo }: { head: Head; width: number; blinkDelay: number; tempo: number }) {
+  const eyes = useMove('blink', blinkDelay, tempo);
   return (
-    <Limb part={{ source: head.source, move: head.move, lift: head.lift, deg: head.deg, pivot: head.neck }} width={width}>
+    <Limb part={{ source: head.source, move: head.move, lift: head.lift, deg: head.deg, pivot: head.neck }} width={width} tempo={tempo}>
       <Animated.View style={[StyleSheet.absoluteFill, { transformOrigin: `${head.eye[0] * 100}% ${head.eye[1] * 100}%`, transform: [{ scaleY: eyes.interpolate({ inputRange: [0, 1], outputRange: [1, 0.12] }) }] }]}>
         <Image source={head.eyes} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
       </Animated.View>
@@ -190,22 +209,55 @@ function HeadLayer({ head, width, blinkDelay }: { head: Head; width: number; bli
 /** ตัวละครหนึ่งท่า ภาพจัตุรัส: ทั้งตัวขยับไปด้วยกันก่อน (หายใจ โยกตัว) แล้วแขนขาและของในมือขยับรอบข้อต่อของตัวเอง จึงดูเป็นร่างเดียว */
 export function Mascot({ name, size }: { name: MascotName; size: number | '100%' }) {
   const [width, setWidth] = useState(typeof size === 'number' ? size : 0);
+  const [tempo] = useState(() => 0.9 + Math.random() * 0.22); // แต่ละตัวเร็วช้าไม่เท่ากัน
   const { body, head, front, parts, sway } = LAYERS[name];
-  const v = useMove(sway ?? 'still');
-  const whole = sway === 'breathe' ? [{ scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.022] }) }, { scaleX: v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.99] }) }]
+  const v = useMove(sway ?? 'still', 0, tempo);
+  const whole = sway === 'bounce' ? [{ translateY: Animated.multiply(v, width * 0.014) }]
+    : sway === 'breathe' ? [{ scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.022] }) }, { scaleX: v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.99] }) }]
     : sway === 'squash' ? [{ scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.03] }) }]
     : sway ? [{ rotate: v.interpolate({ inputRange: [-1, 1], outputRange: sway === 'waddle' ? ['-3deg', '3deg'] : ['-2deg', '2deg'] }) }]
     : [];
   return (
     <Animated.View style={{ width: size, aspectRatio: 1, transformOrigin: 'bottom', transform: whole }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-      {parts.filter((p) => p.behind).map((p, k) => <Limb key={k} part={p} width={width} />)}
+      {parts.filter((p) => p.behind).map((p, k) => <Limb key={k} part={p} width={width} tempo={tempo} />)}
       <Image source={body} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
       {/* กะพริบตาไม่พร้อมกันทุกตัว: หน่วงต่างกันตามชื่อท่า */}
-      <HeadLayer head={head} width={width} blinkDelay={name.length * 430} />
+      <HeadLayer head={head} width={width} blinkDelay={name.length * 430} tempo={tempo} />
       {front !== undefined && <Image source={front} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />}
-      {parts.filter((p) => !p.behind).map((p, k) => <Limb key={k} part={p} width={width} />)}
+      {parts.filter((p) => !p.behind).map((p, k) => <Limb key={k} part={p} width={width} tempo={tempo} />)}
     </Animated.View>
   );
+}
+
+/** ตัวละครที่เปลี่ยนท่าได้: ท่าใหม่ค่อยๆ ขึ้นแทนพร้อมย่อตัวนิดหนึ่ง เหมือนคนขยับเปลี่ยนท่า ไม่กระตุกจากภาพหนึ่งไปอีกภาพ */
+export function Actor({ name, size, motion }: { name: MascotName; size: number | '100%'; motion?: Motion }) {
+  const [v] = useState(() => new Animated.Value(1));
+  useEffect(() => {
+    v.setValue(0);
+    Animated.timing(v, { toValue: 1, duration: 240, easing: Easing.out(Easing.quad), useNativeDriver: Platform.OS !== 'web' }).start();
+  }, [v, name]);
+  const inner = <Mascot key={name} name={name} size={size} />;
+  return (
+    <Animated.View style={{ width: size, opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] }), transformOrigin: 'bottom',
+      transform: [{ scaleY: v.interpolate({ inputRange: [0, 1], outputRange: [0.93, 1] }) }, { scaleX: v.interpolate({ inputRange: [0, 1], outputRange: [1.04, 1] }) }] }}>
+      {motion ? <Float motion={motion}>{inner}</Float> : inner}
+    </Animated.View>
+  );
+}
+
+/** ตัวละครในฉากทำหลายอย่างสลับกันไปตามลำดับ แต่ละท่านานไม่เท่ากันทุกรอบ */
+function Cycle({ seq }: { seq: Beat[] }) {
+  const [k, setK] = useState(0);
+  useEffect(() => {
+    if (seq.length < 2) return;
+    let alive = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
+      if (!reduce && alive) timer = setTimeout(() => setK((x) => (x + 1) % seq.length), seq[k].ms * (0.8 + Math.random() * 0.4));
+    }).catch(() => {});
+    return () => { alive = false; clearTimeout(timer); };
+  }, [k, seq]);
+  return <Actor name={seq[k].name} size="100%" motion={seq[k].motion} />;
 }
 
 /** หัวหน้าจอพร้อมมาสคอต พื้นสีสดประจำหน้า แล้วต่อด้วยแผ่นเนื้อหาสีพื้น */
@@ -234,7 +286,7 @@ export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel
           <Image source={scene.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
           {scene.cast.map((c, k) => (
             <View key={k} style={{ position: 'absolute', left: `${c.left * 100}%`, top: `${c.top * 100}%`, width: `${c.width * 100}%`, aspectRatio: 1 }}>
-              {'motion' in c && c.motion ? <Float motion={c.motion}><Mascot name={c.name} size="100%" /></Float> : <Mascot name={c.name} size="100%" />}
+              <Cycle seq={c.seq} />
             </View>
           ))}
         </View>

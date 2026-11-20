@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 480" width="480" height="480">
+<g transform="translate(240 470) scale(0.92) translate(-240 -470)"><g>
+<g transform="translate(0 0) rotate(3 240 384)">
+<clipPath id="c18"><path d="M164 206 C134 246 122 310 114 384 Q240 406 366 384 C358 310 346 246 316 206 Z"/></clipPath><path d="M164 206 C134 246 122 310 114 384 Q240 406 366 384 C358 310 346 246 316 206 Z" fill="#BFD9FF"/><g clip-path="url(#c18)"><path d="M204 216 V268 M276 216 V268" stroke="#E9603F" stroke-width="9" stroke-linecap="round"/><path d="M198 264 H282 Q290 264 290 272 V300 L326 312 L338 404 H142 L154 312 L190 300 V272 Q190 264 198 264 Z" fill="#FF7A59"/><rect x="212" y="326" width="56" height="38" rx="13" fill="#FFA58C"/></g>
+
+</g></g></g>
+</svg>

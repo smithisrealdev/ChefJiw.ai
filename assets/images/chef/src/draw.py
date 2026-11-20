@@ -91,6 +91,10 @@ def chef(**k):
 A1 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S1, SKY)
 ladle = lambda x, y, r: f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y+26} V{y-66}" stroke="{WOOD}" stroke-width="10" stroke-linecap="round"/><path d="M{x-22} {y-70} a22 22 0 0 0 44 0 z" fill="{WOOD}"/></g>'
 wok = lambda x, y, r=0: f'<g transform="rotate({r} {x} {y})"><path d="M{x-66} {y} q66 56 132 0 z" fill="{INK}"/><path d="M{x+62} {y+2} l48 -12" stroke="{INK}" stroke-width="13" stroke-linecap="round"/></g>'
+spatula = lambda x, y, r: (f'<g transform="rotate({r} {x} {y})"><path d="M{x} {y} H{x+70}" stroke="{WOOD}" stroke-width="10" stroke-linecap="round"/>'
+                           f'<rect x="{x+64}" y="{y-15}" width="34" height="30" rx="7" fill="#A7B0C2"/><path d="M{x+72} {y-6} h18 M{x+72} {y+6} h18" stroke="#8792A8" stroke-width="4" stroke-linecap="round"/></g>')
+knife = lambda x, y, r: (f'<g transform="rotate({r} {x} {y})"><rect x="{x-12}" y="{y-7}" width="30" height="14" rx="6" fill="{INK}"/>'
+                         f'<path d="M{x+16} {y-10} H{x+74} Q{x+80} {y-10} {x+77} {y-2} L{x+70} {y+10} H{x+16} Z" fill="#E4E8F2" stroke="#A7B0C2" stroke-width="3" stroke-linejoin="round"/></g>')
 food = lambda x, y: f'<circle cx="{x-34}" cy="{y-30}" r="9" fill="{GREEN_L}"/><circle cx="{x-2}" cy="{y-50}" r="9" fill="{CORAL}"/><circle cx="{x+30}" cy="{y-34}" r="9" fill="{YEL}"/><circle cx="{x-10}" cy="{y-20}" r="8" fill="{GREEN}"/><circle cx="{x+16}" cy="{y-62}" r="7" fill="{GREEN_L}"/>'
 def build():
     P = {
@@ -106,6 +110,18 @@ def build():
       # ผงะถอยหลัง ยกขาข้างหนึ่ง มือกุมแก้ม
       'oops': chef(lean=-10, tilt=-4, feet=((214, 440, 0), (318, 410, 34)), arms_front=A1('L', 170, 214, -44, 22) + A1('R', 310, 214, 44, 22), hat=toque(-20), blush=0.5,
                    extras={'sweat': '<path d="M408 96 q22 34 0 46 q-22 -12 0 -46 z" fill="#6CC5F5"/>', 'lines': '<path d="M56 122 l-22 -10 M50 156 l-24 2" stroke="#6CC5F5" stroke-width="7" stroke-linecap="round"/>'}),
+      # ---- ท่าทำงานในครัวจำลอง: ตัวหันเข้าหาของที่อยู่ทางขวา มือทั้งสองอยู่ระดับเคาน์เตอร์ ----
+      # เดิน: ก้าวขาสลับ แขนแกว่งสวนขา มองไปทางที่เดิน
+      'walk': chef(lean=3, tilt=-4, look=(7, 0), feet=((196, 442, -6), (290, 440, 14)), split_legs=True, hat=toque(-6),
+                   parts={'armL': A1('L', 134, 352, -14, 4), 'armR': A1('R', 346, 352, 14, 4)}),
+      # ผัด: มือขวาถือตะหลิวคนในกระทะ มือซ้ายจับขอบเคาน์เตอร์ ก้มมองกระทะ
+      'stir': chef(lean=5, tilt=-8, look=(9, 7), feet=((198, 440, -4), (284, 440, 8)), arms_front=A1('L', 214, 344, -32, 14),
+                   parts={'spatula': spatula(374, 330, -4) + A1('R', 374, 330, 22, 2)}),
+      # หั่น: มือขวาถือมีดสับขึ้นลง มือซ้ายจับของบนเขียง
+      'chop': chef(lean=4, tilt=-10, look=(8, 9), arms_front=A1('L', 318, 346, -16, 24),
+                   parts={'knife': knife(378, 326, 16) + A1('R', 378, 326, 20, -2)}, hat=toque(-4)),
+      # ล้าง: สองมือถูของใต้น้ำทางขวา
+      'wash': chef(lean=4, tilt=-8, look=(8, 8), parts={'hands': A1('L', 334, 348, -8, 24) + A1('R', 384, 338, 22, 2)}, hat=toque(-4)),
     }
 
     # ---------- ใบเตย: หมวกบักเก็ต ผมเปียคู่ผูกโบว์ เสื้อยืดเขียวมินต์ เอี๊ยมกระโปรงยีนส์ติดกระดุมเหลือง ถุงผ้าใส่ผัก ----------
@@ -168,6 +184,8 @@ def build():
 POSES = build()
 # ท่าที่ขยับทีละส่วนทำเป็นหลายชั้น: ตัว (-body) กับส่วนที่ขยับ แอปวางซ้อนกันแล้วขยับแต่ละชั้นตาม LAYERS ที่ src/data/images.ts
 SPLIT = {
+    'walk': ('body', 'head', 'eyes', 'armL', 'armR', 'legL', 'legR'), 'stir': ('body', 'head', 'eyes', 'front', 'spatula'),
+    'chop': ('body', 'head', 'eyes', 'front', 'knife'), 'wash': ('body', 'head', 'eyes', 'hands'),
     'cook': ('body', 'head', 'eyes', 'wok', 'food'), 'cheer': ('body', 'head', 'eyes', 'armL', 'armR', 'stars'),
     'think': ('body', 'head', 'eyes', 'front', 'hand', 'bubbles'), 'oops': ('body', 'head', 'eyes', 'front', 'sweat', 'lines'),
     'shop': ('body', 'head', 'eyes', 'front', 'braids', 'legL', 'legR'), 'list': ('body', 'head', 'eyes', 'front', 'braids', 'ground', 'legL', 'legR'),
@@ -337,6 +355,49 @@ me = scene(780, 360, ''.join([
 ]))
 open('scene-me.svg', 'w').write(me)
 
+
+# ---------- ครัวจำลองในหน้าทำอาหาร: ครัวยาว 1200 x 320 เชฟเดินไปทีละจุด (ตู้เย็น อ่างล้าง เขียง เตา) ----------
+# ของที่เปลี่ยนตามขั้น (ประตูตู้เย็น น้ำไหล ของบนเขียง กระทะ ไฟ ไอร้อน) แอปวาดทับเอง ตำแหน่งอยู่ที่ src/components/kitchen-stage.tsx
+# พื้นที่เท้าเชฟอยู่ y=296 ขอบบนเคาน์เตอร์อยู่ y=242 ตรงกับระดับมือของเชฟ
+K_WALL, K_TILE, K_FLOOR, K_FLOOR_D, K_TOP, K_FRONT, K_FRONT_D = '#FFE9A8', '#FFF5D6', '#F4B54E', '#E59F35', '#FFF1D9', '#FFB86B', '#F29E4C'
+counter = lambda x, w: (f'<rect x="{x}" y="242" width="{w}" height="60" fill="{K_FRONT}"/><rect x="{x-6}" y="234" width="{w+12}" height="14" rx="7" fill="{K_TOP}"/>'
+                        + ''.join(f'<path d="M{x + i * w / 3 + 14} 258 h{w / 3 - 28}" stroke="{K_FRONT_D}" stroke-width="5" stroke-linecap="round"/><circle cx="{x + i * w / 3 + w / 6}" cy="276" r="5" fill="{K_TOP}"/>' for i in range(3)))
+kitchen = scene(1200, 320, ''.join([
+  f'<rect x="0" y="0" width="1200" height="320" fill="{K_WALL}"/>',
+  # กระเบื้องหลังเคาน์เตอร์
+  ''.join(f'<rect x="{262 + c * 44}" y="{150 + r * 30}" width="38" height="24" rx="5" fill="{K_TILE}"/>' for r in range(3) for c in range(18)),
+  f'<rect x="0" y="296" width="1200" height="24" fill="{K_FLOOR}"/><path d="M0 300 H1200" stroke="{K_FLOOR_D}" stroke-width="4"/>',
+  # หน้าต่างเหนืออ่าง แสงตกลงพื้น
+  f'<rect x="356" y="34" width="170" height="100" rx="18" fill="#FFFFFF"/><rect x="366" y="44" width="150" height="80" rx="12" fill="#CDEBFF"/>',
+  f'<circle cx="480" cy="72" r="16" fill="{YEL}"/><path d="M380 112 a14 14 0 0 1 20 -12 a18 18 0 0 1 32 6 a12 12 0 0 1 2 24 h-46 a10 10 0 0 1 -8 -18 z" fill="#FFFFFF"/><path d="M441 44 v80 M366 84 h150" stroke="#FFFFFF" stroke-width="6"/>',
+  f'<path d="M366 134 L516 134 L600 296 L300 296 Z" fill="#FFFFFF" opacity="0.18"/>',
+  # ตู้เย็น
+  f'<rect x="40" y="42" width="132" height="254" rx="20" fill="#FFFFFF" stroke="{HAT_D}" stroke-width="5"/><path d="M42 130 h128" stroke="{HAT_D}" stroke-width="5"/>',
+  f'<path d="M150 78 v30 M150 152 v54" stroke="{HAT_D}" stroke-width="8" stroke-linecap="round"/>' + heart(92, 86, 0.6, CORAL) + star(104, 180, 10) + f'<rect x="70" y="200" width="40" height="32" rx="5" fill="#CDEBFF"/>',
+  # อ่างล้าง: เคาน์เตอร์ อ่าง ก๊อก
+  counter(282, 252),
+  f'<ellipse cx="432" cy="240" rx="46" ry="7" fill="#9AA6BD"/><path d="M470 236 V202 Q470 190 458 190 H444 Q436 190 436 198 V204" stroke="#A7B0C2" stroke-width="9" fill="none" stroke-linecap="round"/><rect x="474" y="222" width="14" height="10" rx="4" fill="#A7B0C2"/>',
+  # เคาน์เตอร์เตรียม: เขียง ราวแขวนของ
+  counter(552, 236),
+  f'<rect x="626" y="230" width="112" height="10" rx="5" fill="{WOOD}"/><rect x="620" y="232" width="124" height="6" rx="3" fill="#B97A3E"/>',
+  f'<path d="M596 72 h168" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/><path d="M620 72 v28 M672 72 v36 M728 72 v24" stroke="#FFFFFF" stroke-width="4"/>',
+  f'<circle cx="620" cy="122" r="23" fill="{INK}"/><circle cx="620" cy="122" r="14" fill="#4B4757"/>' + f'<path d="M672 106 V146" stroke="{WOOD}" stroke-width="8" stroke-linecap="round"/><rect x="660" y="144" width="24" height="26" rx="6" fill="#A7B0C2"/>' + f'<rect x="719" y="96" width="18" height="34" rx="6" fill="#A7B0C2"/>',
+  # เตา: ตู้ เตาอบ ปุ่ม หัวเตา เครื่องดูดควัน
+  f'<rect x="806" y="242" width="236" height="60" fill="{K_FRONT_D}"/><rect x="800" y="234" width="248" height="14" rx="7" fill="#6C6878"/>',
+  f'<rect x="846" y="254" width="156" height="40" rx="9" fill="#E58E3F"/><rect x="858" y="262" width="132" height="24" rx="6" fill="{YEL}" opacity="0.8"/>',
+  ''.join(f'<circle cx="{x}" cy="248" r="6" fill="#FFFFFF"/>' for x in (826, 1022)),
+  f'<ellipse cx="930" cy="236" rx="40" ry="5" fill="#3A3644"/>',
+  f'<path d="M866 92 L894 44 H966 L994 92 Z" fill="{K_FRONT_D}"/><rect x="858" y="88" width="144" height="12" rx="6" fill="#E58E3F"/><rect x="910" y="0" width="40" height="46" fill="{K_FRONT_D}"/>',
+  # ชั้นเครื่องปรุงกับต้นไม้
+  f'<path d="M1066 132 h120" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>',
+  f'<rect x="1078" y="88" width="16" height="40" rx="5" fill="#7A4526"/><rect x="1081" y="80" width="10" height="10" rx="3" fill="{CORAL}"/>',
+  f'<rect x="1102" y="94" width="18" height="34" rx="5" fill="#C8782E"/><rect x="1105" y="86" width="12" height="10" rx="3" fill="#FFFFFF"/>',
+  f'<rect x="1130" y="100" width="34" height="28" rx="8" fill="#FFFFFF"/><rect x="1128" y="94" width="38" height="10" rx="5" fill="{PINK}"/>',
+  plant(1140, 266, CORAL),
+  shade(106, 300, 76, 6) + shade(408, 300, 140, 6) + shade(670, 300, 130, 6) + shade(924, 300, 136, 6),
+]))
+open('kitchen.svg', 'w').write(kitchen)
+
 # จุดหมุนของส่วนที่หมุนรอบข้อต่อ (หัวไหล่ สะโพก) เป็นสัดส่วนของภาพ ใส่ใน LAYERS ที่ src/data/images.ts แอปจึงหมุนแขนขารอบข้อต่อจริง ไม่ใช่เลื่อนทั้งท่อน
 import math
 def pivot(x, y, lean=0, drop=0, upper=True, small=False):
@@ -352,11 +413,11 @@ def head_points(lean=0, tilt=0, drop=0, look=(0, 0), small=False):
     a = math.radians(tilt); ex, ey = 240 + 0.8 * look[0] - 240, 178 + 0.8 * look[1] - 236
     eye = (240 + ex * math.cos(a) - ey * math.sin(a), 236 + ex * math.sin(a) + ey * math.cos(a))
     return pivot(240, 236, lean, drop, small=small), pivot(*eye, lean, drop, small=small)
-for label, kw in [('cook', dict(lean=9, tilt=-6)), ('cheer', {}), ('think', dict(lean=3, tilt=11, look=(10, -8))), ('oops', dict(lean=-10, tilt=-4)), ('shop', dict(lean=5, tilt=-5)), ('list', dict(tilt=7)),
+for label, kw in [('walk', dict(lean=3, tilt=-4, look=(7, 0))), ('stir', dict(lean=5, tilt=-8, look=(9, 7))), ('chop', dict(lean=4, tilt=-10, look=(8, 9))), ('wash', dict(lean=4, tilt=-8, look=(8, 8))), ('cook', dict(lean=9, tilt=-6)), ('cheer', {}), ('think', dict(lean=3, tilt=11, look=(10, -8))), ('oops', dict(lean=-10, tilt=-4)), ('shop', dict(lean=5, tilt=-5)), ('list', dict(tilt=7)),
                   ('sip', dict(tilt=-6, drop=40, small=True)), ('yum', dict(lean=7, tilt=-6, small=True)), ('hmm', dict(lean=-4, tilt=-13, look=(-9, -7), small=True))]:
     print(label, 'neck, eyes', *head_points(**kw))
 L, R = SHOULDER['L'], SHOULDER['R']
-for label, p in [('cook wok', pivot(262, 346, lean=9)), ('cheer armL', pivot(*L)), ('cheer armR', pivot(*R)), ('think hand', pivot(*R, lean=3)),
+for label, p in [('walk armL', pivot(*L, lean=3)), ('walk armR', pivot(*R, lean=3)), ('walk legL', pivot(208, 372, upper=False)), ('stir arm', pivot(*R, lean=5)), ('chop arm', pivot(*R, lean=4)), ('wash arms', pivot(*R, lean=4)), ('cook wok', pivot(262, 346, lean=9)), ('cheer armL', pivot(*L)), ('cheer armR', pivot(*R)), ('think hand', pivot(*R, lean=3)),
                  ('list legL', pivot(208, 372, upper=False)), ('list legR', pivot(272, 372, upper=False)), ('sip spoon', pivot(*R, drop=40, small=True)),
                  ('yum arm', pivot(*L, lean=7, small=True)), ('yum spoon', pivot(*R, lean=7, small=True)), ('hmm spoon', pivot(*R, lean=-4, small=True))]:
     print(label, p)
