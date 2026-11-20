@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native
 import { DishCard } from '@/components/dish-card';
 import { Icon } from '@/components/icon';
 import { ApiNotice, Button, Card, Chip, Screen, Skeleton, T, Thumb } from '@/components/ui';
-import { DISH_TINT, IMG, SCENE } from '@/data/images';
+import { DISH_TINT, IMG } from '@/data/images';
 import { fridgeFit, MENU, PANTRY, type MenuItem } from '@/data/recipes';
 import { api, ApiError, type ApiErrorKind, type MenuIdea } from '@/lib/api';
 import { BETA } from '@/lib/beta';
@@ -47,7 +47,7 @@ export default function Recipes() {
   const filters: [Filter, string][] = [['all', t('recipes.all')], ['fast', t('recipes.fast')], ['cheap', t('recipes.cheap', { price: price(40) })], ['light', t('recipes.light')]];
 
   return (
-    <Screen tint={colors.header.recipes} title={t('recipes.title')} subtitle={t('recipes.sample')} scene={SCENE.recipes}>
+    <Screen tint={colors.header.recipes} title={t('recipes.title')} subtitle={t('recipes.sample')} lead="think">
       <View style={[s.search, { backgroundColor: colors.surfaceSoft }]}>
         <Icon name="search" color={colors.muted} />
         <TextInput value={q} onChangeText={setQ} placeholder={t('recipes.search')} placeholderTextColor={colors.muted} accessibilityLabel={t('recipes.search')}

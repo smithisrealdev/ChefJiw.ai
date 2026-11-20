@@ -3,7 +3,7 @@ import { Pressable, Switch, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { Card, Screen, T, Thumb } from '@/components/ui';
-import { DISH_TINT, IMG, SCENE } from '@/data/images';
+import { DISH_TINT, IMG } from '@/data/images';
 import { MENU } from '@/data/recipes';
 import { badges, cookedDays, monthGrid } from '@/lib/calendar';
 import { BETA } from '@/lib/beta';
@@ -32,10 +32,10 @@ export default function Me() {
   const avg = runs.length ? (runs.reduce((s, r) => s + r.score, 0) / runs.length).toFixed(1) : '–';
   const now = new Date(), cooked = cookedDays(runs, now.getFullYear(), now.getMonth()), earned = badges(runs);
   return (
-    <Screen tint={colors.header.me} title={t('me.title')} scene={SCENE.me}>
+    <Screen tint={colors.header.me} title={t('me.title')} lead="list">
       <View style={{ flexDirection: 'row', gap: space.sm }}>
-        <Card tone="mint" style={{ flex: 1 }}><T v="hero" tone="pastel">{runs.length}</T><T v="smallBold" tone="pastel">{t('me.cooked')}</T></Card>
-        <Card tone="accent" style={{ flex: 1 }}><T v="hero" tone="pastel">{avg}</T><T v="smallBold" tone="pastel">{t('me.avg')}</T></Card>
+        <Card style={{ flex: 1 }}><T v="hero">{runs.length}</T><T v="smallBold" tone="muted">{t('me.cooked')}</T></Card>
+        <Card style={{ flex: 1 }}><T v="hero">{avg}</T><T v="smallBold" tone="muted">{t('me.avg')}</T></Card>
       </View>
 
       {/* ปฏิทินของเดือนนี้: วันที่ทำอาหารจบเป็นสติกเกอร์รูปจานนั้น */}
@@ -103,7 +103,7 @@ export default function Me() {
           <T v="bodyBold">{t('me.dark')}</T>
           {theme === 'system' && <T v="small" tone="muted">{t('me.darkSystem')}</T>}
         </View>
-        <Switch accessibilityLabel={t('me.dark')} value={isDark} onValueChange={(v) => set({ theme: v ? 'dark' : 'light' })}
+        <Switch accessibilityLabel={t('me.dark')} hitSlop={12} value={isDark} onValueChange={(v) => set({ theme: v ? 'dark' : 'light' })}
           trackColor={{ true: colors.success, false: colors.line }} thumbColor="#FFFFFF" />
       </View>
     </Screen>

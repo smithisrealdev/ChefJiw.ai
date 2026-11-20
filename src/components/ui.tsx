@@ -5,7 +5,7 @@ import { AccessibilityInfo, Animated, Easing, Modal, Platform, Pressable, Scroll
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/icon';
-import { LAYERS, MASCOT, type BodyMove, type Head, type MascotName, type Motion, type Part, type PartMove, type SCENE } from '@/data/images';
+import { LAYERS, MASCOT, type BodyMove, type Head, type MascotName, type Motion, type Part, type PartMove } from '@/data/images';
 import type { ApiErrorKind } from '@/lib/api';
 import { BETA } from '@/lib/beta';
 import { FREE_PER_DAY } from '@/lib/quota';
@@ -263,7 +263,7 @@ export function Actor({ name, size }: { name: MascotName; size: number | '100%' 
 }
 
 /** หัวหน้าจอพร้อมมาสคอต พื้นสีสดประจำหน้า แล้วต่อด้วยแผ่นเนื้อหาสีพื้น */
-export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; mascot?: number; scene?: (typeof SCENE)[keyof typeof SCENE]; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
+export function Screen({ tint, title, subtitle, lead, onBack, backLabel, right, children, footer }: { tint: string; title: string; subtitle?: string; lead?: MascotName; onBack?: () => void; backLabel?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   const { colors, isDark } = useSettings();
   const insets = useSafeAreaInsets();
   const head = (
@@ -274,24 +274,17 @@ export function Screen({ tint, title, subtitle, mascot, scene, onBack, backLabel
         {subtitle && <T v="smallBold" tone="muted" style={isDark ? undefined : { color: onTint(tint) }}>{subtitle}</T>}
       </View>
       {right}
-      {mascot && <Image source={mascot} style={s.mascot} contentFit="contain" accessible={false} />}
+      {/* ตัวละครตัวเดียวบนสีเรียบ ไม่มีฉากหลัง: สีของจอกับตัวละครพอแล้ว ที่เหลือให้เนื้อหา */}
+      {lead && <View style={{ marginBottom: -space.sm }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants"><Mascot name={lead} size={104} /></View>}
     </View>
   );
   const content = { padding: space.lg, gap: space.md, paddingBottom: footer ? 120 : space.xxl };
   const foot = footer && <View style={[s.footer, { paddingBottom: Math.max(insets.bottom, space.md) }]}><View style={[wide, { paddingHorizontal: space.lg }]}>{footer}</View></View>;
-  // หน้าที่มีฉาก: เลื่อนทั้งหน้า ฉากจึงเลื่อนขึ้นไปพ้นจอ ไม่กินที่ของเนื้อหา
-  if (scene) return (
+  // หน้าแท็บ (มีตัวละคร): หัวจอเลื่อนขึ้นไปพร้อมเนื้อหา ไม่กินที่ของรายการ
+  if (lead && !onBack) return (
     <View style={{ flex: 1, backgroundColor: tint }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         {head}
-        <View style={[wide, { aspectRatio: scene.ratio, marginTop: -space.sm }]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <Image source={scene.source} style={StyleSheet.absoluteFill} contentFit="contain" accessible={false} />
-          {scene.cast.map((c, k) => (
-            <View key={k} style={{ position: 'absolute', left: `${c.left * 100}%`, top: `${c.top * 100}%`, width: `${c.width * 100}%`, aspectRatio: 1 }}>
-              <Mascot name={c.name} size="100%" still={!('lead' in c)} />
-            </View>
-          ))}
-        </View>
         <View style={[s.sheet, { overflow: 'visible', backgroundColor: colors.bg }]}>
           <View style={[content, wide]}>{children}</View>
           {/* ปิดสีหัวจอที่จะโผล่ตอนเลื่อนเกินด้านล่าง */}
@@ -370,13 +363,6 @@ export function ApiNotice({ kind, onRetry }: { kind: ApiErrorKind; onRetry?: () 
   );
 }
 
-/** ป้ายข้อมูลสั้นๆ พื้นขาว ใช้บนการ์ดสีสด (dark ใช้บนพื้นเทาอ่อน) */
-export function Pill({ label, dark }: { label: string; dark?: boolean }) {
-  const { colors } = useSettings();
-  // dark = ป้ายสีหมึกสำหรับพื้นเทาอ่อน ที่ป้ายขาวจะมองไม่เห็น
-  return <View style={[s.pill, dark && { backgroundColor: colors.primary }]}><Text style={{ fontFamily: fonts.bodySemi, fontSize: type.sm, color: dark ? colors.onPrimary : onPastel.ink }}>{label}</Text></View>;
-}
-
 export const mmss = (s: number) => Math.floor(s / 60) + ':' + String(Math.max(0, s) % 60).padStart(2, '0');
 
 export function Thumb({ source, tint, size = 64 }: { source: number; tint?: string; size?: number }) {
@@ -392,9 +378,7 @@ const s = StyleSheet.create({
   iconButton: { width: touch.min, height: touch.min, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   chip: { minHeight: touch.min, paddingHorizontal: space.lg, borderRadius: radius.pill, justifyContent: 'center' },
   card: { borderRadius: radius.lg, padding: space.lg, gap: space.xs },
-  pill: { backgroundColor: '#FFFFFF', borderRadius: radius.pill, paddingHorizontal: space.md, minHeight: 30, justifyContent: 'center' },
   header: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: space.lg, paddingBottom: space.lg, gap: space.md },
-  mascot: { width: 128, height: 128 },
   sheet: { flex: 1, borderTopLeftRadius: 32, borderTopRightRadius: 32, overflow: 'hidden' },
   footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: space.sm },
   scrim: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },

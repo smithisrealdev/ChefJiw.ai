@@ -64,7 +64,7 @@ export default function RecipeDetail() {
         <View key={pick(g.title)} style={{ gap: space.sm }}>
           <T v="subheading" accessibilityRole="header">{pick(g.title)}</T>
           <View style={s.wrap}>{g.opts.map((o, i) => <Chip key={i} label={pick(o.label)} selected={v === i} onPress={() => setV(i)} />)}</View>
-          <Card tone="note"><T tone="pastel">{pick(g.opts[v].note)}</T></Card>
+          <T v="small" tone="muted">{pick(g.opts[v].note)}</T>
         </View>
       ))}
 

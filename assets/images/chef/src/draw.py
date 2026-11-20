@@ -197,7 +197,7 @@ for name, layers in SPLIT.items():
 LAYER[0] = 'all'
 for n, svg in POSES.items(): open(n + '.svg', 'w').write(svg)
 
-# ฉาก: วาดเฉพาะของในฉาก ตัวละครวางทับในแอปเพื่อให้ขยับได้ (ตำแหน่งอยู่ใน SCENE ที่ src/data/images.ts) พื้นหลังโปร่งใส ใช้สีอ่อนเข้มของสีหัวจอ แล้วแต้มสีสดเฉพาะของชิ้นเล็ก
+# ฉาก: วาดเฉพาะของในฉาก แอปเลิกใช้ฉากบนหัวจอแล้ว ภาพชุดนี้เก็บไว้สำหรับงานโปรโมต พื้นหลังโปร่งใส ใช้สีอ่อนเข้มของสีหัวจอ แล้วแต้มสีสดเฉพาะของชิ้นเล็ก
 scene = lambda w, h, body: f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}">\n{body}\n</svg>'
 floor = lambda y, c, h=360: f'<rect x="0" y="{y}" width="780" height="{h - y}" fill="{c}"/>'
 beam = lambda x1, x2, y, fx1, fx2, h=360: f'<path d="M{x1} {y} L{x2} {y} L{fx2} {h} L{fx1} {h} Z" fill="#FFFFFF" opacity="0.1"/>'

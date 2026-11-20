@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { ApiNotice, Button, Card, Chip, Screen, Skeleton, T, Thumb } from '@/components/ui';
-import { IMG, MASCOT } from '@/data/images';
+import { IMG } from '@/data/images';
 import { local, MARKET, type Cat } from '@/data/market';
 import { api, ApiError, type ApiErrorKind, type PriceRow } from '@/lib/api';
 import { COUNTRIES } from '@/lib/money';
@@ -38,7 +38,7 @@ export default function Market() {
   const back = () => (router.canGoBack() ? router.back() : router.replace('/'));
 
   return (
-    <Screen tint={colors.header.market} title={t('market.title')} subtitle={t('market.sample')} mascot={MASCOT.shop} onBack={back} backLabel={t('tab.home')}
+    <Screen tint={colors.header.market} title={t('market.title')} subtitle={t('market.sample')} lead="shop" onBack={back} backLabel={t('tab.home')}
       footer={
         <Card tone="accent" style={s.foot}>
           <View style={{ flex: 1 }}>

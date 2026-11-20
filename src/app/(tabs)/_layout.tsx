@@ -1,11 +1,10 @@
 import { router } from 'expo-router';
 import { Tabs } from 'expo-router/js-tabs';
 import { useEffect } from 'react';
-import { View } from 'react-native';
 
 import { Icon, type IconName } from '@/components/icon';
 import { useSettings } from '@/lib/settings';
-import { fonts, radius } from '@/theme/tokens';
+import { fonts } from '@/theme/tokens';
 
 const TABS: { name: string; key: 'tab.home' | 'tab.recipes' | 'tab.cook' | 'tab.me'; icon: IconName }[] = [
   { name: 'index', key: 'tab.home', icon: 'home' },
@@ -30,11 +29,7 @@ export default function TabLayout() {
         <Tabs.Screen key={tab.name} name={tab.name}
           options={{
             title: t(tab.key),
-            tabBarIcon: ({ focused }) => (
-              <View style={{ width: 52, height: 32, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: focused ? colors.surfaceSoft : 'transparent' }}>
-                <Icon name={tab.icon} color={focused ? colors.ink : colors.muted} />
-              </View>
-            ),
+            tabBarIcon: ({ focused }) => <Icon name={tab.icon} color={focused ? colors.ink : colors.muted} />,
           }} />
       ))}
     </Tabs>
