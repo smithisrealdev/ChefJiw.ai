@@ -3,7 +3,7 @@ import { Pressable, Switch, View } from 'react-native';
 
 import { Icon } from '@/components/icon';
 import { Card, Screen, T, Thumb } from '@/components/ui';
-import { IMG } from '@/data/images';
+import { IMG, SCENE } from '@/data/images';
 import { MENU } from '@/data/recipes';
 import { BETA } from '@/lib/beta';
 import { COUNTRIES } from '@/lib/money';
@@ -30,7 +30,7 @@ export default function Me() {
   const { colors, t, pick, lang, country, theme, isDark, runs, set, signedIn, member } = useSettings();
   const avg = runs.length ? (runs.reduce((s, r) => s + r.score, 0) / runs.length).toFixed(1) : '–';
   return (
-    <Screen tint={colors.header.me} title={t('me.title')}>
+    <Screen tint={colors.header.me} title={t('me.title')} scene={SCENE.me}>
       <View style={{ flexDirection: 'row', gap: space.sm }}>
         <Card tone="mint" style={{ flex: 1 }}><T v="hero" tone="pastel">{runs.length}</T><T v="smallBold" tone="pastel">{t('me.cooked')}</T></Card>
         <Card tone="accent" style={{ flex: 1 }}><T v="hero" tone="pastel">{avg}</T><T v="smallBold" tone="pastel">{t('me.avg')}</T></Card>

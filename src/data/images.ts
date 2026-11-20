@@ -157,6 +157,21 @@ export const SCENE = {
       { name: 'yum', left: 0.759, top: 0.528, width: 0.215, motion: 'jump' },
     ],
   },
+  // ห้องอ่านสูตร (หัวจอสีชมพู): เชฟจิ๋วคิดเมนู น้องชิมสงสัยว่าจะกินอะไร
+  recipes: {
+    source: require('@/assets/images/chef/scene-recipes.png'), ratio: 780 / 360,
+    cast: [{ name: 'think', left: 0.3, top: 0.31, width: 0.3 }, { name: 'hmm', left: 0.52, top: 0.36, width: 0.28 }],
+  },
+  // หน้าเตา (หัวจอสีส้ม): เชฟจิ๋วผัดกระทะ น้องชิมนั่งชิมอยู่ข้างๆ
+  cook: {
+    source: require('@/assets/images/chef/scene-cook.png'), ratio: 780 / 360,
+    cast: [{ name: 'sip', left: 0.02, top: 0.44, width: 0.26 }, { name: 'cook', left: 0.33, top: 0.25, width: 0.34 }],
+  },
+  // มุมรางวัล (หัวจอสีเขียว): ใบเตยนั่งดูรายการ เชฟจิ๋วกระโดดดีใจ
+  me: {
+    source: require('@/assets/images/chef/scene-me.png'), ratio: 780 / 360,
+    cast: [{ name: 'list', left: 0.24, top: 0.4, width: 0.26 }, { name: 'cheer', left: 0.47, top: 0.36, width: 0.27, motion: 'jump' }],
+  },
   // แผงตลาด (หัวจอสีส้ม): ใบเตยเดินเลือกของ
   plan: {
     source: require('@/assets/images/chef/scene-plan.png'), ratio: 780 / 300,

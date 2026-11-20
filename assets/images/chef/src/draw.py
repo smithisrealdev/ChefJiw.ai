@@ -236,6 +236,92 @@ market = scene(780, 300, ''.join([
 ]))
 open('scene-plan.svg', 'w').write(market)
 
+# ---------- ฉากของแท็บที่เหลือ: ของในฉากเยอะขึ้น มีพรม ต้นไม้ ของแขวนผนัง ให้ตัวละครดูอยู่ในห้องจริง ----------
+plant = lambda x, y, pot, leaf='#7BE0B5': (f'<path d="M{x} {y} q-30 -34 -8 -52 q18 16 8 52 z M{x+4} {y} q6 -46 34 -46 q4 30 -34 46 z M{x+2} {y} q-40 -10 -40 -32 q30 0 40 32 z" fill="{leaf}"/>'
+                                          f'<path d="M{x-22} {y-2} h48 l-7 32 h-34 z" fill="{pot}"/>')
+frame = lambda x, y, w, h, inner: f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="10" fill="#FFFFFF"/><rect x="{x+8}" y="{y+8}" width="{w-16}" height="{h-16}" rx="6" fill="{inner}"/>'
+sparkle = lambda x, y, s=10, c='#FFFFFF': star(x, y, s, c)
+
+# ห้องอ่านสูตร (แท็บสูตร สีชมพู): ชั้นหนังสือสูตร ธงราว รูปจานบนผนัง ตู้เย็น พรม และหนังสือสูตรเล่มใหญ่กางอยู่
+P1, P2, P3 = '#EE5075', '#FF93AB', '#FFC6D3'
+book = lambda x, y, w, h, c, tilt=0: f'<rect x="{x}" y="{y - h}" width="{w}" height="{h}" rx="5" fill="{c}" transform="rotate({tilt} {x + w / 2} {y})"/>'
+recipes = scene(780, 360, ''.join([
+  # ธงราว
+  f'<path d="M250 26 Q420 70 590 26" stroke="#FFFFFF" stroke-width="4" fill="none"/>',
+  ''.join(f'<path d="M{x} {y} l22 4 l-14 26 z" fill="{c}"/>' for x, y, c in [(268, 31, YEL), (312, 40, '#FFFFFF'), (358, 46, '#7BE0B5'), (404, 49, YEL), (450, 47, '#FFFFFF'), (496, 42, '#7BE0B5'), (540, 33, YEL)]),
+  # รูปจานในกรอบ
+  frame(292, 96, 84, 70, P3) + f'<circle cx="334" cy="131" r="18" fill="#FFFFFF"/><circle cx="334" cy="131" r="10" fill="{YEL}"/>',
+  frame(396, 110, 64, 56, P3) + f'<circle cx="428" cy="138" r="14" fill="#FFFFFF"/><circle cx="428" cy="138" r="8" fill="#7BE0B5"/>',
+  frame(478, 92, 76, 74, P3) + f'<circle cx="516" cy="129" r="18" fill="#FFFFFF"/><circle cx="516" cy="129" r="10" fill="{CORAL}"/>',
+  # ชั้นหนังสือสูตร
+  f'<rect x="24" y="56" width="196" height="296" rx="18" fill="{P2}"/><rect x="38" y="70" width="168" height="270" rx="10" fill="{P1}"/>',
+  f'<path d="M38 158 h168 M38 248 h168" stroke="{P2}" stroke-width="12"/>',
+  book(50, 152, 22, 62, YEL) + book(76, 152, 18, 70, '#FFFFFF') + book(98, 152, 26, 54, '#7BE0B5') + book(128, 152, 20, 66, NAVY) + book(156, 152, 22, 58, '#FFFFFF', 14),
+  book(50, 242, 26, 64, '#FFFFFF') + book(80, 242, 20, 56, CORAL) + book(104, 242, 22, 70, YEL) + f'<rect x="140" y="214" width="54" height="28" rx="8" fill="#FFFFFF"/><rect x="146" y="204" width="42" height="14" rx="6" fill="{P3}"/>',
+  book(52, 334, 22, 60, '#7BE0B5') + book(78, 334, 24, 68, '#FFFFFF') + book(106, 334, 18, 52, YEL) + book(128, 334, 26, 62, NAVY, -12),
+  plant(120, 26, '#FFFFFF'),
+  # ตู้เย็น
+  f'<rect x="612" y="52" width="144" height="300" rx="22" fill="#FFFFFF"/><path d="M612 156 h144" stroke="{HAT_D}" stroke-width="6"/>',
+  f'<path d="M634 96 v36 M634 186 v60" stroke="{HAT_D}" stroke-width="8" stroke-linecap="round"/>',
+  heart(700, 100, 0.8, CORAL) + star(716, 208, 12) + f'<rect x="672" y="234" width="50" height="42" rx="6" fill="{P3}"/><path d="M682 248 h30 M682 260 h20" stroke="{P1}" stroke-width="4" stroke-linecap="round"/>',
+  # พรมกับหนังสือสูตรเล่มใหญ่
+  f'<ellipse cx="410" cy="338" rx="186" ry="22" fill="{P2}"/>',
+  sparkle(586, 190, 10) + sparkle(248, 214, 8) + sparkle(566, 232, 6),
+]))
+open('scene-recipes.svg', 'w').write(recipes)
+
+# หน้าเตา (แท็บทำอาหาร สีส้ม): ผนังกระเบื้อง เครื่องดูดควัน เตากับเตาอบ หม้อ กา โหลใส่ตะหลิว นาฬิกา
+O3 = '#FFE1BD'
+stove = scene(780, 360, ''.join([
+  # กระเบื้องผนัง
+  ''.join(f'<rect x="{236 + c * 68}" y="{92 + r * 52}" width="56" height="40" rx="8" fill="{O2}" opacity="{0.55 if (r + c) % 2 else 0.9}"/>' for r in range(2) for c in range(8)),
+  # เครื่องดูดควัน
+  f'<rect x="424" y="0" width="60" height="34" fill="{O1}"/><path d="M360 78 L392 30 H516 L548 78 Z" fill="{O1}"/><rect x="352" y="72" width="204" height="16" rx="8" fill="#D96F17"/>',
+  # นาฬิกา ชั้นวางชาม ต้นไม้
+  f'<circle cx="96" cy="84" r="44" fill="#FFFFFF"/><circle cx="96" cy="84" r="36" fill="{O3}"/><path d="M96 84 V58 M96 84 L114 94" stroke="{INK}" stroke-width="6" stroke-linecap="round"/><circle cx="96" cy="84" r="5" fill="{CORAL}"/>',
+  f'<path d="M40 190 h150" stroke="{O3}" stroke-width="10" stroke-linecap="round"/><path d="M56 184 a28 22 0 0 0 56 0 z" fill="#FFFFFF"/><path d="M62 172 a22 16 0 0 0 44 0 z" fill="{O3}"/>',
+  plant(156, 156, CORAL),
+  # เตา: ตัวตู้ หน้าเตา เตาอบ ปุ่ม
+  f'<rect x="212" y="232" width="568" height="140" rx="18" fill="{O2}"/><rect x="200" y="214" width="592" height="26" rx="13" fill="{O3}"/>',
+  f'<rect x="404" y="262" width="176" height="84" rx="14" fill="{O1}"/><rect x="418" y="276" width="148" height="56" rx="10" fill="{YEL}" opacity="0.85"/><path d="M430 262 h124" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>',
+  ''.join(f'<circle cx="{x}" cy="252" r="8" fill="#FFFFFF"/>' for x in (250, 282, 314, 640, 672, 704)),
+  f'<path d="M236 214 h96 M612 214 h96" stroke="{INK}" stroke-width="10" stroke-linecap="round"/>',
+  # หม้อมีฝา กาน้ำ
+  steam(262, 142, '#FFFFFF'),
+  f'<rect x="240" y="164" width="92" height="50" rx="12" fill="#FFFFFF"/><rect x="232" y="154" width="108" height="16" rx="8" fill="#7BE0B5"/><circle cx="286" cy="150" r="8" fill="#7BE0B5"/><path d="M228 182 h12 M332 182 h12" stroke="#FFFFFF" stroke-width="10" stroke-linecap="round"/>',
+  f'<path d="M622 214 q-10 -50 38 -50 q48 0 38 50 z" fill="{YEL}"/><path d="M696 190 q30 -4 30 -30" stroke="{YEL}" stroke-width="10" fill="none" stroke-linecap="round"/><path d="M640 166 q20 -30 40 0" stroke="{INK}" stroke-width="7" fill="none" stroke-linecap="round"/>',
+  # โหลใส่ตะหลิว
+  f'<path d="M742 150 v-50 M756 152 v-62 M768 150 v-44" stroke="{WOOD}" stroke-width="7" stroke-linecap="round"/><ellipse cx="756" cy="84" rx="11" ry="15" fill="{WOOD}"/><rect x="730" y="150" width="50" height="64" rx="12" fill="#FFFFFF"/><path d="M730 172 h50" stroke="{HAT_D}" stroke-width="5"/>',
+  sparkle(208, 120, 9) + sparkle(596, 120, 7),
+]))
+open('scene-cook.svg', 'w').write(stove)
+
+# มุมรางวัล (แท็บฉัน สีเขียว): ชั้นถ้วยรางวัล ปฏิทินสติกเกอร์ ไฟประดับ รูปจานที่เคยทำ เก้าอี้นวม พรม
+G1, G2, G3 = '#14A572', '#63DDB1', '#B8F1DA'
+me = scene(780, 360, ''.join([
+  # ไฟประดับ
+  f'<path d="M230 20 Q400 74 780 22" stroke="#FFFFFF" stroke-width="4" fill="none"/>',
+  ''.join(f'<circle cx="{x}" cy="{y}" r="9" fill="{c}"/>' for x, y, c in [(262, 30, YEL), (322, 42, '#FFFFFF'), (386, 50, CORAL), (452, 53, YEL), (518, 51, '#FFFFFF'), (584, 46, CORAL), (650, 39, YEL), (716, 31, '#FFFFFF')]),
+  # ปฏิทินสติกเกอร์ของจานที่ทำ
+  f'<rect x="32" y="44" width="176" height="150" rx="16" fill="#FFFFFF"/><rect x="32" y="44" width="176" height="34" rx="16" fill="{CORAL}"/><rect x="32" y="62" width="176" height="16" fill="{CORAL}"/>',
+  ''.join(f'<circle cx="{58 + c * 31}" cy="{104 + r * 30}" r="11" fill="{[YEL, "#7BE0B5", PINK, G3, "#A7B0FF"][(r * 2 + c) % 5] if (r, c) not in ((2, 3), (2, 4)) else HAT_D}"/>' for r in range(3) for c in range(5)),
+  # ชั้นถ้วยรางวัล
+  f'<path d="M286 164 h228" stroke="{G3}" stroke-width="10" stroke-linecap="round"/>',
+  f'<path d="M312 100 h52 q0 40 -26 44 q-26 -4 -26 -44 z" fill="{YEL}"/><path d="M312 108 q-18 0 -14 18 q4 12 18 12 M364 108 q18 0 14 -18" stroke="{YEL}" stroke-width="7" fill="none"/><rect x="330" y="142" width="16" height="10" fill="{YEL}"/><rect x="318" y="150" width="40" height="12" rx="5" fill="{WOOD}"/>',
+  f'<path d="M398 92 l10 28 M430 92 l-10 28" stroke="{CORAL}" stroke-width="12"/><circle cx="414" cy="136" r="24" fill="{YEL}"/>' + star(414, 136, 12, '#FFFFFF'),
+  star(478, 124, 26) + f'<rect x="462" y="148" width="32" height="14" rx="5" fill="{WOOD}"/>',
+  # รูปจานที่เคยทำ
+  frame(560, 84, 78, 78, G3) + f'<circle cx="599" cy="123" r="20" fill="#FFFFFF"/><circle cx="599" cy="123" r="11" fill="{CORAL}"/>',
+  frame(654, 100, 68, 62, G3) + f'<circle cx="688" cy="131" r="16" fill="#FFFFFF"/><circle cx="688" cy="131" r="9" fill="{YEL}"/>',
+  # เก้าอี้นวมกับต้นไม้
+  f'<rect x="596" y="214" width="170" height="130" rx="40" fill="{G1}"/><rect x="620" y="260" width="122" height="84" rx="26" fill="{G2}"/><rect x="644" y="236" width="74" height="48" rx="14" fill="{YEL}"/>',
+  plant(250, 312, '#FFFFFF', G3),
+  # พรม
+  f'<ellipse cx="400" cy="340" rx="190" ry="20" fill="{G2}"/>',
+  sparkle(536, 208, 9) + sparkle(246, 222, 7) + sparkle(566, 252, 6),
+]))
+open('scene-me.svg', 'w').write(me)
+
 # จุดหมุนของส่วนที่หมุนรอบข้อต่อ (หัวไหล่ สะโพก) เป็นสัดส่วนของภาพ ใส่ใน LAYERS ที่ src/data/images.ts แอปจึงหมุนแขนขารอบข้อต่อจริง ไม่ใช่เลื่อนทั้งท่อน
 import math
 def pivot(x, y, lean=0, drop=0, upper=True, small=False):
