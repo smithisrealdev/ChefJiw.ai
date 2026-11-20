@@ -101,6 +101,8 @@ export const LAYERS: Record<MascotName, Layers> = {
     parts: [
       { source: require('@/assets/images/chef/shop-legL.png'), move: 'stepL', lift: 0.03, behind: true },
       { source: require('@/assets/images/chef/shop-legR.png'), move: 'stepR', lift: 0.03, behind: true },
+      // ผมเปียอยู่หลังตัว เอียงไปพร้อมหัว (จุดหมุนและจังหวะเดียวกับ head)
+      { source: require('@/assets/images/chef/shop-braids.png'), move: 'waddle', deg: -1.5, pivot: [0.525, 0.532], behind: true },
     ],
   },
   // ใบเตยนั่งบนลัง: หายใจ เอียงคออ่านรายการ ขาแกว่งรอบสะโพกสลับกัน
@@ -111,6 +113,7 @@ export const LAYERS: Record<MascotName, Layers> = {
       { source: require('@/assets/images/chef/list-ground.png'), move: 'still', behind: true },
       { source: require('@/assets/images/chef/list-legL.png'), move: 'swingL', deg: 7, pivot: [0.439, 0.791], behind: true },
       { source: require('@/assets/images/chef/list-legR.png'), move: 'swingR', deg: 7, pivot: [0.561, 0.791], behind: true },
+      { source: require('@/assets/images/chef/list-braids.png'), move: 'ponder', deg: 2.5, pivot: [0.5, 0.531], behind: true },
     ],
   },
   // น้องชิมชิม: หายใจ เอียงคอ แขนที่ถือช้อนลดลงรอบหัวไหล่แล้วยกกลับมาที่ปาก หัวใจลอย

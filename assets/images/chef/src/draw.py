@@ -120,7 +120,7 @@ def build():
     bucket = (f'<g transform="translate(240 92) scale(0.86) translate(-240 -130)"><path d="M96 132 Q240 96 384 132 Q396 150 372 156 Q240 126 108 156 Q84 150 96 132 Z" fill="{CREAM_D}"/>'
               f'<path d="M140 136 C132 60 186 26 240 26 C294 26 348 60 340 136 Q240 110 140 136 Z" fill="{CREAM}"/><path d="M146 112 Q240 88 334 112" stroke="{CREAM_D}" stroke-width="6" fill="none"/></g>')
     def toey(**k):
-        return person(S2, MINT, pinafore, toey_hair, GREEN, back=braid(150, -1) + braid(330, 1), hat=bucket, **k)
+        return person(S2, MINT, pinafore, toey_hair, GREEN, bparts={'braids': braid(150, -1) + braid(330, 1)}, hat=bucket, **k)
     A2 = lambda side, hx, hy, bx=0, by=0: arm(side, hx, hy, bx, by, S2, MINT, 0.4)
     tote = lambda x, y: (f'<path d="M{x-24} {y-4} q24 -60 48 0" stroke="{CREAM_D}" stroke-width="8" fill="none" stroke-linecap="round"/>'
         f'<path d="M{x-26} {y+2} q-20 -42 6 -58 q24 18 8 58 z" fill="{GREEN}"/><path d="M{x-2} {y+2} q-8 -50 24 -62 q18 28 -4 62 z" fill="{GREEN_L}"/><path d="M{x+16} {y+4} l20 -50 q10 4 6 14 l-12 38 z" fill="{CORAL}"/>'
@@ -170,7 +170,7 @@ POSES = build()
 SPLIT = {
     'cook': ('body', 'head', 'eyes', 'wok', 'food'), 'cheer': ('body', 'head', 'eyes', 'armL', 'armR', 'stars'),
     'think': ('body', 'head', 'eyes', 'front', 'hand', 'bubbles'), 'oops': ('body', 'head', 'eyes', 'front', 'sweat', 'lines'),
-    'shop': ('body', 'head', 'eyes', 'front', 'legL', 'legR'), 'list': ('body', 'head', 'eyes', 'front', 'ground', 'legL', 'legR'),
+    'shop': ('body', 'head', 'eyes', 'front', 'braids', 'legL', 'legR'), 'list': ('body', 'head', 'eyes', 'front', 'braids', 'ground', 'legL', 'legR'),
     'sip': ('body', 'head', 'eyes', 'front', 'spoon', 'hearts'), 'yum': ('body', 'head', 'eyes', 'arm', 'spoon', 'stars'), 'hmm': ('body', 'head', 'eyes', 'front', 'spoon', 'bubbles'),
 }
 for name, layers in SPLIT.items():
