@@ -20,7 +20,7 @@ export function DishCard({ m, sub, subTone = 'muted' }: { m: MenuItem; sub?: str
       </View>
       <View style={{ padding: space.md, gap: 2 }}>
         <T v="subheading" numberOfLines={2}>{pick(m.name)}</T>
-        <T v="small" tone="muted">{t('recipes.minutes', { n: m.mins })}{m.easy ? ` · ${t('detail.easy')}` : ''}</T>
+        <T v="small" tone="muted">{t('recipes.minutes', { n: m.mins })}{m.easy ? ` · ${t('detail.easy')}` : ''}{m.onePan ? ` · ${t(m.onePan === 'pot' ? 'detail.onePot' : 'detail.onePan')}` : ''}</T>
         {sub && <T v="smallBold" tone={subTone}>{sub}</T>}
       </View>
     </Pressable>

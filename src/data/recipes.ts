@@ -582,16 +582,17 @@ export function buildRecipe(id: string, o1 = 1, o2 = 0, adapt: string[] = []): R
 export const DEFAULT_OPTS: Record<string, [number, number]> = { kaprao: [1, 0], omelet: [0, 0], 'green-curry': [1, 0], 'moo-palo': [1, 0], 'prik-khing': [1, 0] };
 
 /** รายการเมนูในหน้าสูตร สองเมนูแรกทำตามได้ทุกขั้น ที่เหลือกำลังจะมา */
-export type MenuItem = { id: string; name: L; img: ImgKey; mins: number; easy: boolean; baht: number; kcal: number; ready: boolean; need: string[] };
+// onePan = ทั้งจานใช้กระทะ (pan) หรือหม้อ (pot) ใบเดียว (คนครัวเล็กถามบ่อย) ใส่เฉพาะจานที่ไล่ขั้นแล้วแน่ใจ พะโล้ต้มไข่แยกหม้อจึงไม่ใส่
+export type MenuItem = { id: string; name: L; img: ImgKey; mins: number; easy: boolean; baht: number; kcal: number; ready: boolean; need: string[]; onePan?: 'pan' | 'pot' };
 export const MENU: MenuItem[] = [
-  { id: 'kaprao', name: l('กะเพราหมูสับไข่ดาว', 'Basil pork & egg'), img: 'dish-kaprao', mins: 15, easy: true, baht: 50, kcal: 650, ready: true, need: ['pork', 'egg', 'basil', 'garlic', 'chili', 'rice'] },
-  { id: 'omelet', name: l('ไข่เจียวหมูสับ', 'Thai pork omelet'), img: 'dish-omelet', mins: 10, easy: true, baht: 30, kcal: 550, ready: true, need: ['egg', 'pork'] },
+  { id: 'kaprao', name: l('กะเพราหมูสับไข่ดาว', 'Basil pork & egg'), img: 'dish-kaprao', mins: 15, easy: true, baht: 50, kcal: 650, ready: true, need: ['pork', 'egg', 'basil', 'garlic', 'chili', 'rice'], onePan: 'pan' },
+  { id: 'omelet', name: l('ไข่เจียวหมูสับ', 'Thai pork omelet'), img: 'dish-omelet', mins: 10, easy: true, baht: 30, kcal: 550, ready: true, need: ['egg', 'pork'], onePan: 'pan' },
   { id: 'fried-rice', name: l('ข้าวผัดไข่', 'Egg fried rice'), img: 'dish-fried-rice', mins: 12, easy: true, baht: 35, kcal: 580, ready: false, need: ['rice', 'egg', 'garlic'] },
   { id: 'morning-glory', name: l('ผัดผักบุ้งไฟแดง', 'Stir-fried morning glory'), img: 'dish-morning-glory', mins: 8, easy: true, baht: 25, kcal: 210, ready: false, need: ['morningGlory', 'garlic', 'chili'] },
   { id: 'tom-yum', name: l('ต้มยำกุ้ง', 'Tom yum goong'), img: 'dish-tom-yum', mins: 25, easy: false, baht: 120, kcal: 320, ready: false, need: ['shrimp', 'mushroom', 'chili'] },
-  { id: 'green-curry', name: l('แกงเขียวหวานไก่ (4 จาน)', 'Green curry chicken (serves 4)'), img: 'dish-green-curry', mins: 35, easy: false, baht: 170, kcal: 610, ready: true, need: ['chicken', 'coconut', 'thaiBasil'] },
+  { id: 'green-curry', name: l('แกงเขียวหวานไก่ (4 จาน)', 'Green curry chicken (serves 4)'), img: 'dish-green-curry', mins: 35, easy: false, baht: 170, kcal: 610, ready: true, need: ['chicken', 'coconut', 'thaiBasil'], onePan: 'pot' },
   { id: 'moo-palo', name: l('หมูพะโล้ไข่ (4 จาน)', 'Five-spice pork & eggs (serves 4)'), img: 'dish-moo-palo', mins: 65, easy: false, baht: 177, kcal: 540, ready: true, need: ['pork', 'egg', 'garlic'] },
-  { id: 'prik-khing', name: l('ผัดพริกขิงหมูถั่วฝักยาว (4 จาน)', 'Prik khing pork with long beans (serves 4)'), img: 'dish-prik-khing', mins: 25, easy: true, baht: 138, kcal: 520, ready: true, need: ['pork', 'chili'] },
+  { id: 'prik-khing', name: l('ผัดพริกขิงหมูถั่วฝักยาว (4 จาน)', 'Prik khing pork with long beans (serves 4)'), img: 'dish-prik-khing', mins: 25, easy: true, baht: 138, kcal: 520, ready: true, need: ['pork', 'chili'], onePan: 'pan' },
 ];
 
 export const PANTRY: { id: string; name: L }[] = [

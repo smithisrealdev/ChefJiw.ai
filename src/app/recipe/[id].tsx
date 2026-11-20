@@ -21,6 +21,7 @@ export default function RecipeDetail() {
   const [have, setHave] = useState<string[]>([]);
   const r = buildRecipe(id, o1, o2, adapt);
   const last = r ? reminders(r, lastAns(runs, id)) : [];
+  const menu = MENU.find((m) => m.id === id);
   if (!r) return <Screen tint={colors.header.cook} title={t('recipes.empty')} onBack={() => router.replace('/recipes')} backLabel={t('detail.back')}><T>{t('recipes.emptyHint')}</T></Screen>;
 
   const total = r.ingredients.filter((g) => !have.includes(g.id)).reduce((sum, g) => sum + g.baht, 0);
@@ -34,7 +35,7 @@ export default function RecipeDetail() {
 
   return (
     <Screen tint={colors.header.cook} title={pick(r.name)} onBack={back} backLabel={t('detail.back')}
-      subtitle={`${t('recipes.minutes', { n: r.mins })}${MENU.find((m) => m.id === r.id)?.easy ? ` · ${t('detail.easy')}` : ''} · ${t('detail.kcal', { n: r.kcal })}`}
+      subtitle={`${t('recipes.minutes', { n: r.mins })}${menu?.easy ? ` · ${t('detail.easy')}` : ''}${menu?.onePan ? ` · ${t(menu.onePan === 'pot' ? 'detail.onePot' : 'detail.onePan')}` : ''} · ${t('detail.kcal', { n: r.kcal })}`}
       right={<Float><Thumb source={IMG[r.img]} size={104} /></Float>}
       footer={
         <Card tone="accent" style={s.buy}>
